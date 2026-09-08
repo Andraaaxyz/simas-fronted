@@ -402,7 +402,101 @@
 }
 
 
-/* RESPONSIVE */
+/* =========================
+   MASTER MENU (DROPDOWN)
+========================= */
+
+.master-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.master-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  width: 100%;
+  padding: 12px 15px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: transparent;
+  color: #374151;
+
+  font-size: 15px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.master-toggle:hover {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.master-toggle.active {
+  background: #2563EB;
+  color: white;
+}
+
+.master-toggle span {
+  flex: 1;
+  text-align: left;
+}
+
+.master-chevron {
+  transition: transform 0.2s ease;
+}
+
+.master-chevron.open {
+  transform: rotate(180deg);
+}
+
+.master-dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  margin: 4px 0 4px 14px;
+  padding: 6px 0 6px 10px;
+
+  border-left: 2px solid #dbdee6;
+}
+
+.master-dropdown a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 9px 12px;
+
+  border-radius: 8px;
+
+  color: #5b6472;
+  text-decoration: none;
+
+  font-size: 13px;
+
+  transition: 0.2s;
+}
+
+.master-dropdown a:hover {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.master-dropdown a.active {
+  background: #2563EB;
+  color: white;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
 
 @media (max-width: 600px) {
 

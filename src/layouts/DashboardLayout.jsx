@@ -16,6 +16,13 @@ import {
   LogOut,
   ClipboardList,
   X,
+  Database,
+  ChevronDown,
+  Users,
+  ShieldCheck,
+  FileType,
+  Stamp,
+  FolderOpen,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -25,6 +32,7 @@ function DashboardLayout({ title, children }) {
   const location = useLocation();
 
   const [showNotif, setShowNotif] = useState(false);
+  const [showMaster, setShowMaster] = useState(false);
 
   const isPimpinan =
     location.pathname.startsWith("/pimpinan");
@@ -205,25 +213,108 @@ function DashboardLayout({ title, children }) {
                 Disposisi
               </NavLink>
 
-              <NavLink
-                to="/admin/laporan"
-                className={({ isActive }) =>
-                  isActive ? "active" : ""
-                }
-              >
-                <FileText size={18} />
-                Laporan
-              </NavLink>
+<NavLink
+                  to="/admin/laporan"
+                  className={({ isActive }) =>
+                    isActive ? "active" : ""
+                  }
+                >
+                  <FileText size={18} />
+                  Laporan
+                </NavLink>
 
-              <NavLink
-                to="/admin/profil"
-                className={({ isActive }) =>
-                  isActive ? "active" : ""
-                }
-              >
-                <UserCircle size={18} />
-                Profil
-              </NavLink>
+                {/* ===========
+                    MASTER
+                =========== */}
+                <div className="master-menu">
+                  <button
+                    className={`master-toggle ${
+                      location.pathname.startsWith(
+                        "/admin/master"
+                      )
+                        ? "active"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      setShowMaster(!showMaster)
+                    }
+                  >
+                    <Database size={18} />
+                    <span>Master</span>
+                    <ChevronDown
+                      className={`master-chevron ${
+                        showMaster ? "open" : ""
+                      }`}
+                      size={16}
+                    />
+                  </button>
+
+                  {showMaster && (
+                    <div className="master-dropdown">
+                      <NavLink
+                        to="/admin/master/pimpinan"
+                        className={({ isActive }) =>
+                          isActive
+                            ? "active"
+                            : ""
+                        }
+                      >
+                        <ShieldCheck size={15} />
+                        Pimpinan
+                      </NavLink>
+
+                      <NavLink
+                        to="/admin/master/user"
+                        className={({ isActive }) =>
+                          isActive ? "active" : ""
+                        }
+                      >
+                        <Users size={15} />
+                        User
+                      </NavLink>
+
+                      <NavLink
+                        to="/admin/master/jenis-surat"
+                        className={({ isActive }) =>
+                          isActive ? "active" : ""
+                        }
+                      >
+                        <FileType size={15} />
+                        Jenis Surat
+                      </NavLink>
+
+                      <NavLink
+                        to="/admin/master/sifat-surat"
+                        className={({ isActive }) =>
+                          isActive ? "active" : ""
+                        }
+                      >
+                        <Stamp size={15} />
+                        Sifat Surat
+                      </NavLink>
+
+                      <NavLink
+                        to="/admin/master/bidang"
+                        className={({ isActive }) =>
+                          isActive ? "active" : ""
+                        }
+                      >
+                        <FolderOpen size={15} />
+                        Bidang
+                      </NavLink>
+                    </div>
+                  )}
+                </div>
+
+                <NavLink
+                  to="/admin/profil"
+                  className={({ isActive }) =>
+                    isActive ? "active" : ""
+                  }
+                >
+                  <UserCircle size={18} />
+                  Profil
+                </NavLink>
             </>
           )}
 

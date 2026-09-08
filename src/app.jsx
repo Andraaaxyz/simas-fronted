@@ -18,6 +18,11 @@ import Arsip from "./pages/auth/admin/Arsip";
 import AdminProfil from "./pages/auth/admin/Profil";
 import Laporan from "./pages/auth/admin/Laporan";
 import AdminDisposisi from "./pages/auth/admin/Disposisi";
+import MasterPimpinan from "./pages/auth/admin/Pimpinan";
+import MasterUser from "./pages/auth/admin/User";
+import MasterJenisSurat from "./pages/auth/admin/JenisSurat";
+import MasterSifatSurat from "./pages/auth/admin/SifatSurat";
+import MasterBidang from "./pages/auth/admin/Bidang";
 
 // =========================
 // PIMPINAN
@@ -97,6 +102,35 @@ function App() {
           <Route
             path="/admin/disposisi"
             element={<AdminDisposisi />}
+          />
+
+          {/* =========================
+              MASTER DATA (ADMIN)
+          ========================= */}
+
+          <Route
+            path="/admin/master/pimpinan"
+            element={<MasterPimpinan />}
+          />
+
+          <Route
+            path="/admin/master/user"
+            element={<MasterUser />}
+          />
+
+          <Route
+            path="/admin/master/jenis-surat"
+            element={<MasterJenisSurat />}
+          />
+
+          <Route
+            path="/admin/master/sifat-surat"
+            element={<MasterSifatSurat />}
+          />
+
+          <Route
+            path="/admin/master/bidang"
+            element={<MasterBidang />}
           />
 
           {/* =========================
