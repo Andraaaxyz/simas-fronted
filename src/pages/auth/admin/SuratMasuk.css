@@ -317,6 +317,16 @@
   color: #475569;
 }
 
+.file-terpilih {
+  font-size: 12px;
+  color: #475569;
+  margin-top: 2px;
+}
+
+.form-group input[type="file"] {
+  padding: 8px;
+}
+
 @media (max-width: 900px) {
   .table-card {
     overflow-x: auto;

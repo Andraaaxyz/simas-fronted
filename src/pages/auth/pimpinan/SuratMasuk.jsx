@@ -11,6 +11,8 @@ import {
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./SuratMasuk.css";
 
+import FileDokumen from "../../../component/FileDokumen";
+
 import {
   usePagination,
   EntriesSelect,
@@ -711,7 +713,9 @@ function SuratMasuk() {
                   </span>
 
                   <strong>
-                    {selectedSurat.file || "-"}
+                    <FileDokumen
+                      value={selectedSurat.file}
+                    />
                   </strong>
 
                 </div>

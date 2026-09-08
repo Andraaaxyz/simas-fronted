@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Search,
   Plus,
@@ -9,11 +9,32 @@ import {
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./SuratMasuk.css";
 
+import FileDokumen from "../../../component/FileDokumen";
+
 import {
   usePagination,
   EntriesSelect,
   PaginationBar,
 } from "../../../component/Pagination";
+
+// =========================
+// BACA FILE JADI BASE64
+// =========================
+
+const bacaFile = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () =>
+      resolve({
+        nama: file.name,
+        tipe: file.type,
+        data: reader.result,
+      });
+
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
 // =========================
 // HELPER OPSI MASTER
@@ -262,7 +283,7 @@ function SuratMasuk() {
   // TAMBAH SURAT
   // =========================
 
-  const tambahSurat = () => {
+  const tambahSurat = async () => {
     if (
       !formSurat.noSurat ||
       !formSurat.tanggalSurat ||
@@ -279,6 +300,8 @@ function SuratMasuk() {
       return;
     }
 
+    const fileSimpan = await bacaFile(formSurat.file);
+
     const suratBaru = {
       id: Date.now(),
       noAgenda: generateNoAgenda(dataSurat),
@@ -290,7 +313,7 @@ function SuratMasuk() {
       asal: formSurat.asal,
       tujuan: formSurat.tujuan,
       perihal: formSurat.perihal,
-      file: formSurat.file,
+      file: fileSimpan,
       lampiran: formSurat.lampiran,
       status: "Baru",
       disposisi: null,
@@ -304,12 +327,17 @@ function SuratMasuk() {
 
     const dataBaru = [...dataSurat, suratBaru];
 
-    setDataSurat(dataBaru);
+    try {
+      setDataSurat(dataBaru);
 
-    localStorage.setItem(
-      "dataSurat",
-      JSON.stringify(dataBaru)
-    );
+      localStorage.setItem(
+        "dataSurat",
+        JSON.stringify(dataBaru)
+      );
+    } catch {
+      alert("Gagal menyimpan: file terlalu besar untuk penyimpanan lokal.");
+      return;
+    }
 
     setFormSurat(formKosong());
 
@@ -756,16 +784,38 @@ function SuratMasuk() {
                     <label>File Surat</label>
 
                     <input
-                      type="text"
-                      placeholder="Nama file (contoh: surat.pdf)"
-                      value={formSurat.file}
-                      onChange={(e) =>
+                      type="file"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const f =
+                          e.target.files &&
+                          e.target.files[0];
+
+                        if (
+                          f &&
+                          f.size > 2 * 1024 * 1024
+                        ) {
+                          alert(
+                            "Ukuran file maksimal 2MB."
+                          );
+
+                          e.target.value = "";
+                          return;
+                        }
+
                         setFormSurat({
                           ...formSurat,
-                          file: e.target.value,
-                        })
-                      }
+                          file: f || "",
+                        });
+                      }}
                     />
+
+                    {formSurat.file && (
+                      <span className="file-terpilih">
+                        File dipilih:{" "}
+                        {formSurat.file.name}
+                      </span>
+                    )}
                   </div>
 
                   <div className="form-group">
@@ -938,7 +988,9 @@ function SuratMasuk() {
                   <span>File Surat</span>
 
                   <strong>
-                    {selectedSurat.file || "-"}
+                    <FileDokumen
+                      value={selectedSurat.file}
+                    />
                   </strong>
                 </div>
 

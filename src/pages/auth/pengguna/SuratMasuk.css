@@ -2,6 +2,16 @@
   padding: 4px;
 }
 
+.file-terpilih {
+  font-size: 12px;
+  color: #475569;
+  margin-top: 2px;
+}
+
+.form-group input[type="file"] {
+  padding: 8px;
+}
+
 .surat-header {
   display: flex;
   justify-content: space-between;
