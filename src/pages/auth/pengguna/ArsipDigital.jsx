@@ -9,6 +9,12 @@ import {
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./ArsipDigital.css";
 
+import {
+  usePagination,
+  EntriesSelect,
+  PaginationBar,
+} from "../../../component/Pagination";
+
 function ArsipDigital() {
   const [dataArsip, setDataArsip] = useState([]);
   const [search, setSearch] = useState("");
@@ -73,6 +79,11 @@ function ArsipDigital() {
 
     return cocokSearch && cocokStatus;
   });
+
+  // =========================
+  // PAGINATION
+  // =========================
+  const pag = usePagination(filteredData);
 
   return (
     <DashboardLayout title="Arsip Digital">
@@ -145,6 +156,11 @@ function ArsipDigital() {
             </option>
           </select>
 
+          <EntriesSelect
+            value={pag.entries}
+            onChange={pag.changeEntries}
+          />
+
         </div>
 
         {/* TABLE */}
@@ -181,13 +197,18 @@ function ArsipDigital() {
 
               <tbody>
 
-                {filteredData.length > 0 ? (
+                {pag.pageData.length > 0 ? (
 
-                  filteredData.map((arsip, index) => (
+                  pag.pageData.map((arsip, index) => (
 
                     <tr key={arsip.id}>
 
-                      <td>{index + 1}</td>
+                      <td>
+                        {(pag.page - 1) *
+                          pag.entries +
+                          index +
+                          1}
+                      </td>
 
                       <td>
                         <strong>
@@ -273,6 +294,16 @@ function ArsipDigital() {
           </div>
 
         </div>
+
+        {/* PAGINATION */}
+        <PaginationBar
+          page={pag.page}
+          totalPages={pag.totalPages}
+          onPageChange={pag.goToPage}
+          start={pag.start}
+          end={pag.end}
+          total={pag.total}
+        />
 
       </div>
 

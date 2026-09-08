@@ -10,8 +10,15 @@ import {
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./SuratMasuk.css";
 
+import {
+  usePagination,
+  EntriesSelect,
+  PaginationBar,
+} from "../../../component/Pagination";
+
 function SuratMasuk() {
   const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
   const [selectedSurat, setSelectedSurat] = useState(null);
 
   const [showTambah, setShowTambah] = useState(false);
@@ -82,14 +89,27 @@ function SuratMasuk() {
 
 
   // =========================
-  // SEARCH
+  // SEARCH + FILTER
   // =========================
 
-  const filteredData = dataSurat.filter((item) =>
-    `${item.noSurat} ${item.isi} ${item.asal}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+  const filteredData = dataSurat.filter((item) => {
+    const cocokSearch =
+      `${item.noSurat} ${item.isi} ${item.asal}`
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+    const cocokStatus =
+      !filterStatus ||
+      item.status === filterStatus;
+
+    return cocokSearch && cocokStatus;
+  });
+
+  // =========================
+  // PAGINATION
+  // =========================
+
+  const pag = usePagination(filteredData);
 
 
   // =========================
@@ -259,9 +279,11 @@ function SuratMasuk() {
         </div>
 
 
-        {/* SEARCH */}
+        {/* SEARCH + TOOLS */}
 
-        <div className="surat-toolbar">
+        <div
+          className="surat-toolbar pag-tools"
+        >
 
           <div className="search-box">
 
@@ -278,6 +300,35 @@ function SuratMasuk() {
 
           </div>
 
+          <select
+            className="pag-filter"
+            value={filterStatus}
+            onChange={(e) =>
+              setFilterStatus(e.target.value)
+            }
+          >
+            <option value="">
+              Semua Status
+            </option>
+
+            {[
+              ...new Set(
+                dataSurat
+                  .map((d) => d.status)
+                  .filter(Boolean)
+              ),
+            ].map((st) => (
+              <option key={st} value={st}>
+                {st}
+              </option>
+            ))}
+          </select>
+
+          <EntriesSelect
+            value={pag.entries}
+            onChange={pag.changeEntries}
+          />
+
         </div>
 
 
@@ -289,6 +340,7 @@ function SuratMasuk() {
 
             <thead>
               <tr>
+                <th>No</th>
                 <th>No. Surat</th>
                 <th>Isi / Perihal</th>
                 <th>Asal Surat</th>
@@ -300,9 +352,18 @@ function SuratMasuk() {
 
             <tbody>
 
-              {filteredData.map((item) => (
+              {pag.pageData.length > 0 ? (
+
+                pag.pageData.map((item, index) => (
 
                 <tr key={item.id}>
+
+                  <td>
+                    {(pag.page - 1) *
+                      pag.entries +
+                      index +
+                      1}
+                  </td>
 
                   <td>
                     <strong>
@@ -368,13 +429,42 @@ function SuratMasuk() {
 
                 </tr>
 
-              ))}
+                ))
+
+              ) : (
+
+                <tr>
+
+                  <td
+                    colSpan="7"
+                    className="empty"
+                  >
+                    Belum ada surat masuk.
+                  </td>
+
+                </tr>
+
+              )}
 
             </tbody>
 
           </table>
 
         </div>
+
+
+        {/* =========================
+            PAGINATION
+        ========================= */}
+
+        <PaginationBar
+          page={pag.page}
+          totalPages={pag.totalPages}
+          onPageChange={pag.goToPage}
+          start={pag.start}
+          end={pag.end}
+          total={pag.total}
+        />
 
 
         {/* =========================

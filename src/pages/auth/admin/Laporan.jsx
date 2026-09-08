@@ -13,6 +13,12 @@ import {
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./Laporan.css";
 
+import {
+  usePagination,
+  EntriesSelect,
+  PaginationBar,
+} from "../../../component/Pagination";
+
 function Laporan() {
   const [dataSurat, setDataSurat] = useState([]);
   const [search, setSearch] = useState("");
@@ -69,6 +75,11 @@ function Laporan() {
 
     return cocokSearch && cocokStatus;
   });
+
+  // =========================
+  // PAGINATION
+  // =========================
+  const pag = usePagination(filteredData, 10);
 
   // =========================
   // STATISTIK
@@ -225,6 +236,12 @@ function Laporan() {
                 </option>
               </select>
 
+              {/* ENTRIES */}
+              <EntriesSelect
+                value={pag.entries}
+                onChange={pag.changeEntries}
+              />
+
             </div>
           </div>
 
@@ -246,11 +263,16 @@ function Laporan() {
 
               <tbody>
 
-                {filteredData.length > 0 ? (
-                  filteredData.map((surat, index) => (
+                {pag.pageData.length > 0 ? (
+                  pag.pageData.map((surat, index) => (
                     <tr key={surat.id}>
 
-                      <td>{index + 1}</td>
+                      <td>
+                        {(pag.page - 1) *
+                          pag.entries +
+                          index +
+                          1}
+                      </td>
 
                       <td>
                         <strong>
@@ -317,6 +339,18 @@ function Laporan() {
           </div>
 
         </div>
+
+        {/* =========================
+            PAGINATION
+        ========================= */}
+        <PaginationBar
+          page={pag.page}
+          totalPages={pag.totalPages}
+          onPageChange={pag.goToPage}
+          start={pag.start}
+          end={pag.end}
+          total={pag.total}
+        />
 
       </div>
 

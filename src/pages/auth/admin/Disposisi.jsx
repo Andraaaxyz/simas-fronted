@@ -10,8 +10,15 @@ import {
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./Disposisi.css";
 
+import {
+  usePagination,
+  EntriesSelect,
+  PaginationBar,
+} from "../../../component/Pagination";
+
 function Disposisi() {
   const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
   const [dataDisposisi, setDataDisposisi] = useState([]);
   const [selectedDisposisi, setSelectedDisposisi] =
     useState(null);
@@ -66,18 +73,29 @@ function Disposisi() {
   }, []);
 
   // =========================
-  // SEARCH
+  // SEARCH + FILTER
   // =========================
-  const filteredData =
-    dataDisposisi.filter((item) =>
+  const filteredData = dataDisposisi.filter((item) => {
+    const cocokSearch =
       `${item.noSurat || ""} ${
         item.asal || ""
       } ${item.pengguna || ""} ${
         item.perihal || ""
       }`
         .toLowerCase()
-        .includes(search.toLowerCase())
-    );
+        .includes(search.toLowerCase());
+
+    const cocokStatus =
+      !filterStatus ||
+      item.status === filterStatus;
+
+    return cocokSearch && cocokStatus;
+  });
+
+  // =========================
+  // PAGINATION
+  // =========================
+  const pag = usePagination(filteredData);
 
   return (
     <DashboardLayout title="Disposisi">
@@ -101,9 +119,11 @@ function Disposisi() {
         </div>
 
         {/* =========================
-            SEARCH
+            SEARCH + TOOLS
         ========================= */}
-        <div className="disposisi-toolbar">
+        <div
+          className="disposisi-toolbar pag-tools"
+        >
 
           <div className="search-box-disposisi">
 
@@ -120,6 +140,35 @@ function Disposisi() {
 
           </div>
 
+          <select
+            className="pag-filter"
+            value={filterStatus}
+            onChange={(e) =>
+              setFilterStatus(e.target.value)
+            }
+          >
+            <option value="">
+              Semua Status
+            </option>
+
+            {[
+              ...new Set(
+                dataDisposisi
+                  .map((d) => d.status)
+                  .filter(Boolean)
+              ),
+            ].map((st) => (
+              <option key={st} value={st}>
+                {st}
+              </option>
+            ))}
+          </select>
+
+          <EntriesSelect
+            value={pag.entries}
+            onChange={pag.changeEntries}
+          />
+
         </div>
 
         {/* =========================
@@ -132,6 +181,7 @@ function Disposisi() {
             <thead>
 
               <tr>
+                <th>No</th>
                 <th>No. Surat</th>
                 <th>Asal Surat</th>
                 <th>Perihal</th>
@@ -145,11 +195,18 @@ function Disposisi() {
 
             <tbody>
 
-              {filteredData.length > 0 ? (
+              {pag.pageData.length > 0 ? (
 
-                filteredData.map((item) => (
+                pag.pageData.map((item, index) => (
 
                   <tr key={item.id}>
+
+                    <td>
+                      {(pag.page - 1) *
+                        pag.entries +
+                        index +
+                        1}
+                    </td>
 
                     <td>
                       <strong>
@@ -235,7 +292,7 @@ function Disposisi() {
                 <tr>
 
                   <td
-                    colSpan="7"
+                    colSpan="8"
                     className="empty-disposisi"
                   >
                     Belum ada data disposisi.
@@ -250,6 +307,18 @@ function Disposisi() {
           </table>
 
         </div>
+
+        {/* =========================
+            PAGINATION
+        ========================= */}
+        <PaginationBar
+          page={pag.page}
+          totalPages={pag.totalPages}
+          onPageChange={pag.goToPage}
+          start={pag.start}
+          end={pag.end}
+          total={pag.total}
+        />
 
         {/* =========================
             MODAL DETAIL

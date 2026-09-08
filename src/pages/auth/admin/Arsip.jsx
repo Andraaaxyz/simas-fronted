@@ -9,8 +9,15 @@ import {
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./Arsip.css";
 
+import {
+  usePagination,
+  EntriesSelect,
+  PaginationBar,
+} from "../../../component/Pagination";
+
 function Arsip() {
   const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
   const [dataArsip, setDataArsip] = useState([]);
   const [selectedArsip, setSelectedArsip] =
     useState(null);
@@ -57,18 +64,31 @@ function Arsip() {
   }, []);
 
   // =========================
-  // SEARCH
+  // SEARCH + FILTER
   // =========================
   const filteredData = dataArsip.filter(
-    (item) =>
-      `${item.noSurat || ""} ${
-        item.isi || ""
-      } ${item.asal || ""} ${
-        item.tanggal || ""
-      }`
-        .toLowerCase()
-        .includes(search.toLowerCase())
+    (item) => {
+      const cocokSearch =
+        `${item.noSurat || ""} ${
+          item.isi || ""
+        } ${item.asal || ""} ${
+          item.tanggal || ""
+        }`
+          .toLowerCase()
+          .includes(search.toLowerCase());
+
+      const cocokStatus =
+        !filterStatus ||
+        item.status === filterStatus;
+
+      return cocokSearch && cocokStatus;
+    }
   );
+
+  // =========================
+  // PAGINATION
+  // =========================
+  const pag = usePagination(filteredData);
 
   return (
     <DashboardLayout title="Arsip Digital">
@@ -94,7 +114,9 @@ function Arsip() {
         </div>
 
         {/* TOOLBAR */}
-        <div className="arsip-toolbar">
+        <div
+          className="arsip-toolbar pag-tools"
+        >
 
           <div className="arsip-search">
 
@@ -111,6 +133,35 @@ function Arsip() {
 
           </div>
 
+          <select
+            className="pag-filter"
+            value={filterStatus}
+            onChange={(e) =>
+              setFilterStatus(e.target.value)
+            }
+          >
+            <option value="">
+              Semua Status
+            </option>
+
+            {[
+              ...new Set(
+                dataArsip
+                  .map((d) => d.status)
+                  .filter(Boolean)
+              ),
+            ].map((st) => (
+              <option key={st} value={st}>
+                {st}
+              </option>
+            ))}
+          </select>
+
+          <EntriesSelect
+            value={pag.entries}
+            onChange={pag.changeEntries}
+          />
+
         </div>
 
         {/* TABLE */}
@@ -121,6 +172,7 @@ function Arsip() {
             <thead>
 
               <tr>
+                <th>No</th>
                 <th>No. Surat</th>
                 <th>Perihal</th>
                 <th>Asal Surat</th>
@@ -133,11 +185,18 @@ function Arsip() {
 
             <tbody>
 
-              {filteredData.length > 0 ? (
+              {pag.pageData.length > 0 ? (
 
-                filteredData.map((item) => (
+                pag.pageData.map((item, index) => (
 
                   <tr key={item.id}>
+
+                    <td>
+                      {(pag.page - 1) *
+                        pag.entries +
+                        index +
+                        1}
+                    </td>
 
                     <td>
                       <strong>
@@ -193,7 +252,7 @@ function Arsip() {
                 <tr>
 
                   <td
-                    colSpan="6"
+                    colSpan="7"
                     className="arsip-empty"
                   >
                     Belum ada surat yang
@@ -209,6 +268,18 @@ function Arsip() {
           </table>
 
         </div>
+
+        {/* =========================
+            PAGINATION
+        ========================= */}
+        <PaginationBar
+          page={pag.page}
+          totalPages={pag.totalPages}
+          onPageChange={pag.goToPage}
+          start={pag.start}
+          end={pag.end}
+          total={pag.total}
+        />
 
         {/* =========================
             MODAL DETAIL

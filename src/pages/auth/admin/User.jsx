@@ -29,6 +29,17 @@ function User() {
         },
       ]}
       emptyMessage="Belum ada data user."
+      filters={[
+        {
+          key: "status",
+          label: "Status",
+          options: ["Aktif", "Nonaktif"],
+        },
+        {
+          key: "bidang",
+          label: "Bidang",
+        },
+      ]}
     />
   );
 }

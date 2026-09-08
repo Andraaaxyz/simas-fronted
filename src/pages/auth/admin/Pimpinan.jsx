@@ -29,6 +29,13 @@ function Pimpinan() {
         },
       ]}
       emptyMessage="Belum ada data pimpinan."
+      filters={[
+        {
+          key: "status",
+          label: "Status",
+          options: ["Aktif", "Nonaktif"],
+        },
+      ]}
     />
   );
 }

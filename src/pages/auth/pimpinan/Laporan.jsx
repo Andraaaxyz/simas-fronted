@@ -13,6 +13,12 @@ import {
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./Laporan.css";
 
+import {
+  usePagination,
+  EntriesSelect,
+  PaginationBar,
+} from "../../../component/Pagination";
+
 function Laporan() {
   const [dataSurat, setDataSurat] = useState([]);
   const [search, setSearch] = useState("");
@@ -81,6 +87,11 @@ function Laporan() {
 
     return cocokSearch && cocokStatus;
   });
+
+  // =========================
+  // PAGINATION
+  // =========================
+  const pag = usePagination(filteredData, 10);
 
   return (
     <DashboardLayout>
@@ -219,6 +230,11 @@ function Laporan() {
               <option value="Ditolak">Ditolak</option>
             </select>
 
+            <EntriesSelect
+              value={pag.entries}
+              onChange={pag.changeEntries}
+            />
+
           </div>
 
           {/* TABLE */}
@@ -240,11 +256,16 @@ function Laporan() {
 
               <tbody>
 
-                {filteredData.length > 0 ? (
-                  filteredData.map((item, index) => (
+                {pag.pageData.length > 0 ? (
+                  pag.pageData.map((item, index) => (
                     <tr key={item.id}>
 
-                      <td>{index + 1}</td>
+                      <td>
+                        {(pag.page - 1) *
+                          pag.entries +
+                          index +
+                          1}
+                      </td>
 
                       <td>
                         <strong className="nomor-surat">
@@ -315,6 +336,16 @@ function Laporan() {
             </table>
 
           </div>
+
+          {/* PAGINATION */}
+          <PaginationBar
+            page={pag.page}
+            totalPages={pag.totalPages}
+            onPageChange={pag.goToPage}
+            start={pag.start}
+            end={pag.end}
+            total={pag.total}
+          />
 
         </div>
 

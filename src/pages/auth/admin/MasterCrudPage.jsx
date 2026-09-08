@@ -10,6 +10,12 @@ import {
 import DashboardLayout from "../../../layouts/DashboardLayout";
 
 import {
+  usePagination,
+  EntriesSelect,
+  PaginationBar,
+} from "../../../component/Pagination";
+
+import {
   getMasterData,
   tambahMasterData,
   updateMasterData,
@@ -24,11 +30,18 @@ function MasterCrudPage({
   fields,
   emptyMessage,
   hasStatus = true,
+  filters = [],
 }) {
   const [search, setSearch] = useState("");
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
+
+  const [filterValues, setFilterValues] = useState(() => {
+    const initial = {};
+    filters.forEach((f) => (initial[f.key] = ""));
+    return initial;
+  });
 
   const [form, setForm] = useState(() => {
     const initial = {};
@@ -56,15 +69,30 @@ function MasterCrudPage({
   }, []);
 
   // =========================
-  // SEARCH
+  // SEARCH + FILTER
   // =========================
-  const filteredData = data.filter((item) =>
-    columns
+  const keyword = search.toLowerCase();
+
+  const filteredData = data.filter((item) => {
+    const cocokSearch = columns
       .map((c) => item[c.key] || "")
       .join(" ")
       .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+      .includes(keyword);
+
+    const cocokFilter = filters.every(
+      (f) =>
+        !filterValues[f.key] ||
+        item[f.key] === filterValues[f.key]
+    );
+
+    return cocokSearch && cocokFilter;
+  });
+
+  // =========================
+  // PAGINATION
+  // =========================
+  const pag = usePagination(filteredData);
 
   // =========================
   // TAMBAH
@@ -151,8 +179,8 @@ function MasterCrudPage({
           </button>
         </div>
 
-        {/* SEARCH */}
-        <div className="master-toolbar">
+        {/* SEARCH + TOOLS */}
+        <div className="master-toolbar pag-tools">
           <div className="master-search">
             <Search size={18} />
 
@@ -165,6 +193,47 @@ function MasterCrudPage({
               }
             />
           </div>
+
+          {filters.map((f) => {
+            const opsiDinamis = f.options
+              ? f.options
+              : [
+                  ...new Set(
+                    data
+                      .map((d) => d[f.key])
+                      .filter(Boolean)
+                  ),
+                ];
+
+            return (
+              <select
+                key={f.key}
+                className="pag-filter"
+                value={filterValues[f.key]}
+                onChange={(e) =>
+                  setFilterValues({
+                    ...filterValues,
+                    [f.key]: e.target.value,
+                  })
+                }
+              >
+                <option value="">
+                  Semua {f.label}
+                </option>
+
+                {opsiDinamis.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            );
+          })}
+
+          <EntriesSelect
+            value={pag.entries}
+            onChange={pag.changeEntries}
+          />
         </div>
 
         {/* TABLE */}
@@ -182,10 +251,14 @@ function MasterCrudPage({
             </thead>
 
             <tbody>
-              {filteredData.length > 0 ? (
-                filteredData.map((item, index) => (
+              {pag.pageData.length > 0 ? (
+                pag.pageData.map((item, index) => (
                   <tr key={item.id}>
-                    <td>{index + 1}</td>
+                    <td>
+                      {(pag.page - 1) * pag.entries +
+                        index +
+                        1}
+                    </td>
 
                     {columns.map((col) => (
                       <td key={col.key}>
@@ -257,6 +330,16 @@ function MasterCrudPage({
             </tbody>
           </table>
         </div>
+
+        {/* PAGINATION */}
+        <PaginationBar
+          page={pag.page}
+          totalPages={pag.totalPages}
+          onPageChange={pag.goToPage}
+          start={pag.start}
+          end={pag.end}
+          total={pag.total}
+        />
 
         {/* MODAL */}
         {showModal && (
