@@ -1,0 +1,328 @@
+.disposisi-page {
+  padding: 4px;
+}
+
+/* HEADER */
+.disposisi-header {
+  margin-bottom: 24px;
+}
+
+.disposisi-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #1f2937;
+}
+
+.disposisi-header p {
+  margin-top: 6px;
+  color: #8a94a6;
+  font-size: 14px;
+}
+
+/* SEARCH */
+.disposisi-toolbar {
+  margin-bottom: 18px;
+}
+
+.search-box-disposisi {
+  width: 100%;
+  max-width: 500px;
+  height: 42px;
+  background: white;
+  border: 1px solid #e3e7ef;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  padding: 0 13px;
+  gap: 9px;
+  color: #9aa3b2;
+  box-sizing: border-box;
+}
+
+.search-box-disposisi input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 13px;
+  background: transparent;
+}
+
+/* TABLE */
+.disposisi-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e8ebf0;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(20, 30, 50, 0.04);
+}
+
+.disposisi-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.disposisi-card th {
+  background: #f8f9fc;
+  color: #6d7686;
+  font-size: 12px;
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.disposisi-card td {
+  padding: 15px 16px;
+  font-size: 13px;
+  color: #525b6b;
+  border-top: 1px solid #f0f1f4;
+}
+
+.disposisi-card td strong {
+  color: #303846;
+}
+
+/* STATUS */
+.status-menunggu,
+.status-selesai {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-menunggu {
+  background: #fff4df;
+  color: #c47a00;
+}
+
+.status-selesai {
+  background: #eaf7ef;
+  color: #25834d;
+}
+
+/* AKSI */
+.aksi-disposisi button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e3e7ef;
+  background: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #657083;
+}
+
+.aksi-disposisi button:hover {
+  background: #f3f6ff;
+  color: #315bdc;
+  border-color: #cbd6ff;
+}
+
+/* EMPTY */
+.empty-disposisi {
+  text-align: center;
+  padding: 40px !important;
+  color: #929aaa !important;
+}
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.detail-modal-disposisi {
+  width: 100%;
+  max-width: 540px;
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* MODAL HEADER */
+.modal-header-disposisi {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 22px 24px;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.modal-header-disposisi h2 {
+  margin: 0;
+  color: #202735;
+  font-size: 19px;
+}
+
+.modal-header-disposisi p {
+  margin: 6px 0 0;
+  color: #929aaa;
+  font-size: 12px;
+}
+
+.close-button-disposisi {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: #f4f6f9;
+  color: #697386;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.close-button-disposisi:hover {
+  background: #e9edf3;
+}
+
+/* DETAIL */
+.detail-content-disposisi {
+  padding: 22px 24px;
+}
+
+.detail-row-disposisi {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 13px 0;
+  border-bottom: 1px solid #f0f1f4;
+}
+
+.detail-row-disposisi:last-child {
+  border-bottom: none;
+}
+
+.detail-row-disposisi span {
+  color: #8992a3;
+  font-size: 12px;
+}
+
+.detail-row-disposisi strong {
+  color: #303846;
+  font-size: 13px;
+  text-align: right;
+}
+
+/* FOOTER */
+.modal-footer-disposisi {
+  padding: 15px 24px;
+  border-top: 1px solid #edf0f4;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+/* TOMBOL SELESAI */
+.btn-selesai-disposisi {
+  border: none;
+  background: #16a34a;
+  color: white;
+  padding: 9px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-selesai-disposisi:hover {
+  background: #15803d;
+}
+
+/* TOMBOL TUTUP */
+.btn-tutup-disposisi {
+  border: none;
+  background: #f1f3f6;
+  color: #555f70;
+  padding: 9px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-tutup-disposisi:hover {
+  background: #e6e9ee;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .disposisi-card {
+    overflow-x: auto;
+  }
+
+  .disposisi-card table {
+    min-width: 850px;
+  }
+}
+
+@media (max-width: 600px) {
+  .detail-modal-disposisi {
+    max-height: 95vh;
+    overflow-y: auto;
+  }
+
+  .detail-row-disposisi {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .detail-row-disposisi strong {
+    text-align: left;
+  }
+
+  .modal-footer-disposisi {
+    flex-wrap: wrap;
+  }
+}
+/* =========================
+   AKSI DISPOSISI
+========================= */
+
+.disposisi-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 9px;
+}
+
+.btn-selesai-disposisi {
+  border: none;
+  background: #25834d;
+  color: white;
+
+  padding: 9px 14px;
+
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.btn-selesai-disposisi:hover {
+  background: #1d6f41;
+  transform: translateY(-1px);
+}

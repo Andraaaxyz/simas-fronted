@@ -1,0 +1,267 @@
+.surat-page {
+  padding: 4px;
+}
+
+.surat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.surat-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.surat-header p {
+  margin: 6px 0 0;
+  color: #8a94a6;
+  font-size: 14px;
+}
+
+.surat-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.search-box {
+  flex: 1;
+  max-width: 500px;
+  height: 42px;
+  background: white;
+  border: 1px solid #e3e7ef;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  padding: 0 13px;
+  gap: 9px;
+  color: #9aa3b2;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 13px;
+  color: #333;
+  background: transparent;
+}
+
+.search-box input::placeholder {
+  color: #a5adba;
+}
+
+.table-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e8ebf0;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(20, 30, 50, 0.04);
+}
+
+.table-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-card th {
+  background: #f8f9fc;
+  color: #6d7686;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e8ebf0;
+  white-space: nowrap;
+}
+
+.table-card td {
+  padding: 15px 16px;
+  font-size: 13px;
+  color: #525b6b;
+  border-bottom: 1px solid #f0f1f4;
+  vertical-align: middle;
+}
+
+.table-card tbody tr:hover {
+  background: #fafbfe;
+}
+
+.table-card td strong {
+  color: #303846;
+  font-weight: 600;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 20px;
+  background: #eaf7ef;
+  color: #25834d;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.aksi {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.aksi button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e3e7ef;
+  background: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #657083;
+  transition: 0.2s;
+}
+
+.aksi button:hover {
+  background: #f3f6ff;
+  color: #315bdc;
+  border-color: #cbd6ff;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #929aaa;
+  font-size: 13px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.detail-modal {
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 22px 24px;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #202735;
+  font-size: 19px;
+}
+
+.modal-header p {
+  margin: 6px 0 0;
+  color: #929aaa;
+  font-size: 12px;
+}
+
+.close-button {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: #f4f6f9;
+  color: #697386;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.detail-content {
+  padding: 22px 24px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 13px 0;
+  border-bottom: 1px solid #f0f1f4;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row span:first-child {
+  color: #8992a3;
+  font-size: 12px;
+}
+
+.detail-row strong {
+  color: #303846;
+  font-size: 13px;
+  text-align: right;
+}
+
+.modal-footer {
+  padding: 15px 24px;
+  border-top: 1px solid #edf0f4;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-tutup {
+  border: none;
+  background: #f1f3f6;
+  color: #555f70;
+  padding: 9px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .table-card {
+    overflow-x: auto;
+  }
+
+  .table-card table {
+    min-width: 900px;
+  }
+}
+
+@media (max-width: 600px) {
+  .surat-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .search-box {
+    max-width: none;
+  }
+
+  .detail-modal {
+    max-height: 95vh;
+  }
+}
