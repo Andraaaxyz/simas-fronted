@@ -92,6 +92,67 @@ function Disposisi() {
   const pag = usePagination(filteredData);
 
   // =========================
+  // PROSES DISPOSISI
+  // =========================
+  const prosesDisposisi = () => {
+    if (!selectedDisposisi) return;
+
+    // =========================
+    // UPDATE DISPOSISI
+    // =========================
+    const dataBaru = dataDisposisi.map(
+      (item) =>
+        item.id === selectedDisposisi.id
+          ? {
+              ...item,
+              status: "Diproses",
+            }
+          : item
+    );
+
+    localStorage.setItem(
+      "dataDisposisi",
+      JSON.stringify(dataBaru)
+    );
+
+    setDataDisposisi(dataBaru);
+
+    // =========================
+    // UPDATE STATUS SURAT
+    // =========================
+    const dataSurat =
+      JSON.parse(
+        localStorage.getItem("dataSurat")
+      ) || [];
+
+    const suratUpdate = dataSurat.map(
+      (surat) =>
+        surat.noSurat ===
+        selectedDisposisi.noSurat
+          ? {
+              ...surat,
+              status: "Diproses",
+            }
+          : surat
+    );
+
+    localStorage.setItem(
+      "dataSurat",
+      JSON.stringify(suratUpdate)
+    );
+
+    // =========================
+    // UPDATE MODAL
+    // =========================
+    setSelectedDisposisi({
+      ...selectedDisposisi,
+      status: "Diproses",
+    });
+
+    alert("Disposisi berhasil diproses!");
+  };
+
+  // =========================
   // SELESAIKAN DISPOSISI
   // =========================
   const selesaikanDisposisi = () => {
@@ -286,6 +347,9 @@ function Disposisi() {
                           item.status ===
                           "Selesai"
                             ? "status-selesai"
+                            : item.status ===
+                              "Diproses"
+                            ? "status-diproses"
                             : "status-menunggu"
                         }
                       >
@@ -435,6 +499,14 @@ function Disposisi() {
                 </div>
 
                 <div className="detail-row-disposisi">
+                  <span>Catatan</span>
+                  <strong>
+                    {selectedDisposisi.catatan ||
+                      "-"}
+                  </strong>
+                </div>
+
+                <div className="detail-row-disposisi">
                   <span>Tanggal</span>
                   <strong>
                     {selectedDisposisi.tanggal}
@@ -463,6 +535,19 @@ function Disposisi() {
 
                 {selectedDisposisi.status ===
                   "Menunggu" && (
+
+                  <button
+                    className="btn-proses-disposisi"
+                    onClick={prosesDisposisi}
+                  >
+                    <Clock size={16} />
+                    Proses Disposisi
+                  </button>
+
+                )}
+
+                {selectedDisposisi.status ===
+                  "Diproses" && (
 
                   <button
                     className="btn-selesai-disposisi"

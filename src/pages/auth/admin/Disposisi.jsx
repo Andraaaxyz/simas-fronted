@@ -421,6 +421,19 @@ function Disposisi() {
                 <div className="detail-row-disposisi">
 
                   <span>
+                    Catatan
+                  </span>
+
+                  <strong>
+                    {selectedDisposisi.catatan ||
+                      "-"}
+                  </strong>
+
+                </div>
+
+                <div className="detail-row-disposisi">
+
+                  <span>
                     Tanggal
                   </span>
 

@@ -292,6 +292,16 @@
   color: #64748b;
 }
 
+.laporan-status.menunggu-disposisi {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.laporan-status.didisposisikan {
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
 .laporan-status.diproses {
   background: #fff7ed;
   color: #c2410c;
@@ -300,6 +310,11 @@
 .laporan-status.selesai {
   background: #ecfdf5;
   color: #15803d;
+}
+
+.laporan-status.diarsipkan {
+  background: #f1f5f9;
+  color: #64748b;
 }
 
 .laporan-status.disetujui {

@@ -108,6 +108,145 @@
   font-weight: 600;
 }
 
+.status-baru {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.status-menunggu-disposisi {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.status-didisposisikan {
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.status-diproses {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.status-selesai,
+.status-disetujui {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status-ditolak {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.status-diarsipkan {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* =========================
+   INFO DISPOSISI DI DETAIL
+========================= */
+
+.detail-disposisi-info {
+  margin: 22px 24px 0;
+
+  background: #eff6ff;
+  border: 1px solid #cfe0ff;
+  border-radius: 12px;
+
+  padding: 16px;
+}
+
+.detail-disposisi-info h3 {
+  margin: 0 0 10px;
+
+  font-size: 14px;
+  color: #1e3a8a;
+}
+
+/* =========================
+   TIMELINE
+========================= */
+
+.detail-timeline {
+  margin: 24px;
+
+  padding-top: 16px;
+
+  border-top: 1px dashed #dce3ec;
+}
+
+.detail-timeline h3 {
+  margin: 0 0 14px;
+
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.timeline-item {
+  position: relative;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 12px;
+
+  padding: 0 0 16px 0;
+}
+
+.timeline-item::before {
+  content: "";
+
+  position: absolute;
+
+  left: 5px;
+  top: 16px;
+
+  width: 2px;
+  height: calc(100% - 16px);
+
+  background: #dce3ec;
+}
+
+.timeline-item:last-child::before {
+  display: none;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+
+  margin-top: 3px;
+
+  border-radius: 50%;
+
+  background: #2563eb;
+
+  border: 2px solid #cfe0ff;
+
+  flex-shrink: 0;
+
+  z-index: 1;
+}
+
+.timeline-item div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.timeline-item strong {
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.timeline-item span {
+  font-size: 12px;
+  color: #7a8699;
+}
+
 .aksi {
   display: flex;
   align-items: center;

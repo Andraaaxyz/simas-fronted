@@ -226,8 +226,17 @@ function Laporan() {
               >
                 <option value="Semua">Semua Status</option>
                 <option value="Baru">Baru</option>
+                <option value="Menunggu Disposisi">
+                  Menunggu Disposisi
+                </option>
+                <option value="Didisposisikan">
+                  Didisposisikan
+                </option>
                 <option value="Diproses">Diproses</option>
                 <option value="Selesai">Selesai</option>
+                <option value="Diarsipkan">
+                  Diarsipkan
+                </option>
                 <option value="Disetujui">
                   Disetujui
                 </option>

@@ -4,6 +4,8 @@ import {
   Eye,
   X,
   CheckCircle,
+  ClipboardList,
+  Send,
 } from "lucide-react";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
@@ -22,6 +24,22 @@ function SuratMasuk() {
   const [selectedSurat, setSelectedSurat] = useState(null);
 
   const [keputusan, setKeputusan] = useState("");
+
+  // =========================
+  // DISPOSISI
+  // =========================
+
+  const [showDisposisi, setShowDisposisi] =
+    useState(false);
+
+  const [suratDisposisi, setSuratDisposisi] =
+    useState(null);
+
+  const [formDisposisi, setFormDisposisi] = useState({
+    tujuan: "",
+    instruksi: "",
+    catatan: "",
+  });
 
 
   // =========================
@@ -122,6 +140,149 @@ function SuratMasuk() {
   };
 
 
+// =========================
+  // OPSI TUJUAN (DARI MASTER USER)
+  // =========================
+
+  const opsiTujuan = () => {
+    const data =
+      JSON.parse(
+        localStorage.getItem("masterUser")
+      ) || [];
+
+    if (data.length > 0) {
+      return data.map((u) => u.nama);
+    }
+
+    return [
+      "Pengguna 1",
+      "Pengguna 2",
+      "Pengguna 3",
+    ];
+  };
+
+  // =========================
+  // BUKA FORM DISPOSISI
+  // =========================
+
+  const bukaFormDisposisi = (surat) => {
+    setSuratDisposisi(surat);
+
+    setFormDisposisi({
+      tujuan: "",
+      instruksi: "",
+      catatan: "",
+    });
+
+    setShowDisposisi(true);
+  };
+
+  // =========================
+  // KIRIM DISPOSISI
+  // =========================
+
+  const kirimDisposisi = () => {
+
+    if (
+      !formDisposisi.tujuan ||
+      !formDisposisi.instruksi
+    ) {
+      alert("Tujuan dan instruksi wajib diisi!");
+      return;
+    }
+
+    const tanggalSekarang = new Date();
+
+    const tanggalTeks = tanggalSekarang.toLocaleDateString(
+      "id-ID",
+      {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }
+    );
+
+    const disposisiBaru = {
+      id: Date.now(),
+      noSurat: suratDisposisi.noSurat,
+      asal: suratDisposisi.asal,
+      perihal: suratDisposisi.isi,
+      tanggal: suratDisposisi.tanggal,
+      pengguna: formDisposisi.tujuan,
+      instruksi: formDisposisi.instruksi,
+      catatan: formDisposisi.catatan,
+      tanggalDisposisi: tanggalTeks,
+      status: "Menunggu",
+    };
+
+    // =========================
+    // SIMPAN KE DATA DISPOSISI
+    // =========================
+
+    const dataDisposisiLama =
+      JSON.parse(
+        localStorage.getItem("dataDisposisi")
+      ) || [];
+
+    const dataDisposisiBaru = [
+      ...dataDisposisiLama,
+      disposisiBaru,
+    ];
+
+    localStorage.setItem(
+      "dataDisposisi",
+      JSON.stringify(dataDisposisiBaru)
+    );
+
+    // =========================
+    // UPDATE SURAT
+    // =========================
+
+    const suratUpdate = dataSurat.map((item) =>
+      item.id === suratDisposisi.id
+        ? {
+            ...item,
+            status: "Didisposisikan",
+            keputusan: "",
+
+            disposisi: {
+              tujuan: formDisposisi.tujuan,
+              instruksi: formDisposisi.instruksi,
+              catatan: formDisposisi.catatan,
+              tanggalDisposisi: tanggalTeks,
+            },
+
+            timeline: [
+              ...(item.timeline || []),
+              {
+                label: "Disposisi dibuat",
+                tanggal: tanggalTeks,
+              },
+            ],
+          }
+        : item
+    );
+
+    localStorage.setItem(
+      "dataSurat",
+      JSON.stringify(suratUpdate)
+    );
+
+    setDataSurat(suratUpdate);
+
+    setShowDisposisi(false);
+
+    setSuratDisposisi(null);
+
+    setFormDisposisi({
+      tujuan: "",
+      instruksi: "",
+      catatan: "",
+    });
+
+    alert("Disposisi berhasil dikirim!");
+  };
+
   return (
     <DashboardLayout title="Surat Masuk">
 
@@ -218,6 +379,7 @@ function SuratMasuk() {
                 <th>No. Surat</th>
                 <th>Isi / Perihal</th>
                 <th>Asal Surat</th>
+                <th>Sifat</th>
                 <th>Tanggal</th>
                 <th>Status</th>
                 <th>Aksi</th>
@@ -256,12 +418,25 @@ function SuratMasuk() {
                     </td>
 
                     <td>
+                      {item.sifat || "-"}
+                    </td>
+
+                    <td>
                       {item.tanggal}
                     </td>
 
                     <td>
 
-                      <span className="status">
+                      <span
+                        className={`status ${
+                          item.status
+                            ?.toLowerCase()
+                            .replace(
+                              /\s+/g,
+                              "-"
+                            )
+                        }`}
+                      >
                         {item.status}
                       </span>
 
@@ -269,18 +444,42 @@ function SuratMasuk() {
 
                     <td>
 
-                      <button
-                        className="btn-eye"
-                        title="Lihat Detail"
-                        onClick={() => {
-                          setSelectedSurat(item);
-                          setKeputusan(
-                            item.keputusan || ""
-                          );
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          flexWrap: "wrap",
                         }}
                       >
-                        <Eye size={17} />
-                      </button>
+
+                        <button
+                          className="btn-eye"
+                          title="Lihat Detail"
+                          onClick={() => {
+                            setSelectedSurat(item);
+                            setKeputusan(
+                              item.keputusan || ""
+                            );
+                          }}
+                        >
+                          <Eye size={17} />
+                        </button>
+
+                        {!item.disposisi && (
+                          <button
+                            className="btn-disposisi-aksi"
+                            title="Buat Disposisi"
+                            onClick={() =>
+                              bukaFormDisposisi(item)
+                            }
+                          >
+                            <ClipboardList
+                              size={17}
+                            />
+                          </button>
+                        )}
+
+                      </div>
 
                     </td>
 
@@ -293,7 +492,7 @@ function SuratMasuk() {
                 <tr>
 
                   <td
-                    colSpan="7"
+                    colSpan="8"
                     className="empty"
                   >
                     Belum ada surat masuk.
@@ -418,6 +617,19 @@ function SuratMasuk() {
                 <div className="detail-row">
 
                   <span>
+                    Sifat Surat
+                  </span>
+
+                  <strong>
+                    {selectedSurat.sifat || "-"}
+                  </strong>
+
+                </div>
+
+
+                <div className="detail-row">
+
+                  <span>
                     Tanggal
                   </span>
 
@@ -474,6 +686,81 @@ function SuratMasuk() {
 
                 </div>
 
+
+                {/* INFO DISPOSISI */}
+
+                {selectedSurat.disposisi && (
+                  <div className="detail-disposisi-info">
+
+                    <h3>
+                      Informasi Disposisi
+                    </h3>
+
+                    <div className="detail-row">
+                      <span>Tujuan</span>
+
+                      <strong>
+                        {selectedSurat.disposisi
+                          .tujuan || "-"}
+                      </strong>
+                    </div>
+
+                    <div className="detail-row">
+                      <span>Instruksi</span>
+
+                      <strong>
+                        {selectedSurat.disposisi
+                          .instruksi || "-"}
+                      </strong>
+                    </div>
+
+                    <div className="detail-row">
+                      <span>Catatan</span>
+
+                      <strong>
+                        {selectedSurat.disposisi
+                          .catatan || "-"}
+                      </strong>
+                    </div>
+
+                  </div>
+                )}
+
+                {/* TIMELINE */}
+
+                {selectedSurat.timeline &&
+                  selectedSurat.timeline.length >
+                    0 && (
+                    <div className="detail-timeline">
+
+                      <h3>Riwayat</h3>
+
+                      {selectedSurat.timeline.map(
+                        (tl, i) => (
+                          <div
+                            className="timeline-item"
+                            key={i}
+                          >
+                            <div
+                              className="timeline-dot"
+                            />
+
+                            <div>
+                              <strong>
+                                {tl.label}
+                              </strong>
+
+                              <span>
+                                {tl.tanggal}
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      )}
+
+                    </div>
+                  )}
+
               </div>
 
 
@@ -500,6 +787,223 @@ function SuratMasuk() {
 
                   Simpan Keputusan
 
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        )}
+
+
+        {/* =========================
+            MODAL BUAT DISPOSISI
+        ========================= */}
+
+        {showDisposisi && suratDisposisi && (
+
+          <div
+            className="modal-overlay"
+            onClick={() =>
+              setShowDisposisi(false)
+            }
+          >
+
+            <div
+              className="detail-modal disposisi-form-modal"
+              onClick={(e) =>
+                e.stopPropagation()
+              }
+            >
+
+              {/* HEADER */}
+
+              <div className="modal-header">
+
+                <div>
+
+                  <h2>
+                    Buat Disposisi
+                  </h2>
+
+                  <p>
+                    Distribusikan surat kepada
+                    pegawai terkait
+                  </p>
+
+                </div>
+
+                <button
+                  className="close-button"
+                  onClick={() =>
+                    setShowDisposisi(false)
+                  }
+                >
+                  <X size={18} />
+                </button>
+
+              </div>
+
+
+              {/* BODY 2 KOLOM */}
+
+              <div className="disposisi-form-grid">
+
+                {/* KOLOM INFO SURAT */}
+
+                <div className="disposisi-form-info">
+
+                  <h3>
+                    Informasi Surat
+                  </h3>
+
+                  <div className="detail-row">
+                    <span>No. Surat</span>
+
+                    <strong>
+                      {suratDisposisi.noSurat}
+                    </strong>
+                  </div>
+
+                  <div className="detail-row">
+                    <span>Perihal</span>
+
+                    <strong>
+                      {suratDisposisi.isi}
+                    </strong>
+                  </div>
+
+                  <div className="detail-row">
+                    <span>Asal Surat</span>
+
+                    <strong>
+                      {suratDisposisi.asal}
+                    </strong>
+                  </div>
+
+                  <div className="detail-row">
+                    <span>Sifat Surat</span>
+
+                    <strong>
+                      {suratDisposisi.sifat ||
+                        "-"}
+                    </strong>
+                  </div>
+
+                  <div className="detail-row">
+                    <span>Tanggal</span>
+
+                    <strong>
+                      {suratDisposisi.tanggal}
+                    </strong>
+                  </div>
+
+                  <div className="detail-row">
+                    <span>Status</span>
+
+                    <strong>
+                      {suratDisposisi.status}
+                    </strong>
+                  </div>
+
+                </div>
+
+
+                {/* KOLOM FORM */}
+
+                <div className="disposisi-form-inputs">
+
+                  <div className="form-group">
+                    <label>
+                      Tujuan Kepada
+                    </label>
+
+                    <select
+                      value={formDisposisi.tujuan}
+                      onChange={(e) =>
+                        setFormDisposisi({
+                          ...formDisposisi,
+                          tujuan: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="">
+                        Pilih penerima
+                      </option>
+
+                      {opsiTujuan().map((o) => (
+                        <option key={o} value={o}>
+                          {o}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>
+                      Instruksi
+                    </label>
+
+                    <textarea
+                      rows="4"
+                      placeholder="Contoh: Segera ditindaklanjuti"
+                      value={formDisposisi.instruksi}
+                      onChange={(e) =>
+                        setFormDisposisi({
+                          ...formDisposisi,
+                          instruksi:
+                            e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>
+                      Catatan
+                    </label>
+
+                    <textarea
+                      rows="3"
+                      placeholder="Contoh: Mohon diproses dengan baik"
+                      value={formDisposisi.catatan}
+                      onChange={(e) =>
+                        setFormDisposisi({
+                          ...formDisposisi,
+                          catatan:
+                            e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              {/* FOOTER */}
+
+              <div className="modal-footer">
+
+                <button
+                  className="btn-tutup"
+                  onClick={() =>
+                    setShowDisposisi(false)
+                  }
+                >
+                  Batal
+                </button>
+
+                <button
+                  className="btn-simpan"
+                  onClick={kirimDisposisi}
+                >
+                  <Send size={17} />
+
+                  Kirim Disposisi
                 </button>
 
               </div>

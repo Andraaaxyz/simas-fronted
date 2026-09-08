@@ -32,6 +32,7 @@ function ArsipDigital() {
       const arsip = dataSurat.filter(
         (item) =>
           item.status === "Selesai" ||
+          item.status === "Diarsipkan" ||
           item.status === "Disetujui"
       );
 

@@ -224,8 +224,17 @@ function Laporan() {
             >
               <option value="Semua">Semua Status</option>
               <option value="Baru">Baru</option>
+              <option value="Menunggu Disposisi">
+                Menunggu Disposisi
+              </option>
+              <option value="Didisposisikan">
+                Didisposisikan
+              </option>
               <option value="Diproses">Diproses</option>
               <option value="Selesai">Selesai</option>
+              <option value="Diarsipkan">
+                Diarsipkan
+              </option>
               <option value="Disetujui">Disetujui</option>
               <option value="Ditolak">Ditolak</option>
             </select>
@@ -286,15 +295,12 @@ function Laporan() {
                       <td>
                         <span
                           className={`laporan-status ${
-                            item.status === "Selesai"
-                              ? "selesai"
-                              : item.status === "Disetujui"
-                              ? "disetujui"
-                              : item.status === "Ditolak"
-                              ? "ditolak"
-                              : item.status === "Diproses"
-                              ? "diproses"
-                              : "baru"
+                            item.status
+                              ?.toLowerCase()
+                              .replace(
+                                /\s+/g,
+                                "-"
+                              )
                           }`}
                         >
                           {item.status}
@@ -414,18 +420,12 @@ function Laporan() {
                   <strong>
                     <span
                       className={`laporan-status ${
-                        selectedSurat.status === "Selesai"
-                          ? "selesai"
-                          : selectedSurat.status ===
-                            "Disetujui"
-                          ? "disetujui"
-                          : selectedSurat.status ===
-                            "Ditolak"
-                          ? "ditolak"
-                          : selectedSurat.status ===
-                            "Diproses"
-                          ? "diproses"
-                          : "baru"
+                        selectedSurat.status
+                          ?.toLowerCase()
+                          .replace(
+                            /\s+/g,
+                            "-"
+                          )
                       }`}
                     >
                       {selectedSurat.status}
