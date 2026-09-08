@@ -27,8 +27,21 @@ function Laporan() {
 
   useEffect(() => {
     const ambilData = () => {
-      const data =
+      const dataLama =
         JSON.parse(localStorage.getItem("dataSurat")) || [];
+
+      const data = dataLama.map((item) =>
+        item.perihal !== undefined
+          ? item
+          : {
+              ...item,
+              perihal: item.perihal || item.isi || "",
+              tanggalDiterima:
+                item.tanggalDiterima ||
+                item.tanggal ||
+                "",
+            }
+      );
 
       setDataSurat(data);
 
@@ -75,9 +88,9 @@ function Laporan() {
 
   const filteredData = dataSurat.filter((item) => {
     const cocokSearch =
-      `${item.noSurat || ""} ${item.isi || ""} ${
+      `${item.noSurat || ""} ${item.perihal || ""} ${
         item.asal || ""
-      } ${item.tanggal || ""}`
+      } ${item.tanggalDiterima || ""}`
         .toLowerCase()
         .includes(search.toLowerCase());
 
@@ -284,13 +297,17 @@ function Laporan() {
 
                       <td>
                         <span className="perihal">
-                          {item.isi}
+                          {item.perihal}
                         </span>
                       </td>
 
                       <td>{item.asal}</td>
 
-                      <td>{item.tanggal}</td>
+                      <td>
+                        {formatTanggal(
+                          item.tanggalDiterima
+                        )}
+                      </td>
 
                       <td>
                         <span
@@ -396,7 +413,7 @@ function Laporan() {
                 <div className="detail-box">
                   <span>Perihal</span>
                   <strong>
-                    {selectedSurat.isi}
+                    {selectedSurat.perihal}
                   </strong>
                 </div>
 
@@ -408,9 +425,11 @@ function Laporan() {
                 </div>
 
                 <div className="detail-box">
-                  <span>Tanggal</span>
+                  <span>Tanggal Diterima</span>
                   <strong>
-                    {selectedSurat.tanggal}
+                    {formatTanggal(
+                      selectedSurat.tanggalDiterima
+                    )}
                   </strong>
                 </div>
 
@@ -461,6 +480,39 @@ function Laporan() {
       </div>
     </DashboardLayout>
   );
+}
+
+// =========================
+// FORMAT TGL ke id-ID
+// =========================
+
+function formatTanggal(tgl) {
+  if (!tgl) return "-";
+
+  const m = String(tgl).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (m) {
+    const bulan = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+
+    return `${parseInt(m[3], 10)} ${
+      bulan[parseInt(m[2], 10) - 1]
+    } ${m[1]}`;
+  }
+
+  return tgl;
 }
 
 export default Laporan;

@@ -26,10 +26,23 @@ function Arsip() {
   // AMBIL SURAT SELESAI
   // =========================
   const ambilArsip = () => {
-    const dataSurat =
+    const dataSuratLama =
       JSON.parse(
         localStorage.getItem("dataSurat")
       ) || [];
+
+    const dataSurat = dataSuratLama.map((item) =>
+      item.perihal !== undefined
+        ? item
+        : {
+            ...item,
+            perihal: item.perihal || item.isi || "",
+            tanggalDiterima:
+              item.tanggalDiterima ||
+              item.tanggal ||
+              "",
+          }
+    );
 
     const arsip = dataSurat.filter(
       (item) =>
@@ -71,9 +84,9 @@ function Arsip() {
     (item) => {
       const cocokSearch =
         `${item.noSurat || ""} ${
-          item.isi || ""
+          item.perihal || ""
         } ${item.asal || ""} ${
-          item.tanggal || ""
+          item.tanggalDiterima || ""
         }`
           .toLowerCase()
           .includes(search.toLowerCase());
@@ -206,7 +219,7 @@ function Arsip() {
                     </td>
 
                     <td>
-                      {item.isi}
+                      {item.perihal}
                     </td>
 
                     <td>
@@ -214,7 +227,9 @@ function Arsip() {
                     </td>
 
                     <td>
-                      {item.tanggal}
+                      {formatTanggal(
+                        item.tanggalDiterima
+                      )}
                     </td>
 
                     <td>
@@ -335,7 +350,7 @@ function Arsip() {
                   </span>
 
                   <strong>
-                    {selectedArsip.isi}
+                    {selectedArsip.perihal}
                   </strong>
                 </div>
 
@@ -351,11 +366,13 @@ function Arsip() {
 
                 <div className="arsip-detail-item">
                   <span>
-                    Tanggal
+                    Tanggal Diterima
                   </span>
 
                   <strong>
-                    {selectedArsip.tanggal}
+                    {formatTanggal(
+                      selectedArsip.tanggalDiterima
+                    )}
                   </strong>
                 </div>
 
@@ -394,6 +411,39 @@ function Arsip() {
 
     </DashboardLayout>
   );
+}
+
+// =========================
+// FORMAT TGL ke id-ID
+// =========================
+
+function formatTanggal(tgl) {
+  if (!tgl) return "-";
+
+  const m = String(tgl).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (m) {
+    const bulan = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+
+    return `${parseInt(m[3], 10)} ${
+      bulan[parseInt(m[2], 10) - 1]
+    } ${m[1]}`;
+  }
+
+  return tgl;
 }
 
 export default Arsip;

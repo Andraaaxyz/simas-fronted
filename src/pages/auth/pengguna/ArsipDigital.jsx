@@ -26,8 +26,21 @@ function ArsipDigital() {
   // =========================
   useEffect(() => {
     const ambilData = () => {
-      const dataSurat =
+      const dataSuratLama =
         JSON.parse(localStorage.getItem("dataSurat")) || [];
+
+      const dataSurat = dataSuratLama.map((item) =>
+        item.perihal !== undefined
+          ? item
+          : {
+              ...item,
+              perihal: item.perihal || item.isi || "",
+              tanggalDiterima:
+                item.tanggalDiterima ||
+                item.tanggal ||
+                "",
+            }
+      );
 
       const arsip = dataSurat.filter(
         (item) =>
@@ -68,9 +81,9 @@ function ArsipDigital() {
     const keyword = search.toLowerCase();
 
     const cocokSearch =
-      `${item.noSurat || ""} ${item.isi || ""} ${
+      `${item.noSurat || ""} ${item.perihal || ""} ${
         item.asal || ""
-      } ${item.tanggal || ""}`
+      } ${item.tanggalDiterima || ""}`
         .toLowerCase()
         .includes(keyword);
 
@@ -218,7 +231,7 @@ function ArsipDigital() {
                       </td>
 
                       <td>
-                        {arsip.isi}
+                        {arsip.perihal}
                       </td>
 
                       <td>
@@ -226,7 +239,9 @@ function ArsipDigital() {
                       </td>
 
                       <td>
-                        {arsip.tanggal}
+                        {formatTanggal(
+                          arsip.tanggalDiterima
+                        )}
                       </td>
 
                       <td>
@@ -350,7 +365,7 @@ function ArsipDigital() {
                 <span>Perihal</span>
 
                 <strong>
-                  {selectedArsip.isi}
+                  {selectedArsip.perihal}
                 </strong>
               </div>
 
@@ -363,10 +378,12 @@ function ArsipDigital() {
               </div>
 
               <div className="arsip-detail-item">
-                <span>Tanggal</span>
+                <span>Tanggal Diterima</span>
 
                 <strong>
-                  {selectedArsip.tanggal}
+                  {formatTanggal(
+                    selectedArsip.tanggalDiterima
+                  )}
                 </strong>
               </div>
 
@@ -416,6 +433,39 @@ function ArsipDigital() {
 
     </DashboardLayout>
   );
+}
+
+// =========================
+// FORMAT TGL ke id-ID
+// =========================
+
+function formatTanggal(tgl) {
+  if (!tgl) return "-";
+
+  const m = String(tgl).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (m) {
+    const bulan = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+
+    return `${parseInt(m[3], 10)} ${
+      bulan[parseInt(m[2], 10) - 1]
+    } ${m[1]}`;
+  }
+
+  return tgl;
 }
 
 export default ArsipDigital;

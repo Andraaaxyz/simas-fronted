@@ -41,18 +41,34 @@ function SuratMasuk() {
     catatan: "",
   });
 
-
   // =========================
   // AMBIL DATA SURAT
   // =========================
+
+  const migrasiData = (data) =>
+    data.map((item) => {
+      if (item.perihal !== undefined) return item;
+
+      return {
+        ...item,
+        noAgenda: item.noAgenda || "",
+        tanggalSurat: item.tanggalSurat || "",
+        tanggalDiterima: item.tanggalDiterima || item.tanggal || "",
+        jenis: item.jenis || "",
+        sifat: item.sifat || "",
+        tujuan: item.tujuan || "",
+        perihal: item.perihal || item.isi || "",
+        file: item.file || "",
+        lampiran: item.lampiran || "",
+      };
+    });
 
   const ambilDataSurat = () => {
     const data =
       JSON.parse(localStorage.getItem("dataSurat")) || [];
 
-    setDataSurat(data);
+    setDataSurat(migrasiData(data));
   };
-
 
   useEffect(() => {
     ambilDataSurat();
@@ -70,15 +86,14 @@ function SuratMasuk() {
     };
   }, []);
 
-
   // =========================
   // SEARCH + FILTER
   // =========================
 
   const filteredData = dataSurat.filter((item) => {
-    const cocokSearch = `${item.noSurat} ${
-      item.isi
-    } ${item.asal}`
+    const cocokSearch = `${item.noSurat || ""} ${
+      item.perihal || ""
+    } ${item.asal || ""} ${item.noAgenda || ""}`
       .toLowerCase()
       .includes(search.toLowerCase());
 
@@ -94,7 +109,6 @@ function SuratMasuk() {
   // =========================
 
   const pag = usePagination(filteredData);
-
 
   // =========================
   // SIMPAN KEPUTUSAN
@@ -120,7 +134,6 @@ function SuratMasuk() {
         : item
     );
 
-    // Simpan ke localStorage
     localStorage.setItem(
       "dataSurat",
       JSON.stringify(dataBaru)
@@ -139,8 +152,7 @@ function SuratMasuk() {
     setKeputusan("");
   };
 
-
-// =========================
+  // =========================
   // OPSI TUJUAN (DARI MASTER USER)
   // =========================
 
@@ -193,21 +205,23 @@ function SuratMasuk() {
 
     const tanggalSekarang = new Date();
 
-    const tanggalTeks = tanggalSekarang.toLocaleDateString(
-      "id-ID",
-      {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      }
-    );
+    const tanggalTeks =
+      tanggalSekarang.toLocaleDateString(
+        "id-ID",
+        {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }
+      );
 
     const disposisiBaru = {
       id: Date.now(),
+      noAgenda: suratDisposisi.noAgenda,
       noSurat: suratDisposisi.noSurat,
       asal: suratDisposisi.asal,
-      perihal: suratDisposisi.isi,
-      tanggal: suratDisposisi.tanggal,
+      perihal: suratDisposisi.perihal,
+      tanggal: suratDisposisi.tanggalDiterima,
       pengguna: formDisposisi.tujuan,
       instruksi: formDisposisi.instruksi,
       catatan: formDisposisi.catatan,
@@ -308,7 +322,6 @@ function SuratMasuk() {
 
         </div>
 
-
         {/* =========================
             SEARCH
         ========================= */}
@@ -363,7 +376,6 @@ function SuratMasuk() {
 
         </div>
 
-
         {/* =========================
             TABLE
         ========================= */}
@@ -376,17 +388,17 @@ function SuratMasuk() {
 
               <tr>
                 <th>No</th>
+                <th>No. Agenda</th>
                 <th>No. Surat</th>
-                <th>Isi / Perihal</th>
-                <th>Asal Surat</th>
+                <th>Tanggal Diterima</th>
                 <th>Sifat</th>
-                <th>Tanggal</th>
+                <th>Asal Surat</th>
+                <th>Perihal</th>
                 <th>Status</th>
                 <th>Aksi</th>
               </tr>
 
             </thead>
-
 
             <tbody>
 
@@ -405,16 +417,20 @@ function SuratMasuk() {
 
                     <td>
                       <strong>
+                        {item.noAgenda}
+                      </strong>
+                    </td>
+
+                    <td>
+                      <strong>
                         {item.noSurat}
                       </strong>
                     </td>
 
                     <td>
-                      {item.isi}
-                    </td>
-
-                    <td>
-                      {item.asal}
+                      {formatTanggal(
+                        item.tanggalDiterima
+                      )}
                     </td>
 
                     <td>
@@ -422,7 +438,11 @@ function SuratMasuk() {
                     </td>
 
                     <td>
-                      {item.tanggal}
+                      {item.asal}
+                    </td>
+
+                    <td>
+                      {item.perihal}
                     </td>
 
                     <td>
@@ -492,7 +512,7 @@ function SuratMasuk() {
                 <tr>
 
                   <td
-                    colSpan="8"
+                    colSpan="9"
                     className="empty"
                   >
                     Belum ada surat masuk.
@@ -508,7 +528,6 @@ function SuratMasuk() {
 
         </div>
 
-
         {/* =========================
             PAGINATION
         ========================= */}
@@ -521,7 +540,6 @@ function SuratMasuk() {
           end={pag.end}
           total={pag.total}
         />
-
 
         {/* =========================
             MODAL DETAIL
@@ -570,10 +588,21 @@ function SuratMasuk() {
 
               </div>
 
-
               {/* DETAIL */}
 
               <div className="detail-content">
+
+                <div className="detail-row">
+
+                  <span>
+                    No. Agenda
+                  </span>
+
+                  <strong>
+                    {selectedSurat.noAgenda}
+                  </strong>
+
+                </div>
 
                 <div className="detail-row">
 
@@ -587,32 +616,45 @@ function SuratMasuk() {
 
                 </div>
 
-
                 <div className="detail-row">
 
                   <span>
-                    Perihal
+                    Tanggal Surat
                   </span>
 
                   <strong>
-                    {selectedSurat.isi}
+                    {formatTanggal(
+                      selectedSurat.tanggalSurat
+                    )}
                   </strong>
 
                 </div>
 
-
                 <div className="detail-row">
 
                   <span>
-                    Asal Surat
+                    Tanggal Diterima
                   </span>
 
                   <strong>
-                    {selectedSurat.asal}
+                    {formatTanggal(
+                      selectedSurat.tanggalDiterima
+                    )}
                   </strong>
 
                 </div>
 
+                <div className="detail-row">
+
+                  <span>
+                    Jenis Surat
+                  </span>
+
+                  <strong>
+                    {selectedSurat.jenis || "-"}
+                  </strong>
+
+                </div>
 
                 <div className="detail-row">
 
@@ -626,19 +668,65 @@ function SuratMasuk() {
 
                 </div>
 
-
                 <div className="detail-row">
 
                   <span>
-                    Tanggal
+                    Asal Surat
                   </span>
 
                   <strong>
-                    {selectedSurat.tanggal}
+                    {selectedSurat.asal}
                   </strong>
 
                 </div>
 
+                <div className="detail-row">
+
+                  <span>
+                    Tujuan Surat
+                  </span>
+
+                  <strong>
+                    {selectedSurat.tujuan || "-"}
+                  </strong>
+
+                </div>
+
+                <div className="detail-row">
+
+                  <span>
+                    Perihal
+                  </span>
+
+                  <strong>
+                    {selectedSurat.perihal}
+                  </strong>
+
+                </div>
+
+                <div className="detail-row">
+
+                  <span>
+                    File Surat
+                  </span>
+
+                  <strong>
+                    {selectedSurat.file || "-"}
+                  </strong>
+
+                </div>
+
+                <div className="detail-row">
+
+                  <span>
+                    Lampiran
+                  </span>
+
+                  <strong>
+                    {selectedSurat.lampiran || "-"}
+                  </strong>
+
+                </div>
 
                 <div className="detail-row">
 
@@ -651,7 +739,6 @@ function SuratMasuk() {
                   </strong>
 
                 </div>
-
 
                 {/* KEPUTUSAN */}
 
@@ -685,7 +772,6 @@ function SuratMasuk() {
                   </select>
 
                 </div>
-
 
                 {/* INFO DISPOSISI */}
 
@@ -729,8 +815,7 @@ function SuratMasuk() {
                 {/* TIMELINE */}
 
                 {selectedSurat.timeline &&
-                  selectedSurat.timeline.length >
-                    0 && (
+                  selectedSurat.timeline.length > 0 && (
                     <div className="detail-timeline">
 
                       <h3>Riwayat</h3>
@@ -763,7 +848,6 @@ function SuratMasuk() {
 
               </div>
 
-
               {/* FOOTER */}
 
               <div className="modal-footer">
@@ -776,7 +860,6 @@ function SuratMasuk() {
                 >
                   Tutup
                 </button>
-
 
                 <button
                   className="btn-simpan"
@@ -796,7 +879,6 @@ function SuratMasuk() {
           </div>
 
         )}
-
 
         {/* =========================
             MODAL BUAT DISPOSISI
@@ -846,7 +928,6 @@ function SuratMasuk() {
 
               </div>
 
-
               {/* BODY 2 KOLOM */}
 
               <div className="disposisi-form-grid">
@@ -860,6 +941,14 @@ function SuratMasuk() {
                   </h3>
 
                   <div className="detail-row">
+                    <span>No. Agenda</span>
+
+                    <strong>
+                      {suratDisposisi.noAgenda}
+                    </strong>
+                  </div>
+
+                  <div className="detail-row">
                     <span>No. Surat</span>
 
                     <strong>
@@ -871,7 +960,7 @@ function SuratMasuk() {
                     <span>Perihal</span>
 
                     <strong>
-                      {suratDisposisi.isi}
+                      {suratDisposisi.perihal}
                     </strong>
                   </div>
 
@@ -880,6 +969,15 @@ function SuratMasuk() {
 
                     <strong>
                       {suratDisposisi.asal}
+                    </strong>
+                  </div>
+
+                  <div className="detail-row">
+                    <span>Jenis Surat</span>
+
+                    <strong>
+                      {suratDisposisi.jenis ||
+                        "-"}
                     </strong>
                   </div>
 
@@ -893,23 +991,16 @@ function SuratMasuk() {
                   </div>
 
                   <div className="detail-row">
-                    <span>Tanggal</span>
+                    <span>Tanggal Diterima</span>
 
                     <strong>
-                      {suratDisposisi.tanggal}
-                    </strong>
-                  </div>
-
-                  <div className="detail-row">
-                    <span>Status</span>
-
-                    <strong>
-                      {suratDisposisi.status}
+                      {formatTanggal(
+                        suratDisposisi.tanggalDiterima
+                      )}
                     </strong>
                   </div>
 
                 </div>
-
 
                 {/* KOLOM FORM */}
 
@@ -983,7 +1074,6 @@ function SuratMasuk() {
 
               </div>
 
-
               {/* FOOTER */}
 
               <div className="modal-footer">
@@ -1018,6 +1108,39 @@ function SuratMasuk() {
 
     </DashboardLayout>
   );
+}
+
+// =========================
+// FORMAT TGL ke id-ID
+// =========================
+
+function formatTanggal(tgl) {
+  if (!tgl) return "-";
+
+  const m = String(tgl).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (m) {
+    const bulan = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+
+    return `${parseInt(m[3], 10)} ${
+      bulan[parseInt(m[2], 10) - 1]
+    } ${m[1]}`;
+  }
+
+  return tgl;
 }
 
 export default SuratMasuk;

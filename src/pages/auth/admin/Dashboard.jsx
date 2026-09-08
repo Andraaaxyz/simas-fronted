@@ -53,7 +53,7 @@ function Dashboard() {
         icon: <Mail size={18} />,
         title: "Surat masuk baru",
         description: `Surat dengan nomor ${item.noSurat}`,
-        time: item.tanggal,
+        time: item.tanggalDiterima,
       });
     });
 

@@ -18,6 +18,40 @@ import {
   PaginationBar,
 } from "../../../component/Pagination";
 
+// =========================
+// HELPER OPSI MASTER
+// =========================
+
+function opsiJenisSurat() {
+  const data =
+    JSON.parse(
+      localStorage.getItem("masterJenisSurat")
+    ) || [];
+
+  return data;
+}
+
+function opsiSifatSurat() {
+  const data =
+    JSON.parse(
+      localStorage.getItem("masterSifatSurat")
+    ) || [];
+
+  return data;
+}
+
+function opsiTujuan() {
+  const data =
+    JSON.parse(localStorage.getItem("masterUser")) ||
+    [];
+
+  if (data.length > 0) {
+    return data.map((u) => u.nama);
+  }
+
+  return ["Pengguna 1", "Pengguna 2", "Pengguna 3"];
+}
+
 function SuratMasuk() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
@@ -30,11 +64,64 @@ function SuratMasuk() {
 
   const [formSurat, setFormSurat] = useState({
     noSurat: "",
-    isi: "",
-    asal: "",
-    tanggal: "",
+    tanggalSurat: "",
+    tanggalDiterima: "",
+    jenis: "",
     sifat: "",
+    asal: "",
+    tujuan: "",
+    perihal: "",
+    file: "",
+    lampiran: "",
   });
+
+  const formKosong = () => ({
+    noSurat: "",
+    tanggalSurat: "",
+    tanggalDiterima: "",
+    jenis: "",
+    sifat: "",
+    asal: "",
+    tujuan: "",
+    perihal: "",
+    file: "",
+    lampiran: "",
+  });
+
+  // =========================
+  // MIGRASI DATA LAMA
+  // =========================
+
+  const migrasiData = (data) =>
+    data.map((item) => {
+      if (item.perihal !== undefined) return item;
+
+      return {
+        ...item,
+        noAgenda: item.noAgenda || "",
+        tanggalSurat: item.tanggalSurat || "",
+        tanggalDiterima: item.tanggalDiterima || item.tanggal || "",
+        jenis: item.jenis || "",
+        sifat: item.sifat || "",
+        tujuan: item.tujuan || "",
+        perihal: item.perihal || item.isi || "",
+        file: item.file || "",
+        lampiran: item.lampiran || "",
+      };
+    });
+
+  // =========================
+  // GENERATE NO AGENDA
+  // =========================
+
+  const generateNoAgenda = (data) => {
+    const max = data.reduce((acc, item) => {
+      const n = parseInt(item.noAgenda, 10) || 0;
+      return n > acc ? n : acc;
+    }, 0);
+
+    return String(max + 1).padStart(3, "0");
+  };
 
   // =========================
   // AMBIL DATA SURAT
@@ -48,11 +135,17 @@ function SuratMasuk() {
         const dataAwal = [
           {
             id: 1,
+            noAgenda: "001",
             noSurat: "001/089/SK/2026",
-            isi: "Undangan Rapat Koordinasi",
+            tanggalSurat: "2026-08-19",
+            tanggalDiterima: "2026-08-20",
+            jenis: "Surat Undangan",
+            sifat: "Penting",
             asal: "Dinas Pendidikan",
-            tanggal: "20 Agustus 2026",
-            sifat: "Segera",
+            tujuan: "Rina Wulandari, S.Kom",
+            perihal: "Undangan Rapat Koordinasi",
+            file: "undangan-rapat.pdf",
+            lampiran: "Agenda rapat",
             status: "Baru",
             disposisi: null,
             timeline: [
@@ -64,14 +157,20 @@ function SuratMasuk() {
           },
           {
             id: 2,
+            noAgenda: "002",
             noSurat: "002/090/SK/2026",
-            isi: "Pemberitahuan Kegiatan",
-            asal: "Dinas Kesehatan",
-            tanggal: "21 Agustus 2026",
+            tanggalSurat: "2026-08-20",
+            tanggalDiterima: "2026-08-21",
+            jenis: "Surat Edaran",
             sifat: "Biasa",
+            asal: "Dinas Kesehatan",
+            tujuan: "Budi Santoso, S.E",
+            perihal: "Pemberitahuan Kegiatan Senam",
+            file: "edaran-kegiatan.pdf",
+            lampiran: "-",
             status: "Didisposisikan",
             disposisi: {
-              tujuan: "Budi Santoso",
+              tujuan: "Budi Santoso, S.E",
               instruksi: "Segera ditindaklanjuti",
               catatan: "Mohon diproses dengan baik.",
               tanggalDisposisi: "22 Agustus 2026",
@@ -89,11 +188,17 @@ function SuratMasuk() {
           },
           {
             id: 3,
+            noAgenda: "003",
             noSurat: "003/091/SK/2026",
-            isi: "Surat Permohonan",
-            asal: "Dinas Sosial",
-            tanggal: "22 Agustus 2026",
+            tanggalSurat: "2026-08-21",
+            tanggalDiterima: "2026-08-22",
+            jenis: "Surat Permohonan",
             sifat: "Biasa",
+            asal: "Dinas Sosial",
+            tujuan: "Siti Aminah",
+            perihal: "Surat Permohonan Bantuan",
+            file: "permohonan-bantuan.pdf",
+            lampiran: "Proposal bantuan",
             status: "Selesai",
             disposisi: {
               tujuan: "Siti Aminah",
@@ -129,7 +234,7 @@ function SuratMasuk() {
 
         setDataSurat(dataAwal);
       } else {
-        setDataSurat(data);
+        setDataSurat(migrasiData(data));
       }
     };
 
@@ -150,8 +255,8 @@ function SuratMasuk() {
   // =========================
   const filteredData = dataSurat.filter((item) => {
     const cocokSearch = `${item.noSurat || ""} ${
-      item.isi || ""
-    } ${item.asal || ""}`
+      item.perihal || ""
+    } ${item.asal || ""} ${item.noAgenda || ""}`
       .toLowerCase()
       .includes(search.toLowerCase());
 
@@ -172,10 +277,15 @@ function SuratMasuk() {
   const tambahSurat = () => {
     if (
       !formSurat.noSurat ||
-      !formSurat.isi ||
+      !formSurat.tanggalSurat ||
+      !formSurat.tanggalDiterima ||
+      !formSurat.jenis ||
+      !formSurat.sifat ||
       !formSurat.asal ||
-      !formSurat.tanggal ||
-      !formSurat.sifat
+      !formSurat.tujuan ||
+      !formSurat.perihal ||
+      !formSurat.file ||
+      !formSurat.lampiran
     ) {
       alert("Semua data surat wajib diisi!");
       return;
@@ -183,17 +293,23 @@ function SuratMasuk() {
 
     const suratBaru = {
       id: Date.now(),
+      noAgenda: generateNoAgenda(dataSurat),
       noSurat: formSurat.noSurat,
-      isi: formSurat.isi,
-      asal: formSurat.asal,
-      tanggal: formSurat.tanggal,
+      tanggalSurat: formSurat.tanggalSurat,
+      tanggalDiterima: formSurat.tanggalDiterima,
+      jenis: formSurat.jenis,
       sifat: formSurat.sifat,
+      asal: formSurat.asal,
+      tujuan: formSurat.tujuan,
+      perihal: formSurat.perihal,
+      file: formSurat.file,
+      lampiran: formSurat.lampiran,
       status: "Baru",
       disposisi: null,
       timeline: [
         {
           label: "Surat diterima",
-          tanggal: formSurat.tanggal,
+          tanggal: formSurat.tanggalDiterima,
         },
       ],
     };
@@ -207,13 +323,7 @@ function SuratMasuk() {
       JSON.stringify(dataBaru)
     );
 
-    setFormSurat({
-      noSurat: "",
-      isi: "",
-      asal: "",
-      tanggal: "",
-      sifat: "",
-    });
+    setFormSurat(formKosong());
 
     setShowTambah(false);
 
@@ -228,10 +338,15 @@ function SuratMasuk() {
 
     setFormSurat({
       noSurat: surat.noSurat || "",
-      isi: surat.isi || "",
-      asal: surat.asal || "",
-      tanggal: surat.tanggal || "",
+      tanggalSurat: surat.tanggalSurat || "",
+      tanggalDiterima: surat.tanggalDiterima || "",
+      jenis: surat.jenis || "",
       sifat: surat.sifat || "",
+      asal: surat.asal || "",
+      tujuan: surat.tujuan || "",
+      perihal: surat.perihal || "",
+      file: surat.file || "",
+      lampiran: surat.lampiran || "",
     });
 
     setShowEdit(true);
@@ -243,10 +358,15 @@ function SuratMasuk() {
   const simpanEdit = () => {
     if (
       !formSurat.noSurat ||
-      !formSurat.isi ||
+      !formSurat.tanggalSurat ||
+      !formSurat.tanggalDiterima ||
+      !formSurat.jenis ||
+      !formSurat.sifat ||
       !formSurat.asal ||
-      !formSurat.tanggal ||
-      !formSurat.sifat
+      !formSurat.tujuan ||
+      !formSurat.perihal ||
+      !formSurat.file ||
+      !formSurat.lampiran
     ) {
       alert("Semua data surat wajib diisi!");
       return;
@@ -257,10 +377,15 @@ function SuratMasuk() {
         ? {
             ...item,
             noSurat: formSurat.noSurat,
-            isi: formSurat.isi,
-            asal: formSurat.asal,
-            tanggal: formSurat.tanggal,
+            tanggalSurat: formSurat.tanggalSurat,
+            tanggalDiterima: formSurat.tanggalDiterima,
+            jenis: formSurat.jenis,
             sifat: formSurat.sifat,
+            asal: formSurat.asal,
+            tujuan: formSurat.tujuan,
+            perihal: formSurat.perihal,
+            file: formSurat.file,
+            lampiran: formSurat.lampiran,
           }
         : item
     );
@@ -275,13 +400,7 @@ function SuratMasuk() {
     setShowEdit(false);
     setSelectedSurat(null);
 
-    setFormSurat({
-      noSurat: "",
-      isi: "",
-      asal: "",
-      tanggal: "",
-      sifat: "",
-    });
+    setFormSurat(formKosong());
 
     alert("Surat berhasil diperbarui!");
   };
@@ -384,14 +503,7 @@ function SuratMasuk() {
           <button
             className="btn-tambah-surat"
             onClick={() => {
-              setFormSurat({
-                noSurat: "",
-                isi: "",
-                asal: "",
-                tanggal: "",
-                sifat: "",
-              });
-
+              setFormSurat(formKosong());
               setShowTambah(true);
             }}
           >
@@ -458,11 +570,12 @@ function SuratMasuk() {
             <thead>
               <tr>
                 <th>No</th>
+                <th>No. Agenda</th>
                 <th>No. Surat</th>
-                <th>Perihal</th>
-                <th>Asal Surat</th>
+                <th>Tanggal Diterima</th>
                 <th>Sifat</th>
-                <th>Tanggal</th>
+                <th>Asal Surat</th>
+                <th>Perihal</th>
                 <th>Status</th>
                 <th>Aksi</th>
               </tr>
@@ -484,16 +597,20 @@ function SuratMasuk() {
 
                     <td>
                       <strong>
+                        {item.noAgenda}
+                      </strong>
+                    </td>
+
+                    <td>
+                      <strong>
                         {item.noSurat}
                       </strong>
                     </td>
 
                     <td>
-                      {item.isi}
-                    </td>
-
-                    <td>
-                      {item.asal}
+                      {formatTanggal(
+                        item.tanggalDiterima
+                      )}
                     </td>
 
                     <td>
@@ -501,7 +618,11 @@ function SuratMasuk() {
                     </td>
 
                     <td>
-                      {item.tanggal}
+                      {item.asal}
+                    </td>
+
+                    <td>
+                      {item.perihal}
                     </td>
 
                     <td>
@@ -584,7 +705,7 @@ function SuratMasuk() {
                 <tr>
 
                   <td
-                    colSpan="8"
+                    colSpan="9"
                     className="empty"
                   >
                     Belum ada data surat.
@@ -647,141 +768,263 @@ function SuratMasuk() {
 
               </div>
 
-              <div className="form-content">
+              <div className="form-content form-2kolom">
 
-                <div className="form-group">
+                <div className="form-grid">
 
-                  <label>
-                    No. Surat
-                  </label>
+                  <div className="form-group">
 
-                  <input
-                    type="text"
-                    placeholder="Contoh: 001/089/SK/2026"
-                    value={formSurat.noSurat}
-                    onChange={(e) =>
-                      setFormSurat({
-                        ...formSurat,
-                        noSurat:
-                          e.target.value,
-                      })
-                    }
-                  />
+                    <label>
+                      No. Surat
+                    </label>
 
-                </div>
+                    <input
+                      type="text"
+                      placeholder="Contoh: 001/089/SK/2026"
+                      value={formSurat.noSurat}
+                      onChange={(e) =>
+                        setFormSurat({
+                          ...formSurat,
+                          noSurat:
+                            e.target.value,
+                        })
+                      }
+                    />
 
-                <div className="form-group">
+                  </div>
 
-                  <label>
-                    Perihal
-                  </label>
+                  <div className="form-group">
 
-                  <input
-                    type="text"
-                    placeholder="Masukkan perihal surat"
-                    value={formSurat.isi}
-                    onChange={(e) =>
-                      setFormSurat({
-                        ...formSurat,
-                        isi: e.target.value,
-                      })
-                    }
-                  />
+                    <label>
+                      Jenis Surat
+                    </label>
 
-                </div>
+                    <select
+                      value={formSurat.jenis}
+                      onChange={(e) =>
+                        setFormSurat({
+                          ...formSurat,
+                          jenis: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="">
+                        Pilih Jenis Surat
+                      </option>
 
-                <div className="form-group">
+                      {opsiJenisSurat().length > 0
+                        ? opsiJenisSurat().map((j) => (
+                            <option
+                              key={j.id}
+                              value={j.nama}
+                            >
+                              {j.nama}
+                            </option>
+                          ))
+                        : [
+                            "Surat Edaran",
+                            "Surat Undangan",
+                            "Surat Keputusan",
+                            "Surat Permohonan",
+                          ].map((j) => (
+                            <option key={j} value={j}>
+                              {j}
+                            </option>
+                          ))}
+                    </select>
 
-                  <label>
-                    Asal Surat
-                  </label>
+                  </div>
 
-                  <input
-                    type="text"
-                    placeholder="Masukkan asal surat"
-                    value={formSurat.asal}
-                    onChange={(e) =>
-                      setFormSurat({
-                        ...formSurat,
-                        asal: e.target.value,
-                      })
-                    }
-                  />
+                  <div className="form-group">
 
-                </div>
+                    <label>
+                      Tanggal Surat
+                    </label>
 
-                <div className="form-group">
+                    <input
+                      type="date"
+                      value={formSurat.tanggalSurat}
+                      onChange={(e) =>
+                        setFormSurat({
+                          ...formSurat,
+                          tanggalSurat:
+                            e.target.value,
+                        })
+                      }
+                    />
 
-                  <label>
-                    Tanggal
-                  </label>
+                  </div>
 
-                  <input
-                    type="text"
-                    placeholder="Contoh: 26 Agustus 2026"
-                    value={formSurat.tanggal}
-                    onChange={(e) =>
-                      setFormSurat({
-                        ...formSurat,
-                        tanggal:
-                          e.target.value,
-                      })
-                    }
-                  />
+                  <div className="form-group">
 
-                </div>
+                    <label>
+                      Tanggal Diterima
+                    </label>
 
-                <div className="form-group">
+                    <input
+                      type="date"
+                      value={formSurat.tanggalDiterima}
+                      onChange={(e) =>
+                        setFormSurat({
+                          ...formSurat,
+                          tanggalDiterima:
+                            e.target.value,
+                        })
+                      }
+                    />
 
-                  <label>
-                    Sifat Surat
-                  </label>
+                  </div>
 
-                  <select
-                    value={formSurat.sifat}
-                    onChange={(e) =>
-                      setFormSurat({
-                        ...formSurat,
-                        sifat: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="">
-                      Pilih Sifat Surat
-                    </option>
+                  <div className="form-group">
 
-                    {(
-                      JSON.parse(
-                        localStorage.getItem(
-                          "masterSifatSurat"
-                        )
-                      ) || []
-                    ).length > 0
-                      ? JSON.parse(
-                          localStorage.getItem(
-                            "masterSifatSurat"
-                          )
-                        ).map((s) => (
-                          <option
-                            key={s.id}
-                            value={s.nama}
-                          >
-                            {s.nama}
-                          </option>
-                        ))
-                      : [
-                          "Sangat Segera",
-                          "Segera",
-                          "Biasa",
-                        ].map((s) => (
-                          <option
-                            key={s}
-                            value={s}
-                          >
-                            {s}
-                          </option>
-                        ))}
-                  </select>
+                    <label>
+                      Sifat Surat
+                    </label>
+
+                    <select
+                      value={formSurat.sifat}
+                      onChange={(e) =>
+                        setFormSurat({
+                          ...formSurat,
+                          sifat: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="">
+                        Pilih Sifat Surat
+                      </option>
+
+                      {opsiSifatSurat().length > 0
+                        ? opsiSifatSurat().map((s) => (
+                            <option
+                              key={s.id}
+                              value={s.nama}
+                            >
+                              {s.nama}
+                            </option>
+                          ))
+                        : [
+                            "Biasa",
+                            "Penting",
+                            "Segera",
+                            "Rahasia",
+                          ].map((s) => (
+                            <option key={s} value={s}>
+                              {s}
+                            </option>
+                          ))}
+                    </select>
+
+                  </div>
+
+                  <div className="form-group">
+
+                    <label>
+                      Asal Surat
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Contoh: Dinas Pendidikan"
+                      value={formSurat.asal}
+                      onChange={(e) =>
+                        setFormSurat({
+                          ...formSurat,
+                          asal: e.target.value,
+                        })
+                      }
+                    />
+
+                  </div>
+
+                  <div className="form-group">
+
+                    <label>
+                      Tujuan Surat
+                    </label>
+
+                    <select
+                      value={formSurat.tujuan}
+                      onChange={(e) =>
+                        setFormSurat({
+                          ...formSurat,
+                          tujuan: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="">
+                        Pilih Tujuan
+                      </option>
+
+                      {opsiTujuan().map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+
+                  </div>
+
+                  <div className="form-group form-span-2">
+
+                    <label>
+                      Perihal
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Masukkan perihal surat"
+                      value={formSurat.perihal}
+                      onChange={(e) =>
+                        setFormSurat({
+                          ...formSurat,
+                          perihal: e.target.value,
+                        })
+                      }
+                    />
+
+                  </div>
+
+                  <div className="form-group">
+
+                    <label>
+                      File Surat
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Nama file (contoh: surat.pdf)"
+                      value={formSurat.file}
+                      onChange={(e) =>
+                        setFormSurat({
+                          ...formSurat,
+                          file: e.target.value,
+                        })
+                      }
+                    />
+
+                  </div>
+
+                  <div className="form-group">
+
+                    <label>
+                      Lampiran
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Lampiran surat"
+                      value={formSurat.lampiran}
+                      onChange={(e) =>
+                        setFormSurat({
+                          ...formSurat,
+                          lampiran:
+                            e.target.value,
+                        })
+                      }
+                    />
+
+                  </div>
 
                 </div>
 
@@ -856,6 +1099,13 @@ function SuratMasuk() {
               <div className="detail-content">
 
                 <div className="detail-row">
+                  <span>No. Agenda</span>
+                  <strong>
+                    {selectedSurat.noAgenda}
+                  </strong>
+                </div>
+
+                <div className="detail-row">
                   <span>No. Surat</span>
                   <strong>
                     {selectedSurat.noSurat}
@@ -863,16 +1113,27 @@ function SuratMasuk() {
                 </div>
 
                 <div className="detail-row">
-                  <span>Perihal</span>
+                  <span>Tanggal Surat</span>
                   <strong>
-                    {selectedSurat.isi}
+                    {formatTanggal(
+                      selectedSurat.tanggalSurat
+                    )}
                   </strong>
                 </div>
 
                 <div className="detail-row">
-                  <span>Asal Surat</span>
+                  <span>Tanggal Diterima</span>
                   <strong>
-                    {selectedSurat.asal}
+                    {formatTanggal(
+                      selectedSurat.tanggalDiterima
+                    )}
+                  </strong>
+                </div>
+
+                <div className="detail-row">
+                  <span>Jenis Surat</span>
+                  <strong>
+                    {selectedSurat.jenis || "-"}
                   </strong>
                 </div>
 
@@ -884,9 +1145,37 @@ function SuratMasuk() {
                 </div>
 
                 <div className="detail-row">
-                  <span>Tanggal</span>
+                  <span>Asal Surat</span>
                   <strong>
-                    {selectedSurat.tanggal}
+                    {selectedSurat.asal}
+                  </strong>
+                </div>
+
+                <div className="detail-row">
+                  <span>Tujuan Surat</span>
+                  <strong>
+                    {selectedSurat.tujuan || "-"}
+                  </strong>
+                </div>
+
+                <div className="detail-row">
+                  <span>Perihal</span>
+                  <strong>
+                    {selectedSurat.perihal}
+                  </strong>
+                </div>
+
+                <div className="detail-row">
+                  <span>File Surat</span>
+                  <strong>
+                    {selectedSurat.file || "-"}
+                  </strong>
+                </div>
+
+                <div className="detail-row">
+                  <span>Lampiran</span>
+                  <strong>
+                    {selectedSurat.lampiran || "-"}
                   </strong>
                 </div>
 
@@ -930,8 +1219,7 @@ function SuratMasuk() {
               )}
 
               {selectedSurat.timeline &&
-                selectedSurat.timeline.length >
-                  0 && (
+                selectedSurat.timeline.length > 0 && (
                   <div className="detail-timeline">
                     <h3>Riwayat</h3>
 
@@ -977,6 +1265,39 @@ function SuratMasuk() {
 
     </DashboardLayout>
   );
+}
+
+// =========================
+// FORMAT TGL ke id-ID
+// =========================
+
+function formatTanggal(tgl) {
+  if (!tgl) return "-";
+
+  const m = String(tgl).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (m) {
+    const bulan = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+
+    return `${parseInt(m[3], 10)} ${
+      bulan[parseInt(m[2], 10) - 1]
+    } ${m[1]}`;
+  }
+
+  return tgl;
 }
 
 export default SuratMasuk;
