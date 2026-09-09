@@ -66,15 +66,30 @@ function opsiSifatSurat() {
 }
 
 function opsiTujuan() {
-  const data =
-    JSON.parse(localStorage.getItem("masterUser")) ||
-    [];
+  const pimpinan =
+    JSON.parse(localStorage.getItem("masterPimpinan")) || [];
+  const bidang =
+    JSON.parse(localStorage.getItem("masterBidang")) || [];
 
-  if (data.length > 0) {
-    return data.map((u) => u.nama);
+  const daftar = [
+    ...pimpinan.map((p) => p.nama),
+    ...bidang.map((b) => b.nama),
+  ];
+
+  const unik = [...new Set(daftar.filter(Boolean))];
+
+  if (unik.length > 0) {
+    return unik;
   }
 
-  return ["Pengguna 1", "Pengguna 2", "Pengguna 3"];
+  return [
+    "Ir. Ahmad Fauzi, M.Si",
+    "Dra. Siti Rahayu, M.M",
+    "Tata Usaha",
+    "Kepegawaian",
+    "Umum",
+    "Keuangan",
+  ];
 }
 
 function SuratMasuk() {
@@ -167,7 +182,7 @@ function SuratMasuk() {
             jenis: "Surat Undangan",
             sifat: "Penting",
             asal: "Dinas Pendidikan",
-            tujuan: "Rina Wulandari, S.Kom",
+            tujuan: "Bidang Tata Usaha",
             perihal: "Undangan Rapat Koordinasi",
             file: "undangan-rapat.pdf",
             lampiran: "Agenda rapat",
@@ -189,7 +204,7 @@ function SuratMasuk() {
             jenis: "Surat Edaran",
             sifat: "Biasa",
             asal: "Dinas Kesehatan",
-            tujuan: "Budi Santoso, S.E",
+            tujuan: "Ir. Ahmad Fauzi, M.Si",
             perihal: "Pemberitahuan Kegiatan Senam",
             file: "edaran-kegiatan.pdf",
             lampiran: "-",
@@ -220,7 +235,7 @@ function SuratMasuk() {
             jenis: "Surat Permohonan",
             sifat: "Biasa",
             asal: "Dinas Sosial",
-            tujuan: "Siti Aminah",
+            tujuan: "Bidang Umum",
             perihal: "Surat Permohonan Bantuan",
             file: "permohonan-bantuan.pdf",
             lampiran: "Proposal bantuan",
