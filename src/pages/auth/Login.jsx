@@ -72,26 +72,43 @@ function Login() {
     <div className="login-page">
 
       {/* =========================
-          AREA KIRI — FOTO GEDUNG
+          HERO FOTO + ORGANIC SHAPES
       ========================= */}
-      <div className="login-left">
+      <div className="login-hero">
 
-        {/* DEKORASI CURVE */}
-        <span className="decor-curve decor-top" />
-        <span className="decor-curve-line decor-line" />
-        <span className="decor-curve decor-bottom" />
+        {/* ELEMEN DEKORATIF POJOK KIRI */}
+        <img
+          className="corner-img corner-top-left"
+          src="/images/kiri-atas.png"
+          alt=""
+        />
+        <img
+          className="corner-img corner-bottom-left"
+          src="/images/kiri-bawah.png"
+          alt=""
+        />
 
-        <div className="brand">
+        {/* ORGANIC SHAPES POJOK KIRI */}
+        <span className="login-blob blob-top" />
+        <span className="login-line line-1" />
+        <span className="login-blob blob-dot" />
+        <span className="login-blob blob-bottom" />
+        <span className="login-line line-2" />
 
-          <h1>SIMAS</h1>
+        {/* BRANDING HERO */}
+        <div className="hero-brand">
 
-          <h3>
-            Sistem Informasi Administrasi Surat
-          </h3>
+          <img
+            className="hero-logo"
+            src="/images/logo-remove.png"
+            alt="Logo SIMAS"
+          />
+
+          <h2>Sistem Informasi Administrasi Surat</h2>
 
           <p>
-            Aplikasi ini digunakan untuk
-            pencatatan surat masuk dan arsip digital.
+            Digitalisasi administrasi untuk pengelolaan
+            yang lebih tertib, efisien, dan terintegrasi.
           </p>
 
         </div>
@@ -100,13 +117,17 @@ function Login() {
 
 
       {/* =========================
-          AREA KANAN — LOGIN CARD
+          PANEL LOGIN MELENGKUNG
       ========================= */}
-      <div className="login-right">
+      <div className="login-screen">
+
+        {/* DEKOR SAMAR DI BELAKANG CARD */}
+        <span className="screen-blob screen-blob-a" />
+        <span className="screen-blob screen-blob-b" />
 
         <div className="login-card">
 
-          {/* HEADER + LOGO */}
+          {/* LOGO + TITLE */}
           <div className="login-header">
 
             <img
@@ -135,7 +156,7 @@ function Login() {
 
               <div className="input-wrapper">
 
-                <User size={20} />
+                <User size={19} />
 
                 <input
                   id="login-username"
@@ -159,7 +180,7 @@ function Login() {
 
               <div className="input-wrapper">
 
-                <Lock size={20} />
+                <Lock size={19} />
 
                 <input
                   id="login-password"
@@ -187,9 +208,9 @@ function Login() {
                   }
                 >
                   {showPassword ? (
-                    <EyeOff size={19} />
+                    <EyeOff size={18} />
                   ) : (
-                    <Eye size={19} />
+                    <Eye size={18} />
                   )}
                 </button>
 

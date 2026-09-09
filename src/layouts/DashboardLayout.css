@@ -31,7 +31,7 @@
 
 .logo {
   display: flex;
-  gap: 12px;
+  justify-content: center;
   align-items: center;
   padding: 4px 8px;
   margin-bottom: 20px;
@@ -62,6 +62,15 @@
   font-weight: 700;
   letter-spacing: -0.3px;
   color: #17233b;
+}
+
+.logo-img {
+  width: 120px;
+  height: 120px;
+
+  object-fit: contain;
+
+  flex-shrink: 0;
 }
 
 .logo span {
@@ -214,6 +223,37 @@
 
 .notif-btn:hover {
   background: #c8ece5;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-btn {
+  width: 42px;
+  height: 42px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #0d9488, #0b7a70);
+  color: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.35);
+
+  transition: 0.18s;
+}
+
+.user-btn:hover {
+  background: linear-gradient(135deg, #0b9d90, #096d64);
 }
 
 .notif-badge {

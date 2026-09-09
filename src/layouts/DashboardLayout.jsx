@@ -13,6 +13,7 @@ import {
   FileText,
   UserCircle,
   Bell,
+  User,
   LogOut,
   ClipboardList,
   X,
@@ -63,16 +64,11 @@ function DashboardLayout({ title, children }) {
 
         {/* LOGO */}
         <div className="logo">
-          <div className="logo-circle">
-            S
-          </div>
-
-          <div>
-            <h2>SIMAS</h2>
-            <span>
-              Sistem Administrasi Surat
-            </span>
-          </div>
+          <img
+            className="logo-img"
+            src="/images/logo-remove.png"
+            alt="Logo SIMAS"
+          />
         </div>
 
         {/* MENU */}
@@ -346,7 +342,9 @@ function DashboardLayout({ title, children }) {
           </div>
 
 
-          {/* NOTIFICATION */}
+          {/* NOTIFICATION + USER */}
+          <div className="navbar-actions">
+
           <div className="notification-wrapper">
 
             <button
@@ -431,6 +429,15 @@ function DashboardLayout({ title, children }) {
 
               </div>
             )}
+
+          </div>
+
+          <button
+            className="user-btn"
+            type="button"
+          >
+            <User size={20} />
+          </button>
 
           </div>
 
