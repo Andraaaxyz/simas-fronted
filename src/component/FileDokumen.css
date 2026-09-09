@@ -14,12 +14,12 @@
   align-items: center;
   gap: 6px;
   color: #344054;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .file-nama {
   color: #303846;
-  font-size: 13px;
+  font-size: 14px;
   word-break: break-word;
 }
 
@@ -35,11 +35,11 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 7px 13px;
+  border-radius: 9px;
   background: #eff6ff;
   color: #2563eb;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;

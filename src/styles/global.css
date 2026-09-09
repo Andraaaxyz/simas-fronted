@@ -1,17 +1,60 @@
+/* ============================================
+   SIMAS - DESIGN SYSTEM
+============================================ */
+
+:root {
+  --primary: #2563eb;
+  --primary-2: #1d4ed8;
+  --primary-soft: #eef4ff;
+  --primary-border: #c7d7ff;
+
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --border: #e5eaf2;
+
+  --text: #17233b;
+  --muted: #64748b;
+
+  --success: #16a34a;
+  --success-soft: #ecfdf3;
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+  --warning-soft: #fff7ed;
+  --info-soft: #eff6ff;
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04),
+    0 10px 30px rgba(16, 24, 40, 0.06);
+  --shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: #f8f9fb;
-  color: #111827;
+  font-family: "Segoe UI",
+    -apple-system, BlinkMacSystemFont, Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font-family: inherit;
 }
 
@@ -22,4 +65,407 @@ button {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+/* ============================================
+   TIPOGRAFI & LAYOUT DASAR
+============================================ */
+
+.page-content {
+  font-size: 15px;
+}
+
+.page-content h1,
+.page-content h2,
+.page-content h3 {
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+/* ============================================
+   V2 OVERRIDE - HEADER HALAMAN
+============================================ */
+
+.page-content .surat-header h2,
+.page-content .disposisi-header h2,
+.page-content .dashboard-header h2 {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.page-content .arsip-header h2 {
+  font-size: 29px;
+  font-weight: 700;
+}
+
+.page-content .laporan-header h1,
+.page-content .arsip-digital-header h1 {
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.page-content .surat-header p,
+.page-content .disposisi-header p,
+.page-content .arsip-header p,
+.page-content .dashboard-header p,
+.page-content .laporan-header p,
+.page-content .arsip-digital-header p {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.page-content .laporan-table-header h2,
+.page-content .arsip-digital-card-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.page-content .section-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.page-content .laporan-card-header h3 {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+/* ============================================
+   V2 OVERRIDE - KARTU TABEL
+============================================ */
+
+.page-content .table-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.page-content .table-card th {
+  padding: 13px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--muted);
+  background: #f8fafd;
+  border-bottom: 1px solid var(--border);
+}
+
+.page-content .table-card td {
+  padding: 13px 16px;
+  font-size: 14.5px;
+  color: #2c3850;
+  border-bottom: 1px solid #eef1f6;
+}
+
+.page-content .table-card tbody tr:hover {
+  background: #f8fafd;
+}
+
+.page-content .table-card td strong {
+  font-size: 14.5px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ============================================
+   V2 OVERRIDE - DASHBOARD WELCOME & STAT
+============================================ */
+
+.page-content .welcome-card {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #3b82f6 100%);
+  border: none;
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.28);
+  color: #fff;
+}
+
+.page-content .welcome-card h2 {
+  color: #fff;
+  font-size: 24px;
+}
+
+.page-content .welcome-card p {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 15px;
+}
+
+.page-content .welcome-label {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+}
+
+.page-content .stats-grid {
+  gap: 18px;
+}
+
+.page-content .stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.page-content .stat-card p {
+  font-size: 14.5px;
+  color: var(--muted);
+}
+
+.page-content .stat-card h3 {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.page-content .stat-card span,
+.page-content .stat-card small {
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.page-content .activity-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px 24px;
+}
+
+/* ============================================
+   V2 OVERRIDE - LAPORAN STAT CARD
+============================================ */
+
+.page-content .laporan-stat-card {
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.page-content .laporan-stat-card strong {
+  font-size: 26px;
+}
+
+.page-content .laporan-stat-card span {
+  font-size: 14px;
+}
+
+/* ============================================
+   V2 OVERRIDE - FORM
+============================================ */
+
+.page-content .form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #33405a;
+  margin-bottom: 7px;
+}
+
+.page-content .form-group input[type="text"],
+.page-content .form-group input[type="date"],
+.page-content .form-group select,
+.page-content .form-group textarea {
+  font-size: 15px;
+  color: var(--text);
+  border-color: var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+
+.page-content .form-group input:focus,
+.page-content .form-group select:focus,
+.page-content .form-group textarea:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.page-content input[type="text"],
+.page-content input[type="search"],
+.page-content input[type="date"],
+.page-content select,
+.page-content textarea {
+  font-size: 15px;
+}
+
+/* ============================================
+   V2 OVERRIDE - TOMBOL
+============================================ */
+
+.page-content .btn-simpan {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 11px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transition: 0.2s;
+}
+
+.page-content .btn-simpan:hover {
+  background: var(--primary-2);
+  transform: translateY(-1px);
+}
+
+.page-content .btn-tutup {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  padding: 11px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.page-content .btn-tutup:hover {
+  background: #e2e8f0;
+}
+
+.page-content .btn-disposisi,
+.page-content .btn-arsipkan {
+  font-size: 14.5px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+}
+
+.page-content .btn-eye,
+.page-content .btn-edit,
+.page-content .btn-delete {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+}
+
+/* ============================================
+   V2 OVERRIDE - BADGE STATUS
+============================================ */
+
+.page-content .status-badge,
+.page-content .status-baru,
+.page-content .status-menunggu,
+.page-content .status-menunggu-disposisi,
+.page-content .status-didisposisikan,
+.page-content .status-diproses,
+.page-content .status-selesai,
+.page-content .status-disetujui,
+.page-content .status-ditolak,
+.page-content .status-diarsipkan,
+.page-content .status-disposisi {
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+/* ============================================
+   V2 OVERRIDE - MODAL
+============================================ */
+
+.page-content .modal-overlay,
+.page-content .laporan-modal-overlay,
+.page-content .arsip-modal-overlay {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+}
+
+.page-content .modal,
+.page-content .laporan-modal,
+.page-content .arsip-modal,
+.page-content .detail-modal {
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+
+.page-content .modal-header h2,
+.page-content .modal-header-disposisi h2,
+.page-content .laporan-modal-header h2,
+.page-content .arsip-modal-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.page-content .modal-footer {
+  border-top: 1px solid #eef1f6;
+}
+
+/* ============================================
+   V2 OVERRIDE - DETAIL ROW
+============================================ */
+
+.page-content .detail-row span:first-child,
+.page-content .detail-row-disposisi span {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.page-content .detail-row strong,
+.page-content .detail-row-disposisi strong,
+.page-content .detail-row-disposisi td strong {
+  font-size: 14.5px;
+  color: var(--text);
+}
+
+/* ============================================
+   V2 OVERRIDE - EMPTY STATE
+============================================ */
+
+.page-content .empty,
+.page-content .empty-disposisi,
+.page-content .laporan-empty,
+.page-content .empty-data {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* ============================================
+   V2 OVERRIDE - PAGINATION & SEARCH (KOMPONEN)
+============================================ */
+
+.pag-label,
+.pag-info {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.pag-btn {
+  min-width: 38px;
+  height: 38px;
+  font-size: 14px;
+  border-radius: 9px;
+}
+
+.pag-select,
+.pag-filter {
+  height: 42px;
+  font-size: 14px;
+  border-radius: 10px;
+}
+
+/* ============================================
+   SCROLLBAR HALUS
+============================================ */
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cdd5e1;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b4bfd1;
 }
