@@ -5,8 +5,6 @@ import {
   Navigate,
 } from "react-router-dom";
 
-import { DisposisiProvider } from "./context/DisposisiContext";
-
 import Login from "./pages/auth/Login";
 
 // =========================
@@ -44,8 +42,7 @@ import PenggunaArsip from "./pages/auth/pengguna/ArsipDigital";
 
 function App() {
   return (
-    <DisposisiProvider>
-      <BrowserRouter>
+    <BrowserRouter>
 
         <Routes>
 
@@ -194,7 +191,6 @@ function App() {
         </Routes>
 
       </BrowserRouter>
-    </DisposisiProvider>
   );
 }
 
