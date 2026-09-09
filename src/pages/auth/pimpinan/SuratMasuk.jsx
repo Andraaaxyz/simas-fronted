@@ -12,6 +12,10 @@ import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./SuratMasuk.css";
 
 import FileDokumen from "../../../component/FileDokumen";
+import {
+  formatTanggal,
+  hariIniISO,
+} from "../../../utils/tanggal";
 
 import {
   usePagination,
@@ -205,17 +209,7 @@ function SuratMasuk() {
       return;
     }
 
-    const tanggalSekarang = new Date();
-
-    const tanggalTeks =
-      tanggalSekarang.toLocaleDateString(
-        "id-ID",
-        {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }
-      );
+    const tanggalISO = hariIniISO();
 
     const disposisiBaru = {
       id: Date.now(),
@@ -227,7 +221,7 @@ function SuratMasuk() {
       pengguna: formDisposisi.tujuan,
       instruksi: formDisposisi.instruksi,
       catatan: formDisposisi.catatan,
-      tanggalDisposisi: tanggalTeks,
+      tanggalDisposisi: tanggalISO,
       status: "Menunggu",
     };
 
@@ -265,14 +259,14 @@ function SuratMasuk() {
               tujuan: formDisposisi.tujuan,
               instruksi: formDisposisi.instruksi,
               catatan: formDisposisi.catatan,
-              tanggalDisposisi: tanggalTeks,
+              tanggalDisposisi: tanggalISO,
             },
 
             timeline: [
               ...(item.timeline || []),
               {
                 label: "Disposisi dibuat",
-                tanggal: tanggalTeks,
+                tanggal: tanggalISO,
               },
             ],
           }
@@ -840,7 +834,7 @@ function SuratMasuk() {
                               </strong>
 
                               <span>
-                                {tl.tanggal}
+                                {formatTanggal(tl.tanggal)}
                               </span>
                             </div>
                           </div>
@@ -1112,39 +1106,6 @@ function SuratMasuk() {
 
     </DashboardLayout>
   );
-}
-
-// =========================
-// FORMAT TGL ke id-ID
-// =========================
-
-function formatTanggal(tgl) {
-  if (!tgl) return "-";
-
-  const m = String(tgl).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-
-  if (m) {
-    const bulan = [
-      "Januari",
-      "Februari",
-      "Maret",
-      "April",
-      "Mei",
-      "Juni",
-      "Juli",
-      "Agustus",
-      "September",
-      "Oktober",
-      "November",
-      "Desember",
-    ];
-
-    return `${parseInt(m[3], 10)} ${
-      bulan[parseInt(m[2], 10) - 1]
-    } ${m[1]}`;
-  }
-
-  return tgl;
 }
 
 export default SuratMasuk;

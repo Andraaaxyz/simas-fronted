@@ -9,6 +9,10 @@ import {
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./Disposisi.css";
+import {
+  formatTanggal,
+  ubahKeISO,
+} from "../../../utils/tanggal";
 
 import {
   usePagination,
@@ -33,13 +37,21 @@ function Disposisi() {
           localStorage.getItem("dataDisposisi")
         ) || [];
 
-      setDataDisposisi(data);
+      const dataRapi = data.map((item) => ({
+        ...item,
+        tanggal: ubahKeISO(item.tanggal),
+        tanggalDisposisi: ubahKeISO(
+          item.tanggalDisposisi
+        ),
+      }));
+
+      setDataDisposisi(dataRapi);
 
       // Update detail jika sedang dibuka
       setSelectedDisposisi((prev) => {
         if (!prev) return null;
 
-        const update = data.find(
+        const update = dataRapi.find(
           (item) => item.id === prev.id
         );
 
@@ -227,7 +239,7 @@ function Disposisi() {
                     </td>
 
                     <td>
-                      {item.tanggal}
+                      {formatTanggal(item.tanggal)}
                     </td>
 
                     {/* STATUS */}
@@ -438,7 +450,7 @@ function Disposisi() {
                   </span>
 
                   <strong>
-                    {selectedDisposisi.tanggal}
+                    {formatTanggal(selectedDisposisi.tanggal)}
                   </strong>
 
                 </div>

@@ -10,6 +10,10 @@ import {
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./Disposisi.css";
+import {
+  formatTanggal,
+  ubahKeISO,
+} from "../../../utils/tanggal";
 
 import {
   usePagination,
@@ -34,7 +38,15 @@ function Disposisi() {
           localStorage.getItem("dataDisposisi")
         ) || [];
 
-      setDataDisposisi(data);
+      const dataRapi = data.map((item) => ({
+        ...item,
+        tanggal: ubahKeISO(item.tanggal),
+        tanggalDisposisi: ubahKeISO(
+          item.tanggalDisposisi
+        ),
+      }));
+
+      setDataDisposisi(dataRapi);
     };
 
     ambilData();
@@ -337,7 +349,7 @@ function Disposisi() {
                     </td>
 
                     <td>
-                      {item.tanggal}
+                      {formatTanggal(item.tanggal)}
                     </td>
 
                     <td>
@@ -509,7 +521,7 @@ function Disposisi() {
                 <div className="detail-row-disposisi">
                   <span>Tanggal</span>
                   <strong>
-                    {selectedDisposisi.tanggal}
+                    {formatTanggal(selectedDisposisi.tanggal)}
                   </strong>
                 </div>
 

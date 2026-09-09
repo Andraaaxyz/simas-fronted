@@ -1,5 +1,6 @@
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import { FileText, Eye, Download } from "lucide-react";
+import { formatTanggal } from "../../../utils/tanggal";
 
 function Arsip() {
   const data = [
@@ -7,13 +8,13 @@ function Arsip() {
       id: 1,
       noSurat: "001/089/SK/2023",
       isi: "Edaran Libur/WFH",
-      tanggal: "02 April 2026",
+      tanggal: "2026-04-02",
     },
     {
       id: 2,
       noSurat: "002/089/SK/2023",
       isi: "Undangan Rapat",
-      tanggal: "16 Juni 2026",
+      tanggal: "2026-06-16",
     },
   ];
 
@@ -41,7 +42,7 @@ function Arsip() {
                   <strong>{arsip.noSurat}</strong>
                 </td>
                 <td>{arsip.isi}</td>
-                <td>{arsip.tanggal}</td>
+                <td>{formatTanggal(arsip.tanggal)}</td>
 
                 <td>
                   <div className="aksi">

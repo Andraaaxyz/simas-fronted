@@ -10,6 +10,7 @@ import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./SuratMasuk.css";
 
 import FileDokumen from "../../../component/FileDokumen";
+import { formatTanggal } from "../../../utils/tanggal";
 
 import {
   usePagination,
@@ -170,7 +171,7 @@ function SuratMasuk() {
           timeline: [
             {
               label: "Surat diterima",
-              tanggal: "20 Agustus 2026",
+              tanggal: "2026-08-20",
             },
           ],
         },
@@ -192,16 +193,16 @@ function SuratMasuk() {
             tujuan: "Budi Santoso, S.E",
             instruksi: "Segera ditindaklanjuti",
             catatan: "Mohon diproses dengan baik.",
-            tanggalDisposisi: "22 Agustus 2026",
+            tanggalDisposisi: "2026-08-22",
           },
           timeline: [
             {
               label: "Surat diterima",
-              tanggal: "21 Agustus 2026",
+              tanggal: "2026-08-21",
             },
             {
               label: "Disposisi dibuat",
-              tanggal: "22 Agustus 2026",
+              tanggal: "2026-08-22",
             },
           ],
         },
@@ -223,24 +224,24 @@ function SuratMasuk() {
             tujuan: "Siti Aminah",
             instruksi: "Dilaporkan ke pimpinan",
             catatan: "Sudah diproses.",
-            tanggalDisposisi: "23 Agustus 2026",
+            tanggalDisposisi: "2026-08-23",
           },
           timeline: [
             {
               label: "Surat diterima",
-              tanggal: "22 Agustus 2026",
+              tanggal: "2026-08-22",
             },
             {
               label: "Disposisi dibuat",
-              tanggal: "23 Agustus 2026",
+              tanggal: "2026-08-23",
             },
             {
               label: "Diproses pegawai",
-              tanggal: "24 Agustus 2026",
+              tanggal: "2026-08-24",
             },
             {
               label: "Selesai diproses",
-              tanggal: "25 Agustus 2026",
+              tanggal: "2026-08-25",
             },
           ],
         },
@@ -1057,7 +1058,7 @@ function SuratMasuk() {
 
                           <div>
                             <strong>{tl.label}</strong>
-                            <span>{tl.tanggal}</span>
+                            <span>{formatTanggal(tl.tanggal)}</span>
                           </div>
                         </div>
                       )
@@ -1088,39 +1089,6 @@ function SuratMasuk() {
 
     </DashboardLayout>
   );
-}
-
-// =========================
-// FORMAT TGL ke id-ID
-// =========================
-
-function formatTanggal(tgl) {
-  if (!tgl) return "-";
-
-  const m = String(tgl).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-
-  if (m) {
-    const bulan = [
-      "Januari",
-      "Februari",
-      "Maret",
-      "April",
-      "Mei",
-      "Juni",
-      "Juli",
-      "Agustus",
-      "September",
-      "Oktober",
-      "November",
-      "Desember",
-    ];
-
-    return `${parseInt(m[3], 10)} ${
-      bulan[parseInt(m[2], 10) - 1]
-    } ${m[1]}`;
-  }
-
-  return tgl;
 }
 
 export default SuratMasuk;

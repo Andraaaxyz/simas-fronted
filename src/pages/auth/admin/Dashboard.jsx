@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./Dashboard.css";
+import {
+  formatTanggal,
+  ubahKeISO,
+} from "../../../utils/tanggal";
 
 import {
   Mail,
@@ -65,7 +69,7 @@ function Dashboard() {
         icon: <Send size={18} />,
         title: "Disposisi surat",
         description: `Surat diberikan kepada ${item.pengguna}`,
-        time: item.tanggal,
+        time: ubahKeISO(item.tanggal),
       });
     });
 
@@ -77,7 +81,7 @@ function Dashboard() {
         icon: <Archive size={18} />,
         title: "Arsip digital",
         description: `Surat ${item.noSurat} telah selesai`,
-        time: item.tanggal,
+        time: ubahKeISO(item.tanggal),
       });
     });
 
@@ -277,7 +281,7 @@ function Dashboard() {
               </div>
 
               <span>
-                {item.time}
+                {formatTanggal(item.time)}
               </span>
 
             </div>
