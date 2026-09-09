@@ -1,5 +1,5 @@
 .welcome-card {
-  background: linear-gradient(135deg, #315bdc, #5b7cfa);
+  background: linear-gradient(135deg, #0d9488, #14b8a6);
   padding: 30px;
   border-radius: 18px;
   color: white;
@@ -50,8 +50,8 @@
 }
 
 .stat-icon.blue {
-  background: #e9efff;
-  color: #315bdc;
+  background: #d9f4ef;
+  color: #0d9488;
 }
 
 .stat-icon.orange {
@@ -121,8 +121,8 @@
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: #eef2ff;
-  color: #315bdc;
+  background: #e6f7f5;
+  color: #0d9488;
   display: flex;
   align-items: center;
   justify-content: center;

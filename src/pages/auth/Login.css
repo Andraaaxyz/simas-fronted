@@ -17,7 +17,7 @@
 
   padding: 80px;
 
-  background: linear-gradient(135deg, #172a5e 0%, #1d4ed8 55%, #3b82f6 100%);
+  background: linear-gradient(135deg, #134e4a 0%, #0f766e 55%, #14b8a6 100%);
 }
 
 .brand {
@@ -110,8 +110,8 @@
 }
 
 .input-wrapper:focus-within {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13,148,136, 0.12);
 }
 
 .input-wrapper input {
@@ -136,7 +136,7 @@
 }
 
 .password-button:hover {
-  color: #2563eb;
+  color: #0d9488;
 }
 
 /* OPTIONS */
@@ -160,7 +160,7 @@
 .login-options button {
   border: none;
   background: transparent;
-  color: #2563eb;
+  color: #0d9488;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
@@ -177,18 +177,18 @@
   height: 50px;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, #0d9488, #0f766e);
   color: #ffffff;
   font-size: 16px;
   font-weight: 700;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 8px 20px rgba(13,148,136, 0.3);
   transition: 0.2s;
   cursor: pointer;
 }
 
 .login-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.38);
+  box-shadow: 0 10px 26px rgba(13,148,136, 0.38);
 }
 
 /* FOOTER */
@@ -201,7 +201,7 @@
 }
 
 .login-footer span {
-  color: #2563eb;
+  color: #0d9488;
   font-weight: 600;
 }
 

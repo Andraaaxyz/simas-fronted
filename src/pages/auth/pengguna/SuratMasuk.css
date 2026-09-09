@@ -119,8 +119,8 @@
 }
 
 .status-baru {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #e6f7f5;
+  color: #0f766e;
 }
 
 .status-menunggu-disposisi {
@@ -161,8 +161,8 @@
 .detail-disposisi-info {
   margin: 22px 24px 0;
 
-  background: #eff6ff;
-  border: 1px solid #cfe0ff;
+  background: #e6f7f5;
+  border: 1px solid #b7e3dc;
   border-radius: 12px;
 
   padding: 16px;
@@ -172,7 +172,7 @@
   margin: 0 0 10px;
 
   font-size: 14px;
-  color: #1e3a8a;
+  color: #115e59;
 }
 
 /* =========================
@@ -231,9 +231,9 @@
 
   border-radius: 50%;
 
-  background: #2563eb;
+  background: #0d9488;
 
-  border: 2px solid #cfe0ff;
+  border: 2px solid #b7e3dc;
 
   flex-shrink: 0;
 
@@ -278,9 +278,9 @@
 }
 
 .aksi button:hover {
-  background: #f3f6ff;
-  color: #315bdc;
-  border-color: #cbd6ff;
+  background: #f0faf8;
+  color: #0d9488;
+  border-color: #b7e3dc;
 }
 
 .empty {
@@ -419,7 +419,7 @@
 
 .form-group input:focus,
 .form-group select:focus {
-  border-color: #315bdc;
+  border-color: #0d9488;
 }
 
 /* GRID 2 KOLOM UNTUK FORM BANYAK FIELD */

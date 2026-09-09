@@ -41,7 +41,7 @@
 }
 
 .arsip-total svg {
-  color: #2563eb;
+  color: #0d9488;
 }
 
 .arsip-total span {
@@ -157,7 +157,7 @@
 }
 
 .arsip-digital-table tbody tr:hover {
-  background: #fafcff;
+  background: #f7fcfb;
 }
 
 /* STATUS */
@@ -187,8 +187,8 @@
   height: 36px;
   border: none;
   border-radius: 9px;
-  background: #edf4ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -196,7 +196,7 @@
 }
 
 .arsip-view-btn:hover {
-  background: #2563eb;
+  background: #0d9488;
   color: white;
 }
 
@@ -305,7 +305,7 @@
 
 .arsip-close-large {
   border: none;
-  background: #2563eb;
+  background: #0d9488;
   color: white;
   padding: 10px 20px;
   border-radius: 9px;
@@ -314,7 +314,7 @@
 }
 
 .arsip-close-large:hover {
-  background: #1d4ed8;
+  background: #0f766e;
 }
 
 /* RESPONSIVE */

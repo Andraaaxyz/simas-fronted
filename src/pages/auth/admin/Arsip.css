@@ -69,7 +69,7 @@
 }
 
 .arsip-search:focus-within {
-  border-color: #2864e8;
+  border-color: #0d9488;
 
   box-shadow:
     0 0 0 3px rgba(40, 100, 232, 0.1);
@@ -131,7 +131,7 @@
 }
 
 .arsip-table thead {
-  background: #f8faff;
+  background: #f5fbfa;
 }
 
 .arsip-table th {
@@ -171,7 +171,7 @@
 }
 
 .arsip-table tbody tr:hover {
-  background: #f9fbff;
+  background: #f5fbfa;
 }
 
 .arsip-table td strong {
@@ -196,9 +196,9 @@
 
   border-radius: 20px;
 
-  background: #edf4ff;
+  background: #e6f7f5;
 
-  color: #3267d6;
+  color: #0f766e;
 
   font-size: 13px;
 
@@ -247,11 +247,11 @@
 }
 
 .arsip-btn-view:hover {
-  background: #edf4ff;
+  background: #e6f7f5;
 
-  border-color: #cbdcff;
+  border-color: #b7e3dc;
 
-  color: #2864e8;
+  color: #0d9488;
 }
 
 .arsip-btn-delete {

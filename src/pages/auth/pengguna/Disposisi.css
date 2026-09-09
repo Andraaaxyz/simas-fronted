@@ -98,8 +98,8 @@
 }
 
 .status-diproses {
-  background: #e7effc;
-  color: #2563eb;
+  background: #d9f4ef;
+  color: #0d9488;
 }
 
 .status-selesai {
@@ -122,9 +122,9 @@
 }
 
 .aksi-disposisi button:hover {
-  background: #f3f6ff;
-  color: #315bdc;
-  border-color: #cbd6ff;
+  background: #f0faf8;
+  color: #0d9488;
+  border-color: #b7e3dc;
 }
 
 /* EMPTY */
@@ -234,7 +234,7 @@
 /* TOMBOL PROSES */
 .btn-proses-disposisi {
   border: none;
-  background: #2563eb;
+  background: #0d9488;
   color: white;
   padding: 9px 16px;
   border-radius: 8px;
@@ -247,7 +247,7 @@
 }
 
 .btn-proses-disposisi:hover {
-  background: #1d4ed8;
+  background: #0f766e;
 }
 
 /* TOMBOL SELESAI */

@@ -3,10 +3,10 @@
 ============================================ */
 
 :root {
-  --primary: #2563eb;
-  --primary-2: #1d4ed8;
-  --primary-soft: #eef4ff;
-  --primary-border: #c7d7ff;
+  --primary: #0d9488;
+  --primary-2: #0f766e;
+  --primary-soft: #e6f7f5;
+  --primary-border: #b7e3dc;
 
   --bg: #f5f7fb;
   --surface: #ffffff;
@@ -20,7 +20,7 @@
   --danger: #dc2626;
   --danger-soft: #fef2f2;
   --warning-soft: #fff7ed;
-  --info-soft: #eff6ff;
+  --info-soft: #e6f7f5;
 
   --radius: 14px;
   --radius-sm: 10px;
@@ -173,10 +173,10 @@ a {
 ============================================ */
 
 .page-content .welcome-card {
-  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #3b82f6 100%);
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 55%, #14b8a6 100%);
   border: none;
   border-radius: 18px;
-  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.28);
+  box-shadow: 0 12px 32px rgba(13,148,136, 0.28);
   color: #fff;
 }
 
@@ -283,7 +283,7 @@ a {
 .page-content .form-group textarea:focus {
   border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 0 0 3px rgba(13,148,136, 0.12);
 }
 
 .page-content input[type="text"],
@@ -306,7 +306,7 @@ a {
   padding: 11px 24px;
   font-size: 15px;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 4px 12px rgba(13,148,136, 0.25);
   transition: 0.2s;
 }
 

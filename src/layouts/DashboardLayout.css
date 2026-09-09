@@ -41,7 +41,7 @@
   width: 46px;
   height: 46px;
 
-  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  background: linear-gradient(135deg, #0d9488, #0d9488);
   color: #ffffff;
 
   border-radius: 13px;
@@ -53,7 +53,7 @@
   font-weight: 700;
   font-size: 19px;
 
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 6px 16px rgba(13,148,136, 0.35);
 }
 
 .logo h2 {
@@ -99,15 +99,15 @@
 
 .menu a:hover,
 .master-toggle:hover {
-  background: #eef4ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
 }
 
 .menu .active,
 .master-toggle.active {
-  background: #2563eb;
+  background: #0d9488;
   color: #ffffff;
-  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 6px 14px rgba(13,148,136, 0.3);
 }
 
 .menu a svg,
@@ -197,11 +197,11 @@
   width: 42px;
   height: 42px;
 
-  border: 1px solid #dbe4f5;
+  border: 1px solid #cdede7;
   border-radius: 12px;
 
-  background: #eef4ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
 
   display: flex;
   align-items: center;
@@ -213,7 +213,7 @@
 }
 
 .notif-btn:hover {
-  background: #dbe8ff;
+  background: #c8ece5;
 }
 
 .notif-badge {
@@ -324,7 +324,7 @@
 }
 
 .notification-item:hover {
-  background: #f5f8ff;
+  background: #f0faf8;
 }
 
 .notification-icon {
@@ -333,8 +333,8 @@
 
   flex-shrink: 0;
 
-  background: #eef3ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
 
   border-radius: 11px;
 
@@ -420,12 +420,12 @@
 }
 
 .master-dropdown a:hover {
-  background: #eef4ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
 }
 
 .master-dropdown a.active {
-  background: #2563eb;
+  background: #0d9488;
   color: #ffffff;
 }
 

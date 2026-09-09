@@ -41,7 +41,7 @@
   padding: 0 20px;
   border: none;
   border-radius: 10px;
-  background: #2563eb;
+  background: #0d9488;
   color: white;
   font-size: 14px;
   font-weight: 600;
@@ -51,7 +51,7 @@
 }
 
 .master-btn-add:hover {
-  background: #1d4ed8;
+  background: #0f766e;
 }
 
 /* SEARCH */
@@ -75,8 +75,8 @@
 }
 
 .master-search:focus-within {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13,148,136, 0.1);
 }
 
 .master-search input {
@@ -128,7 +128,7 @@
 }
 
 .master-table tbody tr:hover {
-  background: #fafcff;
+  background: #f7fcfb;
 }
 
 /* STATUS */
@@ -175,12 +175,12 @@
 }
 
 .master-edit {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
 }
 
 .master-edit:hover {
-  background: #dbeafe;
+  background: #cdede7;
 }
 
 .master-delete {
@@ -310,7 +310,7 @@
 
 .master-field input:focus,
 .master-field select:focus {
-  border-color: #2563eb;
+  border-color: #0d9488;
 }
 
 .master-field select {
@@ -340,12 +340,12 @@
 
 .master-btn-simpan {
   border: none;
-  background: #2563eb;
+  background: #0d9488;
   color: white;
 }
 
 .master-btn-simpan:hover {
-  background: #1d4ed8;
+  background: #0f766e;
 }
 
 .master-btn-batal {

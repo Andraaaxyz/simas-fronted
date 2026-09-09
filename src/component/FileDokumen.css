@@ -37,8 +37,8 @@
   gap: 6px;
   padding: 7px 13px;
   border-radius: 9px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -47,5 +47,5 @@
 }
 
 .file-download:hover {
-  background: #dbeafe;
+  background: #cdede7;
 }

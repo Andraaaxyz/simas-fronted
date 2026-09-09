@@ -61,8 +61,8 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: #edf4ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -200,7 +200,7 @@
 }
 
 .laporan-table tbody tr:hover {
-  background: #fafcff;
+  background: #f7fcfb;
 }
 
 /* =========================
@@ -234,8 +234,8 @@
 }
 
 .status-badge.diproses {
-  background: #edf4ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
 }
 
 .status-badge.selesai {
@@ -267,8 +267,8 @@
   height: 36px;
   border: none;
   border-radius: 9px;
-  background: #edf4ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -277,7 +277,7 @@
 }
 
 .laporan-btn-view:hover {
-  background: #2563eb;
+  background: #0d9488;
   color: white;
 }
 
@@ -399,7 +399,7 @@
 
 .laporan-btn-close {
   border: none;
-  background: #2563eb;
+  background: #0d9488;
   color: white;
   padding: 10px 20px;
   border-radius: 9px;
@@ -408,7 +408,7 @@
 }
 
 .laporan-btn-close:hover {
-  background: #1d4ed8;
+  background: #0f766e;
 }
 
 /* =========================

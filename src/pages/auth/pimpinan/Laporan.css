@@ -34,8 +34,8 @@
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
 
   display: flex;
   align-items: center;
@@ -77,8 +77,8 @@
 }
 
 .laporan-stat-card.blue .stat-icon {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
 }
 
 .laporan-stat-card.orange .stat-icon {
@@ -159,8 +159,8 @@
   padding: 7px 12px;
   border-radius: 8px;
 
-  background: #eff6ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
 
   font-size: 11px;
   font-weight: 700;
@@ -195,8 +195,8 @@
 }
 
 .laporan-search:focus-within {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,.08);
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13,148,136,.08);
 }
 
 .laporan-search input {
@@ -261,11 +261,11 @@
 }
 
 .laporan-table tbody tr:hover {
-  background: #fafcff;
+  background: #f7fcfb;
 }
 
 .nomor-surat {
-  color: #2563eb;
+  color: #0d9488;
   font-size: 12px;
 }
 
@@ -318,8 +318,8 @@
 }
 
 .laporan-status.disetujui {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
 }
 
 .laporan-status.ditolak {
@@ -336,8 +336,8 @@
   border: none;
   border-radius: 8px;
 
-  background: #eff6ff;
-  color: #2563eb;
+  background: #e6f7f5;
+  color: #0d9488;
 
   display: flex;
   align-items: center;
@@ -348,7 +348,7 @@
 }
 
 .laporan-eye:hover {
-  background: #2563eb;
+  background: #0d9488;
   color: white;
 }
 
@@ -416,7 +416,7 @@
 
 .laporan-modal-header span {
   font-size: 11px;
-  color: #2563eb;
+  color: #0d9488;
   font-weight: 700;
 }
 
@@ -481,7 +481,7 @@
 
 .keputusan-box {
   grid-column: span 2;
-  background: #eff6ff;
+  background: #e6f7f5;
 }
 
 /* FOOTER */
@@ -501,7 +501,7 @@
   border: none;
   border-radius: 8px;
 
-  background: #2563eb;
+  background: #0d9488;
   color: white;
 
   font-size: 12px;
@@ -511,7 +511,7 @@
 }
 
 .laporan-modal-footer button:hover {
-  background: #1d4ed8;
+  background: #0f766e;
 }
 
 /* RESPONSIVE */
