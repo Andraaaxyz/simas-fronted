@@ -71,8 +71,15 @@ function Login() {
   return (
     <div className="login-page">
 
-      {/* BAGIAN KIRI */}
+      {/* =========================
+          AREA KIRI — FOTO GEDUNG
+      ========================= */}
       <div className="login-left">
+
+        {/* DEKORASI CURVE */}
+        <span className="decor-curve decor-top" />
+        <span className="decor-curve-line decor-line" />
+        <span className="decor-curve decor-bottom" />
 
         <div className="brand">
 
@@ -92,13 +99,21 @@ function Login() {
       </div>
 
 
-      {/* BAGIAN KANAN */}
+      {/* =========================
+          AREA KANAN — LOGIN CARD
+      ========================= */}
       <div className="login-right">
 
         <div className="login-card">
 
-          {/* HEADER */}
+          {/* HEADER + LOGO */}
           <div className="login-header">
+
+            <img
+              className="login-logo"
+              src="/images/logo.png"
+              alt="Logo SIMAS"
+            />
 
             <h2>Selamat Datang</h2>
 
@@ -108,14 +123,13 @@ function Login() {
 
           </div>
 
-
-          {/* FORM */}
+          {/* FORM LOGIN */}
           <form onSubmit={handleSubmit}>
 
             {/* USERNAME */}
             <div className="form-group">
 
-              <label>
+              <label htmlFor="login-username">
                 Username
               </label>
 
@@ -124,9 +138,10 @@ function Login() {
                 <User size={20} />
 
                 <input
+                  id="login-username"
                   type="text"
                   name="username"
-                  placeholder="Masukan username"
+                  placeholder="Masukkan username"
                   value={form.username}
                   onChange={handleChange}
                 />
@@ -135,11 +150,10 @@ function Login() {
 
             </div>
 
-
             {/* PASSWORD */}
             <div className="form-group">
 
-              <label>
+              <label htmlFor="login-password">
                 Password
               </label>
 
@@ -148,13 +162,14 @@ function Login() {
                 <Lock size={20} />
 
                 <input
+                  id="login-password"
                   type={
                     showPassword
                       ? "text"
                       : "password"
                   }
                   name="password"
-                  placeholder="Masukan password"
+                  placeholder="Masukkan password"
                   value={form.password}
                   onChange={handleChange}
                 />
@@ -165,18 +180,22 @@ function Login() {
                   onClick={() =>
                     setShowPassword(!showPassword)
                   }
+                  aria-label={
+                    showPassword
+                      ? "Sembunyikan password"
+                      : "Tampilkan password"
+                  }
                 >
                   {showPassword ? (
-                    <EyeOff size={18} />
+                    <EyeOff size={19} />
                   ) : (
-                    <Eye size={18} />
+                    <Eye size={19} />
                   )}
                 </button>
 
               </div>
 
             </div>
-
 
             {/* OPTIONS */}
             <div className="login-options">
@@ -192,7 +211,6 @@ function Login() {
 
             </div>
 
-
             {/* BUTTON LOGIN */}
             <button
               className="login-button"
@@ -202,7 +220,6 @@ function Login() {
             </button>
 
           </form>
-
 
           {/* FOOTER */}
           <div className="login-footer">
