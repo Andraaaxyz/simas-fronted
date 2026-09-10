@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
-import "./Dashboard.css";
 import {
   formatTanggal,
   ubahKeISO,
@@ -15,6 +14,7 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
+  Calendar,
 } from "lucide-react";
 
 function Dashboard() {
@@ -23,16 +23,19 @@ function Dashboard() {
   const [jumlahSurat, setJumlahSurat] = useState(0);
   const [jumlahDisposisi, setJumlahDisposisi] = useState(0);
   const [jumlahArsip, setJumlahArsip] = useState(0);
-
   const [aktivitas, setAktivitas] = useState([]);
+  const [chartData, setChartData] = useState([]);
 
-  // =========================
-  // AMBIL DATA
-  // =========================
+  const hariIni = new Date().toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
   const ambilData = () => {
     const dataSurat =
       JSON.parse(localStorage.getItem("dataSurat")) || [];
-
     const dataDisposisi =
       JSON.parse(localStorage.getItem("dataDisposisi")) || [];
 
@@ -44,12 +47,9 @@ function Dashboard() {
     setJumlahDisposisi(dataDisposisi.length);
     setJumlahArsip(dataArsip.length);
 
-    // =========================
-    // BUAT AKTIVITAS
-    // =========================
+    // AKTIVITAS
     const aktivitasBaru = [];
 
-    // SURAT MASUK
     dataSurat.slice(-3).forEach((item) => {
       aktivitasBaru.push({
         id: `surat-${item.id}`,
@@ -61,7 +61,6 @@ function Dashboard() {
       });
     });
 
-    // DISPOSISI
     dataDisposisi.slice(-3).forEach((item) => {
       aktivitasBaru.push({
         id: `disposisi-${item.id}`,
@@ -73,7 +72,6 @@ function Dashboard() {
       });
     });
 
-    // ARSIP
     dataArsip.slice(-3).forEach((item) => {
       aktivitasBaru.push({
         id: `arsip-${item.id}`,
@@ -85,233 +83,178 @@ function Dashboard() {
       });
     });
 
-    // DATA TERBARU DI ATAS
-    setAktivitas(
-      aktivitasBaru.reverse().slice(0, 5)
-    );
+    setAktivitas(aktivitasBaru.reverse().slice(0, 5));
+
+    // CHART — hitung surat per bulan (6 bulan terakhir)
+    const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    const now = new Date();
+    const chart = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const m = d.getMonth();
+      const y = d.getFullYear();
+
+      const count = dataSurat.filter((s) => {
+        const t = new Date(s.tanggalDiterima);
+        return t.getMonth() === m && t.getFullYear() === y;
+      }).length;
+
+      chart.push({ label: bulan[m], value: count });
+    }
+
+    setChartData(chart);
   };
 
   useEffect(() => {
     ambilData();
-
-    const updateData = () => {
-      ambilData();
-    };
-
+    const updateData = () => ambilData();
     window.addEventListener("storage", updateData);
-
-    return () => {
-      window.removeEventListener("storage", updateData);
-    };
+    return () => window.removeEventListener("storage", updateData);
   }, []);
+
+  const maxChart = Math.max(...chartData.map((c) => c.value), 1);
 
   return (
     <DashboardLayout title="Dashboard Admin">
 
-      {/* =========================
-          WELCOME
-      ========================= */}
+      {/* WELCOME */}
       <div className="welcome-card">
-
         <div>
-
-          <span className="welcome-label">
-            SIMAS
-          </span>
-
-          <h2>
-            Sistem Informasi Administrasi Surat
-          </h2>
-
+          <span className="welcome-label">SIMAS</span>
+          <h2>Selamat Datang, Admin</h2>
           <p>
             Aplikasi ini digunakan untuk pencatatan
             surat masuk dan arsip digital.
           </p>
-
+          <div className="welcome-date">
+            <Calendar size={14} />
+            {hariIni}
+          </div>
         </div>
-
       </div>
 
 
-      {/* =========================
-          STATISTIK
-      ========================= */}
+      {/* STATISTIK */}
       <div className="stats-grid">
 
-        {/* SURAT MASUK */}
         <div
           className="stat-card"
-          onClick={() =>
-            navigate("/admin/surat-masuk")
-          }
-          style={{ cursor: "pointer" }}
+          onClick={() => navigate("/admin/surat-masuk")}
         >
-
           <div className="stat-icon blue">
             <Mail size={25} />
           </div>
-
           <div>
-
             <p>Surat Masuk</p>
-
-            <h3>
-              {jumlahSurat}
-            </h3>
-
+            <h3>{jumlahSurat}</h3>
             <span>
               <TrendingUp size={14} />
-              Data surat masuk
+              Total surat masuk
             </span>
-
           </div>
-
         </div>
 
-
-        {/* DISPOSISI */}
         <div
           className="stat-card"
-          onClick={() =>
-            navigate("/admin/disposisi")
-          }
-          style={{ cursor: "pointer" }}
+          onClick={() => navigate("/admin/disposisi")}
         >
-
           <div className="stat-icon orange">
             <Send size={25} />
           </div>
-
           <div>
-
             <p>Disposisi</p>
-
-            <h3>
-              {jumlahDisposisi}
-            </h3>
-
+            <h3>{jumlahDisposisi}</h3>
             <span>
               <Clock size={14} />
               Menunggu proses
             </span>
-
           </div>
-
         </div>
 
-
-        {/* ARSIP */}
         <div
           className="stat-card"
-          onClick={() =>
-            navigate("/admin/arsip")
-          }
-          style={{ cursor: "pointer" }}
+          onClick={() => navigate("/admin/arsip")}
         >
-
           <div className="stat-icon green">
             <Archive size={25} />
           </div>
-
           <div>
-
             <p>Arsip Digital</p>
-
-            <h3>
-              {jumlahArsip}
-            </h3>
-
+            <h3>{jumlahArsip}</h3>
             <span>
               <CheckCircle size={14} />
               Arsip tersimpan
             </span>
-
           </div>
-
         </div>
 
       </div>
 
 
-      {/* =========================
-          AKTIVITAS TERBARU
-      ========================= */}
-      <div className="activity-card">
-
-        <div className="activity-header">
-
+      {/* CHART BULANAN */}
+      <div className="chart-card">
+        <div className="chart-header">
           <div>
-
-            <h3>
-              Aktivitas Terbaru
-            </h3>
-
-            <p>
-              Aktivitas administrasi surat terbaru
-            </p>
-
+            <h3>Surat per Bulan</h3>
+            <p>6 bulan terakhir</p>
           </div>
-
+          <div className="stat-trend up">
+            <TrendingUp size={12} />
+            Aktif
+          </div>
         </div>
 
+        <div className="chart-bars">
+          {chartData.map((item, i) => (
+            <div className="chart-col" key={i}>
+              <span className="chart-value">{item.value}</span>
+              <div
+                className="chart-bar"
+                style={{
+                  height: `${(item.value / maxChart) * 100}%`,
+                }}
+              />
+              <span className="chart-label">{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+
+      {/* AKTIVITAS */}
+      <div className="activity-card">
+        <div className="activity-header">
+          <div>
+            <h3>Aktivitas Terbaru</h3>
+            <p>Aktivitas administrasi surat terbaru</p>
+          </div>
+        </div>
 
         {aktivitas.length > 0 ? (
-
           aktivitas.map((item) => (
-
-            <div
-              className="activity-item"
-              key={item.id}
-            >
-
+            <div className="activity-item" key={item.id}>
               <div className="activity-icon">
                 {item.icon}
               </div>
-
               <div>
-
-                <strong>
-                  {item.title}
-                </strong>
-
-                <p>
-                  {item.description}
-                </p>
-
+                <strong>{item.title}</strong>
+                <p>{item.description}</p>
               </div>
-
-              <span>
-                {formatTanggal(item.time)}
-              </span>
-
+              <span>{formatTanggal(item.time)}</span>
             </div>
-
           ))
-
         ) : (
-
           <div className="activity-item">
-
             <div className="activity-icon">
               <Mail size={18} />
             </div>
-
             <div>
-
-              <strong>
-                Belum ada aktivitas
-              </strong>
-
-              <p>
-                Aktivitas surat akan muncul di sini.
-              </p>
-
+              <strong>Belum ada aktivitas</strong>
+              <p>Aktivitas surat akan muncul di sini.</p>
             </div>
-
           </div>
-
         )}
-
       </div>
 
     </DashboardLayout>
