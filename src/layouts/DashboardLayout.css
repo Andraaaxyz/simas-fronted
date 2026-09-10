@@ -434,12 +434,18 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: var(--primary);
-  color: #ffffff;
+  background: var(--primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .profile-info {
@@ -497,12 +503,18 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--primary);
-  color: #ffffff;
+  background: var(--primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.profile-avatar-lg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .profile-dropdown-header strong {

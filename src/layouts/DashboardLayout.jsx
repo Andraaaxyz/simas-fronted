@@ -13,7 +13,6 @@ import {
   FileText,
   UserCircle,
   Bell,
-  User,
   LogOut,
   ClipboardList,
   X,
@@ -305,7 +304,7 @@ function DashboardLayout({ title, children }) {
                 onClick={() => setShowProfile(!showProfile)}
               >
                 <div className="profile-avatar">
-                  <User size={18} />
+                  <img src="/images/user-profile.png" alt={roleLabel} />
                 </div>
                 <div className="profile-info">
                   <span className="profile-role">{roleLabel}</span>
@@ -317,7 +316,7 @@ function DashboardLayout({ title, children }) {
                 <div className="profile-dropdown">
                   <div className="profile-dropdown-header">
                     <div className="profile-avatar-lg">
-                      <User size={22} />
+                      <img src="/images/user-profile.png" alt={roleLabel} />
                     </div>
                     <div>
                       <strong>{roleLabel}</strong>
