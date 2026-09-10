@@ -132,7 +132,7 @@ function Login() {
 
             <img
               className="login-logo"
-              src="/images/logo.png"
+              src="/images/logo-remove.png"
               alt="Logo SIMAS"
             />
 

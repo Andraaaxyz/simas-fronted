@@ -3,8 +3,6 @@
 ========================= */
 
 .laporan-page {
-  padding: 30px 34px 50px;
-  background: #f5f7fb;
   min-height: calc(100vh - 90px);
 }
 
