@@ -26,6 +26,14 @@ function Dashboard() {
   const [aktivitas, setAktivitas] = useState([]);
   const [chartData, setChartData] = useState([]);
 
+  const getSapaan = () => {
+    const jam = new Date().getHours();
+    if (jam < 11) return "Selamat pagi";
+    if (jam < 15) return "Selamat siang";
+    if (jam < 18) return "Selamat sore";
+    return "Selamat malam";
+  };
+
   const hariIni = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
     day: "numeric",
@@ -121,12 +129,8 @@ function Dashboard() {
       {/* WELCOME */}
       <div className="welcome-card">
         <div>
-          <span className="welcome-label">SIMAS</span>
           <h2>Selamat Datang, Admin</h2>
-          <p>
-            Aplikasi ini digunakan untuk pencatatan
-            surat masuk dan arsip digital.
-          </p>
+          <p>{getSapaan()}! Have a nice day today, you can do it! 💪</p>
           <div className="welcome-date">
             <Calendar size={14} />
             {hariIni}

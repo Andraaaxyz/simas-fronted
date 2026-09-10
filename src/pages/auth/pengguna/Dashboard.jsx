@@ -2,11 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
-import { formatTanggal, ubahKeISO } from "../../../utils/tanggal";
 
 import {
   Mail,
-  FileText,
   Clock,
   CheckCircle,
   Archive,
@@ -20,8 +18,15 @@ function Dashboard() {
   const [jumlahSurat, setJumlahSurat] = useState(0);
   const [jumlahDisposisi, setJumlahDisposisi] = useState(0);
   const [jumlahArsip, setJumlahArsip] = useState(0);
-  const [aktivitas, setAktivitas] = useState([]);
   const [chartData, setChartData] = useState([]);
+
+  const getSapaan = () => {
+    const jam = new Date().getHours();
+    if (jam < 11) return "Selamat pagi";
+    if (jam < 15) return "Selamat siang";
+    if (jam < 18) return "Selamat sore";
+    return "Selamat malam";
+  };
 
   const hariIni = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
@@ -43,43 +48,6 @@ function Dashboard() {
     setJumlahSurat(dataSurat.length);
     setJumlahDisposisi(dataDisposisi.length);
     setJumlahArsip(dataArsip.length);
-
-    const aktivitasBaru = [];
-
-    dataSurat.slice(-3).forEach((item) => {
-      aktivitasBaru.push({
-        id: `surat-${item.id}`,
-        type: "surat",
-        icon: <Mail size={18} />,
-        title: "Surat masuk baru",
-        description: `Surat dengan nomor ${item.noSurat}`,
-        time: item.tanggalDiterima,
-      });
-    });
-
-    dataDisposisi.slice(-3).forEach((item) => {
-      aktivitasBaru.push({
-        id: `disposisi-${item.id}`,
-        type: "disposisi",
-        icon: <FileText size={18} />,
-        title: "Disposisi surat",
-        description: `Surat diberikan kepada ${item.pengguna}`,
-        time: ubahKeISO(item.tanggal),
-      });
-    });
-
-    dataArsip.slice(-3).forEach((item) => {
-      aktivitasBaru.push({
-        id: `arsip-${item.id}`,
-        type: "arsip",
-        icon: <Archive size={18} />,
-        title: "Arsip digital",
-        description: `Surat ${item.noSurat} telah selesai`,
-        time: ubahKeISO(item.tanggal),
-      });
-    });
-
-    setAktivitas(aktivitasBaru.reverse().slice(0, 5));
 
     const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
     const now = new Date();
@@ -115,12 +83,8 @@ function Dashboard() {
 
       <div className="welcome-card">
         <div>
-          <span className="welcome-label">SIMAS</span>
           <h2>Selamat Datang, Pengguna</h2>
-          <p>
-            Kelola dan pantau informasi surat
-            yang tersedia pada sistem SIMAS.
-          </p>
+          <p>{getSapaan()}! Have a nice day today, you can do it! 💪</p>
           <div className="welcome-date">
             <Calendar size={14} />
             {hariIni}
@@ -173,36 +137,6 @@ function Dashboard() {
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="activity-card">
-        <div className="activity-header">
-          <div>
-            <h3>Aktivitas Terbaru</h3>
-            <p>Aktivitas administrasi surat terbaru</p>
-          </div>
-        </div>
-
-        {aktivitas.length > 0 ? (
-          aktivitas.map((item) => (
-            <div className="activity-item" key={item.id}>
-              <div className="activity-icon">{item.icon}</div>
-              <div>
-                <strong>{item.title}</strong>
-                <p>{item.description}</p>
-              </div>
-              <span>{formatTanggal(item.time)}</span>
-            </div>
-          ))
-        ) : (
-          <div className="activity-item">
-            <div className="activity-icon"><Mail size={18} /></div>
-            <div>
-              <strong>Belum ada aktivitas</strong>
-              <p>Aktivitas surat akan muncul di sini.</p>
-            </div>
-          </div>
-        )}
       </div>
 
     </DashboardLayout>
