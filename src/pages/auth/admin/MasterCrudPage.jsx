@@ -8,6 +8,9 @@ import {
 } from "lucide-react";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
+import ConfirmDialog from "../../../component/ConfirmDialog";
+import { useToast } from "../../../component/Toast";
+import EmptyState from "../../../component/EmptyState";
 
 import {
   usePagination,
@@ -32,10 +35,12 @@ function MasterCrudPage({
   hasStatus = true,
   filters = [],
 }) {
+  const showToast = useToast();
   const [search, setSearch] = useState("");
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const [filterValues, setFilterValues] = useState(() => {
     const initial = {};
@@ -49,28 +54,20 @@ function MasterCrudPage({
     return initial;
   });
 
-  // =========================
-  // AMBIL DATA
-  // =========================
   const ambilData = () => {
     setData(getMasterData(storageKey));
   };
 
   useEffect(() => {
     ambilData();
-
     window.addEventListener("storage", ambilData);
     const interval = setInterval(ambilData, 1000);
-
     return () => {
       window.removeEventListener("storage", ambilData);
       clearInterval(interval);
     };
   }, []);
 
-  // =========================
-  // SEARCH + FILTER
-  // =========================
   const keyword = search.toLowerCase();
 
   const filteredData = data.filter((item) => {
@@ -81,22 +78,14 @@ function MasterCrudPage({
       .includes(keyword);
 
     const cocokFilter = filters.every(
-      (f) =>
-        !filterValues[f.key] ||
-        item[f.key] === filterValues[f.key]
+      (f) => !filterValues[f.key] || item[f.key] === filterValues[f.key]
     );
 
     return cocokSearch && cocokFilter;
   });
 
-  // =========================
-  // PAGINATION
-  // =========================
   const pag = usePagination(filteredData);
 
-  // =========================
-  // TAMBAH
-  // =========================
   const bukaTambah = () => {
     const initial = {};
     fields.forEach((f) => (initial[f.name] = ""));
@@ -105,9 +94,6 @@ function MasterCrudPage({
     setShowModal(true);
   };
 
-  // =========================
-  // EDIT
-  // =========================
   const bukaEdit = (item) => {
     const init = {};
     fields.forEach((f) => {
@@ -118,92 +104,63 @@ function MasterCrudPage({
     setShowModal(true);
   };
 
-  // =========================
-  // SIMPAN
-  // =========================
   const simpan = () => {
     const kosong = fields.some((f) => !form[f.name]);
 
     if (kosong) {
-      alert("Semua data wajib diisi!");
+      showToast("warning", "Semua data wajib diisi!");
       return;
     }
 
     if (editId) {
       updateMasterData(storageKey, editId, form);
-      alert("Data berhasil diperbarui!");
+      showToast("success", "Data berhasil diperbarui!");
     } else {
       tambahMasterData(storageKey, form);
-      alert("Data berhasil ditambahkan!");
+      showToast("success", "Data berhasil ditambahkan!");
     }
 
     setShowModal(false);
   };
 
-  // =========================
-  // HAPUS
-  // =========================
-  const hapus = (id) => {
-    const yakin = window.confirm(
-      "Yakin ingin menghapus data ini?"
-    );
-
-    if (!yakin) return;
-
-    hapusMasterData(storageKey, id);
-    alert("Data berhasil dihapus!");
+  const konfirmasiHapus = () => {
+    hapusMasterData(storageKey, deleteTarget);
+    setDeleteTarget(null);
+    showToast("success", "Data berhasil dihapus!");
   };
 
   return (
     <DashboardLayout title={title}>
       <div className="master-page">
 
-        {/* HEADER */}
         <div className="master-header">
           <div>
-            <div className="master-breadcrumb">
-              Master / {title}
-            </div>
-
+            <div className="master-breadcrumb">Master / {title}</div>
             <h1>{title}</h1>
-
             <p>{subtitle}</p>
           </div>
 
-          <button
-            className="master-btn-add"
-            onClick={bukaTambah}
-          >
+          <button className="master-btn-add" onClick={bukaTambah}>
             <Plus size={18} />
             Tambah {title}
           </button>
         </div>
 
-        {/* SEARCH + TOOLS */}
         <div className="master-toolbar pag-tools">
           <div className="master-search">
             <Search size={18} />
-
             <input
               type="text"
               placeholder={`Cari ${title.toLowerCase()}...`}
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
           {filters.map((f) => {
             const opsiDinamis = f.options
               ? f.options
-              : [
-                  ...new Set(
-                    data
-                      .map((d) => d[f.key])
-                      .filter(Boolean)
-                  ),
-                ];
+              : [...new Set(data.map((d) => d[f.key]).filter(Boolean))];
 
             return (
               <select
@@ -211,32 +168,20 @@ function MasterCrudPage({
                 className="pag-filter"
                 value={filterValues[f.key]}
                 onChange={(e) =>
-                  setFilterValues({
-                    ...filterValues,
-                    [f.key]: e.target.value,
-                  })
+                  setFilterValues({ ...filterValues, [f.key]: e.target.value })
                 }
               >
-                <option value="">
-                  Semua {f.label}
-                </option>
-
+                <option value="">Semua {f.label}</option>
                 {opsiDinamis.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
+                  <option key={opt} value={opt}>{opt}</option>
                 ))}
               </select>
             );
           })}
 
-          <EntriesSelect
-            value={pag.entries}
-            onChange={pag.changeEntries}
-          />
+          <EntriesSelect value={pag.entries} onChange={pag.changeEntries} />
         </div>
 
-        {/* TABLE */}
         <div className="master-card">
           <table className="master-table">
             <thead>
@@ -254,61 +199,32 @@ function MasterCrudPage({
               {pag.pageData.length > 0 ? (
                 pag.pageData.map((item, index) => (
                   <tr key={item.id}>
-                    <td>
-                      {(pag.page - 1) * pag.entries +
-                        index +
-                        1}
-                    </td>
+                    <td>{(pag.page - 1) * pag.entries + index + 1}</td>
 
                     {columns.map((col) => (
                       <td key={col.key}>
-                        <strong>
-                          {col.mask
-                            ? "••••••••"
-                            : item[col.key]}
-                        </strong>
+                        <strong>{col.mask ? "••••••••" : item[col.key]}</strong>
                       </td>
                     ))}
 
                     {hasStatus && (
                       <td>
                         {item.status ? (
-                          <span
-                            className={`master-status ${
-                              item.status === "Aktif"
-                                ? "aktif"
-                                : "nonaktif"
-                            }`}
-                          >
+                          <span className={`master-status ${item.status === "Aktif" ? "aktif" : "nonaktif"}`}>
                             {item.status}
                           </span>
                         ) : (
-                          <span className="master-status-baru">
-                            -
-                          </span>
+                          <span className="master-status-baru">-</span>
                         )}
                       </td>
                     )}
 
                     <td>
                       <div className="master-actions">
-                        <button
-                          className="master-edit"
-                          title="Edit"
-                          onClick={() =>
-                            bukaEdit(item)
-                          }
-                        >
+                        <button className="master-edit" title="Edit" onClick={() => bukaEdit(item)}>
                           <Pencil size={16} />
                         </button>
-
-                        <button
-                          className="master-delete"
-                          title="Hapus"
-                          onClick={() =>
-                            hapus(item.id)
-                          }
-                        >
+                        <button className="master-delete" title="Hapus" onClick={() => setDeleteTarget(item.id)}>
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -317,13 +233,11 @@ function MasterCrudPage({
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan={
-                      columns.length + (hasStatus ? 3 : 2)
-                    }
-                    className="master-empty"
-                  >
-                    {emptyMessage}
+                  <td colSpan={columns.length + (hasStatus ? 3 : 2)}>
+                    <EmptyState
+                      title={emptyMessage}
+                      description="Data belum tersedia di sistem."
+                    />
                   </td>
                 </tr>
               )}
@@ -331,7 +245,6 @@ function MasterCrudPage({
           </table>
         </div>
 
-        {/* PAGINATION */}
         <PaginationBar
           page={pag.page}
           totalPages={pag.totalPages}
@@ -341,84 +254,40 @@ function MasterCrudPage({
           total={pag.total}
         />
 
-        {/* MODAL */}
         {showModal && (
           <div className="master-modal-overlay">
             <div className="master-modal">
               <div className="master-modal-header">
                 <div>
-                  <h2>
-                    {editId ? "Edit" : "Tambah"}{" "}
-                    {title}
-                  </h2>
-
-                  <p>
-                    {editId
-                      ? "Perbarui data"
-                      : "Masukkan data baru"}
-                  </p>
+                  <h2>{editId ? "Edit" : "Tambah"} {title}</h2>
+                  <p>{editId ? "Perbarui data" : "Masukkan data baru"}</p>
                 </div>
-
-                <button
-                  className="master-close"
-                  onClick={() =>
-                    setShowModal(false)
-                  }
-                >
+                <button className="master-close" onClick={() => setShowModal(false)}>
                   <X size={18} />
                 </button>
               </div>
 
               <div className="master-form">
                 {fields.map((f) => (
-                  <div
-                    className="master-field"
-                    key={f.name}
-                  >
+                  <div className="master-field" key={f.name}>
                     <label>{f.label}</label>
 
                     {f.type === "select" ? (
                       <select
                         value={form[f.name]}
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            [f.name]:
-                              e.target.value,
-                          })
-                        }
+                        onChange={(e) => setForm({ ...form, [f.name]: e.target.value })}
                       >
-                        <option value="">
-                          Pilih {f.label}
-                        </option>
+                        <option value="">Pilih {f.label}</option>
                         {f.options.map((opt) => (
-                          <option
-                            key={opt}
-                            value={opt}
-                          >
-                            {opt}
-                          </option>
+                          <option key={opt} value={opt}>{opt}</option>
                         ))}
                       </select>
                     ) : (
                       <input
-                        type={
-                          f.type === "password"
-                            ? "password"
-                            : "text"
-                        }
-                        placeholder={
-                          f.placeholder ||
-                          `Masukkan ${f.label.toLowerCase()}`
-                        }
+                        type={f.type === "password" ? "password" : "text"}
+                        placeholder={f.placeholder || `Masukkan ${f.label.toLowerCase()}`}
                         value={form[f.name]}
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            [f.name]:
-                              e.target.value,
-                          })
-                        }
+                        onChange={(e) => setForm({ ...form, [f.name]: e.target.value })}
                       />
                     )}
                   </div>
@@ -426,27 +295,27 @@ function MasterCrudPage({
               </div>
 
               <div className="master-modal-footer">
-                <button
-                  className="master-btn-batal"
-                  onClick={() =>
-                    setShowModal(false)
-                  }
-                >
+                <button className="master-btn-batal" onClick={() => setShowModal(false)}>
                   Batal
                 </button>
-
-                <button
-                  className="master-btn-simpan"
-                  onClick={simpan}
-                >
-                  {editId
-                    ? "Simpan Perubahan"
-                    : "Simpan Data"}
+                <button className="master-btn-simpan" onClick={simpan}>
+                  {editId ? "Simpan Perubahan" : "Simpan Data"}
                 </button>
               </div>
             </div>
           </div>
         )}
+
+        <ConfirmDialog
+          open={!!deleteTarget}
+          title="Hapus Data"
+          message="Yakin ingin menghapus data ini? Data yang dihapus tidak dapat dikembalikan."
+          confirmText="Hapus"
+          cancelText="Batal"
+          danger
+          onConfirm={konfirmasiHapus}
+          onCancel={() => setDeleteTarget(null)}
+        />
 
       </div>
     </DashboardLayout>
