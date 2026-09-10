@@ -1,4 +1,35 @@
 /* =========================
+   TOMBOL TAMBAH SURAT
+========================= */
+
+.btn-tambah-surat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background: var(--primary);
+  color: #ffffff;
+
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 11px 20px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn-tambah-surat:hover {
+  background: var(--primary-2);
+  transform: translateY(-1px);
+}
+
+/* =========================
    AKSI SURAT
 ========================= */
 
