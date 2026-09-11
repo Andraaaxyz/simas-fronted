@@ -8,6 +8,7 @@ import {
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./ArsipDigital.css";
+import FileDokumen from "../../../component/FileDokumen";
 import { formatTanggal } from "../../../utils/tanggal";
 
 import {
@@ -400,6 +401,16 @@ function ArsipDigital() {
                 >
                   {selectedArsip.status}
                 </span>
+              </div>
+
+              <div className="arsip-detail-item">
+                <span>File Surat</span>
+
+                <strong>
+                  <FileDokumen
+                    value={selectedArsip.file}
+                  />
+                </strong>
               </div>
 
               <div className="arsip-detail-item">

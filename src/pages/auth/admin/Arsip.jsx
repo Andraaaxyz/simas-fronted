@@ -4,10 +4,12 @@ import {
   Eye,
   X,
   Archive,
+  Download,
 } from "lucide-react";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./Arsip.css";
+import FileDokumen from "../../../component/FileDokumen";
 import { formatTanggal } from "../../../utils/tanggal";
 
 import {
@@ -256,6 +258,29 @@ function Arsip() {
                           <Eye size={17} />
                         </button>
 
+                        {item.file && (
+                          <a
+                            className="arsip-btn arsip-btn-download"
+                            title="Download File"
+                            href={
+                              typeof item.file ===
+                              "string"
+                                ? item.file
+                                : item.file.data
+                            }
+                            download={
+                              typeof item.file ===
+                              "string"
+                                ? item.file
+                                : item.file.nama
+                            }
+                          >
+                            <Download
+                              size={17}
+                            />
+                          </a>
+                        )}
+
                       </div>
 
                     </td>
@@ -384,6 +409,18 @@ function Arsip() {
 
                   <strong>
                     {selectedArsip.status}
+                  </strong>
+                </div>
+
+                <div className="arsip-detail-item">
+                  <span>
+                    File Surat
+                  </span>
+
+                  <strong>
+                    <FileDokumen
+                      value={selectedArsip.file}
+                    />
                   </strong>
                 </div>
 
