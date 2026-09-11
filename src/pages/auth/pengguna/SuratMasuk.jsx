@@ -265,9 +265,10 @@ asal: "Dinas Sosial",
                 <th>No</th>
                 <th>No. Agenda</th>
                 <th>No. Surat</th>
-                <th>Tanggal Diterima</th>
-                <th>Sifat</th>
+                <th>Tanggal Surat</th>
+                <th>Sifat Surat</th>
                 <th>Asal Surat</th>
+                <th>Tujuan Surat</th>
                 <th>Perihal</th>
                 <th>Status</th>
                 <th>Aksi</th>
@@ -301,7 +302,7 @@ asal: "Dinas Sosial",
 
                     <td>
                       {formatTanggal(
-                        item.tanggalDiterima
+                        item.tanggalSurat
                       )}
                     </td>
 
@@ -311,6 +312,10 @@ asal: "Dinas Sosial",
 
                     <td>
                       {item.asal}
+                    </td>
+
+                    <td>
+                      {item.tujuan || "-"}
                     </td>
 
                     <td>
@@ -364,7 +369,7 @@ asal: "Dinas Sosial",
                 <tr>
 
                   <td
-                    colSpan="9"
+                    colSpan="10"
                     className="empty"
                   >
                     Belum ada surat masuk.

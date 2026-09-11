@@ -264,6 +264,21 @@
 }
 
 /* =========================
+   DOWNLOAD ARSIP (LINK)
+========================= */
+
+.btn-download-arsip {
+  text-decoration: none;
+  background: #eef7ff;
+  color: #2563eb;
+}
+
+.btn-download-arsip:hover {
+  background: #dbebff;
+  color: #1d4ed8;
+}
+
+/* =========================
    STATUS BADGE DINAMIS
 ========================= */
 

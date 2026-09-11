@@ -386,9 +386,10 @@ function SuratMasuk() {
                 <th>No</th>
                 <th>No. Agenda</th>
                 <th>No. Surat</th>
-                <th>Tanggal Diterima</th>
-                <th>Sifat</th>
+                <th>Tanggal Surat</th>
+                <th>Sifat Surat</th>
                 <th>Asal Surat</th>
+                <th>Tujuan Surat</th>
                 <th>Perihal</th>
                 <th>Status</th>
                 <th>Aksi</th>
@@ -425,7 +426,7 @@ function SuratMasuk() {
 
                     <td>
                       {formatTanggal(
-                        item.tanggalDiterima
+                        item.tanggalSurat
                       )}
                     </td>
 
@@ -435,6 +436,10 @@ function SuratMasuk() {
 
                     <td>
                       {item.asal}
+                    </td>
+
+                    <td>
+                      {item.tujuan || "-"}
                     </td>
 
                     <td>
@@ -508,7 +513,7 @@ function SuratMasuk() {
                 <tr>
 
                   <td
-                    colSpan="9"
+                    colSpan="10"
                     className="empty"
                   >
                     Belum ada surat masuk.
