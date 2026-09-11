@@ -54,6 +54,51 @@
   background: #0f766e;
 }
 
+/* HEADER ACTIONS */
+.master-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.master-btn-excel,
+.master-btn-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.2s;
+}
+
+.master-btn-excel {
+  background: #eef7ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.master-btn-excel:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.master-btn-print {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #047857;
+}
+
+.master-btn-print:hover {
+  background: #d1fae5;
+  border-color: #6ee7b7;
+}
+
 /* SEARCH */
 .master-toolbar {
   margin-bottom: 18px;
@@ -370,6 +415,10 @@
   .master-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .master-header-actions {
+    flex-wrap: wrap;
   }
 
   .master-modal {

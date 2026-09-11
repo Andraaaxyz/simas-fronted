@@ -5,12 +5,18 @@ import {
   Pencil,
   Trash2,
   X,
+  FileSpreadsheet,
+  Printer,
 } from "lucide-react";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmDialog from "../../../component/ConfirmDialog";
 import { useToast } from "../../../component/Toast";
 import EmptyState from "../../../component/EmptyState";
+import {
+  exportExcel,
+  buatHTMLPrint,
+} from "../../../utils/report";
 
 import {
   usePagination,
@@ -129,6 +135,46 @@ function MasterCrudPage({
     showToast("success", "Data berhasil dihapus!");
   };
 
+  // =========================
+  // EXPORT EXCEL
+  // =========================
+  const exportMaster = () => {
+    const kolomExport = columns
+      .filter((c) => !c.mask)
+      .map((c) => ({ key: c.key, label: c.label }));
+
+    if (hasStatus) {
+      kolomExport.push({ key: "status", label: "Status" });
+    }
+
+    exportExcel({
+      rows: filteredData,
+      columns: kolomExport,
+      filename: `master-${storageKey.toLowerCase()}`,
+    });
+  };
+
+  // =========================
+  // PRINT MASTER
+  // =========================
+  const printMaster = () => {
+    const kolomPrint = columns
+      .filter((c) => !c.mask)
+      .map((c) => ({ key: c.key, label: c.label }));
+
+    if (hasStatus) {
+      kolomPrint.push({ key: "status", label: "Status" });
+    }
+
+    buatHTMLPrint({
+      title: `Data Master ${title}`,
+      subtitle: `Daftar data ${title.toLowerCase()} pada sistem SIMAS`,
+      columns: kolomPrint,
+      rows: filteredData,
+      footer: `Total data: ${filteredData.length}`,
+    });
+  };
+
   return (
     <DashboardLayout title={title}>
       <div className="master-page">
@@ -140,10 +186,32 @@ function MasterCrudPage({
             <p>{subtitle}</p>
           </div>
 
-          <button className="master-btn-add" onClick={bukaTambah}>
-            <Plus size={18} />
-            Tambah {title}
-          </button>
+          <div className="master-header-actions">
+
+            <button
+              className="master-btn-excel"
+              onClick={exportMaster}
+              title="Export Excel"
+            >
+              <FileSpreadsheet size={17} />
+              Excel
+            </button>
+
+            <button
+              className="master-btn-print"
+              onClick={printMaster}
+              title="Print"
+            >
+              <Printer size={17} />
+              Print
+            </button>
+
+            <button className="master-btn-add" onClick={bukaTambah}>
+              <Plus size={18} />
+              Tambah {title}
+            </button>
+
+          </div>
         </div>
 
         <div className="master-toolbar pag-tools">
