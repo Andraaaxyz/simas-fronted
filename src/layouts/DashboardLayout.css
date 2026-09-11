@@ -33,7 +33,7 @@
   justify-content: center;
   align-items: center;
   padding: 4px 8px;
-  margin-bottom: 4px;
+  margin-bottom: 18px;
 }
 
 .logo-img {
@@ -43,16 +43,6 @@
   object-fit: contain;
 
   flex-shrink: 0;
-}
-
-.sidebar-tagline {
-  display: block;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--muted);
-  margin-bottom: 20px;
-  letter-spacing: 0.3px;
 }
 
 /* MENU */

@@ -92,8 +92,6 @@ function DashboardLayout({ title, children }) {
           />
         </div>
 
-        <span className="sidebar-tagline">Sistem Administrasi Surat</span>
-
         {/* MENU */}
         <nav className="menu">
 
