@@ -308,8 +308,8 @@ function Disposisi() {
                 <th>No. Surat</th>
                 <th>Asal Surat</th>
                 <th>Perihal</th>
-                <th>Pengguna</th>
-                <th>Tanggal</th>
+                <th>Penerima Disposisi</th>
+                <th>Tanggal Disposisi</th>
                 <th>Status</th>
                 <th>Aksi</th>
               </tr>
@@ -349,7 +349,7 @@ function Disposisi() {
                     </td>
 
                     <td>
-                      {formatTanggal(item.tanggal)}
+                      {formatTanggal(item.tanggalDisposisi)}
                     </td>
 
                     <td>
@@ -497,7 +497,7 @@ function Disposisi() {
                 </div>
 
                 <div className="detail-row-disposisi">
-                  <span>Pengguna</span>
+                  <span>Penerima Disposisi</span>
                   <strong>
                     {selectedDisposisi.pengguna}
                   </strong>
@@ -519,9 +519,9 @@ function Disposisi() {
                 </div>
 
                 <div className="detail-row-disposisi">
-                  <span>Tanggal</span>
+                  <span>Tanggal Disposisi</span>
                   <strong>
-                    {formatTanggal(selectedDisposisi.tanggal)}
+                    {formatTanggal(selectedDisposisi.tanggalDisposisi)}
                   </strong>
                 </div>
 
