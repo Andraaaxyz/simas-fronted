@@ -223,6 +223,117 @@
   font-size: 12px;
 }
 
+/* =========================
+   AKSI LAPORAN
+========================= */
+
+.laporan-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-laporan-rekap,
+.btn-laporan-excel,
+.btn-laporan-print {
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  border-radius: 9px;
+  border: 1px solid;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.2s;
+}
+
+.btn-laporan-rekap {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+  color: #6d28d9;
+}
+
+.btn-laporan-rekap:hover {
+  background: #ede9fe;
+  border-color: #c4b5fd;
+}
+
+.btn-laporan-excel {
+  background: #eef7ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.btn-laporan-excel:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.btn-laporan-print {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #047857;
+}
+
+.btn-laporan-print:hover {
+  background: #d1fae5;
+  border-color: #6ee7b7;
+}
+
+/* =========================
+   REKAP JUMLAH BODY
+========================= */
+
+.laporan-rekap-body {
+  padding: 20px 24px;
+}
+
+.laporan-rekap-body .laporan-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.laporan-rekap-body th {
+  padding: 12px 14px;
+  text-align: left;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.laporan-rekap-body td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eef2f7;
+  font-size: 14px;
+  color: #334155;
+}
+
+.laporan-rekap-total {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: #e6f7f5;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.laporan-rekap-total span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f766e;
+}
+
+.laporan-rekap-total strong {
+  font-size: 18px;
+  color: #0d9488;
+}
+
 /* TABLE */
 
 .laporan-table-wrapper {

@@ -8,11 +8,18 @@ import {
   CheckCircle2,
   XCircle,
   Archive,
+  FileSpreadsheet,
+  Printer,
+  BarChart3,
 } from "lucide-react";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./Laporan.css";
 import { formatTanggal } from "../../../utils/tanggal";
+import {
+  exportExcel,
+  buatHTMLPrint,
+} from "../../../utils/report";
 
 import {
   usePagination,
@@ -25,6 +32,7 @@ function Laporan() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("Semua");
   const [selectedSurat, setSelectedSurat] = useState(null);
+  const [showRekap, setShowRekap] = useState(false);
 
   // =========================
   // AMBIL DATA SURAT
@@ -115,6 +123,71 @@ function Laporan() {
   const suratDitolak = dataSurat.filter(
     (item) => item.status === "Ditolak"
   ).length;
+
+  // =========================
+  // REKAP PER STATUS
+  // =========================
+  const rekapPerStatus = () => {
+    const statusList = [
+      "Baru",
+      "Menunggu Disposisi",
+      "Didisposisikan",
+      "Diproses",
+      "Selesai",
+      "Diarsipkan",
+      "Disetujui",
+      "Ditolak",
+    ];
+
+    return statusList
+      .map((status) => ({
+        status,
+        jumlah: dataSurat.filter(
+          (item) => item.status === status
+        ).length,
+      }))
+      .filter((r) => r.jumlah > 0);
+  };
+
+  // =========================
+  // EXPORT EXCEL
+  // =========================
+  const exportLaporan = () => {
+    const columns = [
+      { key: "noSurat", label: "No. Surat" },
+      { key: "perihal", label: "Perihal" },
+      { key: "asal", label: "Asal Surat" },
+      { key: "tanggalDiterima", label: "Tanggal Diterima", render: (r) => formatTanggal(r.tanggalDiterima) },
+      { key: "status", label: "Status" },
+    ];
+
+    exportExcel({
+      rows: filteredData,
+      columns,
+      filename: "laporan-surat",
+    });
+  };
+
+  // =========================
+  // PRINT LAPORAN
+  // =========================
+  const printLaporan = () => {
+    const columns = [
+      { key: "noSurat", label: "No. Surat" },
+      { key: "perihal", label: "Perihal" },
+      { key: "asal", label: "Asal Surat" },
+      { key: "tanggalDiterima", label: "Tanggal Diterima", render: (r) => formatTanggal(r.tanggalDiterima) },
+      { key: "status", label: "Status" },
+    ];
+
+    buatHTMLPrint({
+      title: "Laporan Surat Masuk",
+      subtitle: `Rekapitulasi data surat masuk SIMAS - ${filterStatus === "Semua" ? "Semua Status" : filterStatus}`,
+      columns,
+      rows: filteredData,
+      footer: `Total surat: ${filteredData.length}`,
+    });
+  };
 
   return (
     <DashboardLayout title="Laporan">
@@ -258,6 +331,40 @@ function Laporan() {
                   Ditolak
                 </option>
               </select>
+
+              {/* AKSI LAPORAN */}
+              <div className="laporan-actions">
+
+                <button
+                  className="btn-laporan-rekap"
+                  onClick={() =>
+                    setShowRekap(true)
+                  }
+                  title="Rekap Jumlah"
+                >
+                  <BarChart3 size={17} />
+                  Rekap
+                </button>
+
+                <button
+                  className="btn-laporan-excel"
+                  onClick={exportLaporan}
+                  title="Export Excel"
+                >
+                  <FileSpreadsheet size={17} />
+                  Excel
+                </button>
+
+                <button
+                  className="btn-laporan-print"
+                  onClick={printLaporan}
+                  title="Print Laporan"
+                >
+                  <Printer size={17} />
+                  Print
+                </button>
+
+              </div>
 
               {/* ENTRIES */}
               <EntriesSelect
@@ -473,6 +580,90 @@ function Laporan() {
 
           </div>
 
+        </div>
+      )}
+
+      {/* =========================
+          MODAL REKAP JUMLAH
+      ========================= */}
+      {showRekap && (
+        <div
+          className="laporan-modal-overlay"
+          onClick={() => setShowRekap(false)}
+        >
+          <div
+            className="laporan-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="laporan-modal-header">
+              <div>
+                <h2>Rekap Jumlah Surat</h2>
+                <p>
+                  Jumlah surat berdasarkan status
+                </p>
+              </div>
+
+              <button
+                className="laporan-close"
+                onClick={() => setShowRekap(false)}
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            <div className="laporan-rekap-body">
+              <table className="laporan-table">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Status</th>
+                    <th>Jumlah</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {rekapPerStatus().map(
+                    (r, index) => (
+                      <tr key={r.status}>
+                        <td>{index + 1}</td>
+                        <td>
+                          <span
+                            className={`status-badge ${
+                              r.status
+                                .toLowerCase()
+                                .replace(
+                                  /\s+/g,
+                                  "-"
+                                )
+                            }`}
+                          >
+                            {r.status}
+                          </span>
+                        </td>
+                        <td>
+                          <strong>{r.jumlah}</strong>
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+
+              <div className="laporan-rekap-total">
+                <span>Total Surat</span>
+                <strong>{dataSurat.length}</strong>
+              </div>
+            </div>
+
+            <div className="laporan-modal-footer">
+              <button
+                className="laporan-btn-close"
+                onClick={() => setShowRekap(false)}
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

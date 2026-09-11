@@ -8,11 +8,17 @@ import {
   Eye,
   X,
   BarChart3,
+  FileSpreadsheet,
+  Printer,
 } from "lucide-react";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./Laporan.css";
 import { formatTanggal } from "../../../utils/tanggal";
+import {
+  exportExcel,
+  buatHTMLPrint,
+} from "../../../utils/report";
 
 import {
   usePagination,
@@ -25,6 +31,7 @@ function Laporan() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("Semua");
   const [selectedSurat, setSelectedSurat] = useState(null);
+  const [showRekap, setShowRekap] = useState(false);
 
   useEffect(() => {
     const ambilData = () => {
@@ -106,6 +113,71 @@ function Laporan() {
   // PAGINATION
   // =========================
   const pag = usePagination(filteredData, 10);
+
+  // =========================
+  // REKAP PER STATUS
+  // =========================
+  const rekapPerStatus = () => {
+    const statusList = [
+      "Baru",
+      "Menunggu Disposisi",
+      "Didisposisikan",
+      "Diproses",
+      "Selesai",
+      "Diarsipkan",
+      "Disetujui",
+      "Ditolak",
+    ];
+
+    return statusList
+      .map((status) => ({
+        status,
+        jumlah: dataSurat.filter(
+          (item) => item.status === status
+        ).length,
+      }))
+      .filter((r) => r.jumlah > 0);
+  };
+
+  // =========================
+  // EXPORT EXCEL
+  // =========================
+  const exportLaporan = () => {
+    const columns = [
+      { key: "noSurat", label: "No. Surat" },
+      { key: "perihal", label: "Perihal" },
+      { key: "asal", label: "Asal Surat" },
+      { key: "tanggalDiterima", label: "Tanggal Diterima", render: (r) => formatTanggal(r.tanggalDiterima) },
+      { key: "status", label: "Status" },
+    ];
+
+    exportExcel({
+      rows: filteredData,
+      columns,
+      filename: "laporan-pimpinan",
+    });
+  };
+
+  // =========================
+  // PRINT LAPORAN
+  // =========================
+  const printLaporan = () => {
+    const columns = [
+      { key: "noSurat", label: "No. Surat" },
+      { key: "perihal", label: "Perihal" },
+      { key: "asal", label: "Asal Surat" },
+      { key: "tanggalDiterima", label: "Tanggal Diterima", render: (r) => formatTanggal(r.tanggalDiterima) },
+      { key: "status", label: "Status" },
+    ];
+
+    buatHTMLPrint({
+      title: "Laporan Surat Pimpinan",
+      subtitle: `Monitoring dan rekapitulasi administrasi surat - ${filterStatus === "Semua" ? "Semua Status" : filterStatus}`,
+      columns,
+      rows: filteredData,
+      footer: `Total surat: ${filteredData.length}`,
+    });
+  };
 
   return (
     <DashboardLayout>
@@ -252,6 +324,37 @@ function Laporan() {
               <option value="Disetujui">Disetujui</option>
               <option value="Ditolak">Ditolak</option>
             </select>
+
+            <div className="laporan-actions">
+
+              <button
+                className="btn-laporan-rekap"
+                onClick={() => setShowRekap(true)}
+                title="Rekap Jumlah"
+              >
+                <BarChart3 size={17} />
+                Rekap
+              </button>
+
+              <button
+                className="btn-laporan-excel"
+                onClick={exportLaporan}
+                title="Export Excel"
+              >
+                <FileSpreadsheet size={17} />
+                Excel
+              </button>
+
+              <button
+                className="btn-laporan-print"
+                onClick={printLaporan}
+                title="Print Laporan"
+              >
+                <Printer size={17} />
+                Print
+              </button>
+
+            </div>
 
             <EntriesSelect
               value={pag.entries}
@@ -479,6 +582,84 @@ function Laporan() {
         )}
 
       </div>
+
+      {/* REKAP JUMLAH MODAL */}
+      {showRekap && (
+        <div
+          className="laporan-modal-overlay"
+          onClick={() => setShowRekap(false)}
+        >
+          <div
+            className="laporan-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="laporan-modal-header">
+              <div>
+                <span>Rekap Jumlah</span>
+                <h2>Surat per Status</h2>
+              </div>
+
+              <button
+                className="laporan-close"
+                onClick={() => setShowRekap(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="laporan-rekap-body">
+              <table className="laporan-table">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Status</th>
+                    <th>Jumlah</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {rekapPerStatus().map(
+                    (r, index) => (
+                      <tr key={r.status}>
+                        <td>{index + 1}</td>
+                        <td>
+                          <span
+                            className={`laporan-status ${
+                              r.status
+                                .toLowerCase()
+                                .replace(
+                                  /\s+/g,
+                                  "-"
+                                )
+                            }`}
+                          >
+                            {r.status}
+                          </span>
+                        </td>
+                        <td>
+                          <strong>{r.jumlah}</strong>
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+
+              <div className="laporan-rekap-total">
+                <span>Total Surat</span>
+                <strong>{dataSurat.length}</strong>
+              </div>
+            </div>
+
+            <div className="laporan-modal-footer">
+              <button onClick={() => setShowRekap(false)}>
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </DashboardLayout>
   );
 }
