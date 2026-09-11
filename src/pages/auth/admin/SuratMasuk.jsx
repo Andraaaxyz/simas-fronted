@@ -13,6 +13,8 @@ import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./SuratMasuk.css";
 
 import FileDokumen from "../../../component/FileDokumen";
+import ConfirmDialog from "../../../component/ConfirmDialog";
+import { useToast } from "../../../component/Toast";
 import {
   formatTanggal,
   hariIniISO,
@@ -93,6 +95,7 @@ function opsiTujuan() {
 }
 
 function SuratMasuk() {
+  const showToast = useToast();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [dataSurat, setDataSurat] = useState([]);
@@ -101,6 +104,8 @@ function SuratMasuk() {
   const [showTambah, setShowTambah] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [arsipTarget, setArsipTarget] = useState(null);
 
   const [formSurat, setFormSurat] = useState({
     noSurat: "",
@@ -327,7 +332,7 @@ function SuratMasuk() {
       !formSurat.file ||
       !formSurat.lampiran
     ) {
-      alert("Semua data surat wajib diisi!");
+      showToast("warning", "Semua data surat wajib diisi!");
       return;
     }
 
@@ -366,7 +371,7 @@ function SuratMasuk() {
         JSON.stringify(dataBaru)
       );
     } catch {
-      alert("Gagal menyimpan: file terlalu besar untuk penyimpanan lokal.");
+      showToast("error", "Gagal menyimpan: file terlalu besar untuk penyimpanan lokal.");
       return;
     }
 
@@ -374,7 +379,7 @@ function SuratMasuk() {
 
     setShowTambah(false);
 
-    alert("Surat berhasil ditambahkan!");
+    showToast("success", "Surat berhasil ditambahkan!");
   };
 
   // =========================
@@ -415,7 +420,7 @@ function SuratMasuk() {
       (!formSurat.file && !selectedSurat.file) ||
       !formSurat.lampiran
     ) {
-      alert("Semua data surat wajib diisi!");
+      showToast("warning", "Semua data surat wajib diisi!");
       return;
     }
 
@@ -449,7 +454,7 @@ function SuratMasuk() {
         JSON.stringify(dataBaru)
       );
     } catch {
-      alert("Gagal menyimpan: file terlalu besar untuk penyimpanan lokal.");
+      showToast("error", "Gagal menyimpan: file terlalu besar untuk penyimpanan lokal.");
       return;
     }
 
@@ -458,21 +463,15 @@ function SuratMasuk() {
 
     setFormSurat(formKosong());
 
-    alert("Surat berhasil diperbarui!");
+    showToast("success", "Surat berhasil diperbarui!");
   };
 
   // =========================
   // HAPUS SURAT
   // =========================
-  const hapusSurat = (id) => {
-    const yakin = window.confirm(
-      "Yakin ingin menghapus surat ini?"
-    );
-
-    if (!yakin) return;
-
+  const konfirmasiHapus = () => {
     const dataBaru = dataSurat.filter(
-      (item) => item.id !== id
+      (item) => item.id !== deleteTarget
     );
 
     setDataSurat(dataBaru);
@@ -482,7 +481,7 @@ function SuratMasuk() {
       JSON.stringify(dataBaru)
     );
 
-    alert("Surat berhasil dihapus!");
+    showToast("success", "Surat berhasil dihapus!");
   };
 
   // =========================
@@ -496,17 +495,11 @@ function SuratMasuk() {
   // =========================
   // ARSIPKAN LANGSUNG
   // =========================
-  const arsipkanSurat = (id) => {
-    const yakin = window.confirm(
-      "Arsipkan surat ini langsung ke arsip?"
-    );
-
-    if (!yakin) return;
-
+  const konfirmasiArsipkan = () => {
     const tanggalISO = hariIniISO();
 
     const dataBaru = dataSurat.map((item) =>
-      item.id === id
+      item.id === arsipTarget
         ? {
             ...item,
             status: "Diarsipkan",
@@ -528,7 +521,7 @@ function SuratMasuk() {
       JSON.stringify(dataBaru)
     );
 
-    alert("Surat berhasil diarsipkan!");
+    showToast("success", "Surat berhasil diarsipkan!");
   };
 
   return (
@@ -620,9 +613,10 @@ function SuratMasuk() {
                 <th>No</th>
                 <th>No. Agenda</th>
                 <th>No. Surat</th>
-                <th>Tanggal Diterima</th>
-                <th>Sifat</th>
+                <th>Tanggal Surat</th>
+                <th>Sifat Surat</th>
                 <th>Asal Surat</th>
+                <th>Tujuan Surat</th>
                 <th>Perihal</th>
                 <th>Status</th>
                 <th>Aksi</th>
@@ -657,7 +651,7 @@ function SuratMasuk() {
 
                     <td>
                       {formatTanggal(
-                        item.tanggalDiterima
+                        item.tanggalSurat
                       )}
                     </td>
 
@@ -667,6 +661,10 @@ function SuratMasuk() {
 
                     <td>
                       {item.asal}
+                    </td>
+
+                    <td>
+                      {item.tujuan || "-"}
                     </td>
 
                     <td>
@@ -715,12 +713,14 @@ function SuratMasuk() {
                         </button>
 
                         {/* ARSIPKAN LANGSUNG */}
-                        {item.status === "Baru" && (
+                        {!["Diarsipkan", "Selesai", "Disetujui", "Ditolak"].includes(
+                          item.status
+                        ) && (
                           <button
                             className="btn-arsipkan"
                             title="Arsipkan Langsung"
                             onClick={() =>
-                              arsipkanSurat(
+                              setArsipTarget(
                                 item.id
                               )
                             }
@@ -734,7 +734,9 @@ function SuratMasuk() {
                           className="btn-delete"
                           title="Hapus Surat"
                           onClick={() =>
-                            hapusSurat(item.id)
+                            setDeleteTarget(
+                              item.id
+                            )
                           }
                         >
                           <Trash2 size={17} />
@@ -753,7 +755,7 @@ function SuratMasuk() {
                 <tr>
 
                   <td
-                    colSpan="9"
+                    colSpan="10"
                     className="empty"
                   >
                     Belum ada data surat.
@@ -1051,7 +1053,8 @@ function SuratMasuk() {
                           f &&
                           f.size > 2 * 1024 * 1024
                         ) {
-                          alert(
+                          showToast(
+                            "warning",
                             "Ukuran file maksimal 2MB."
                           );
 
@@ -1343,6 +1346,33 @@ function SuratMasuk() {
           </div>
 
         )}
+
+        <ConfirmDialog
+          open={!!deleteTarget}
+          title="Hapus Surat"
+          message="Yakin ingin menghapus surat ini? Data yang dihapus tidak dapat dikembalikan."
+          confirmText="Hapus"
+          cancelText="Batal"
+          danger
+          onConfirm={() => {
+            konfirmasiHapus();
+            setDeleteTarget(null);
+          }}
+          onCancel={() => setDeleteTarget(null)}
+        />
+
+        <ConfirmDialog
+          open={!!arsipTarget}
+          title="Arsipkan Surat"
+          message="Arsipkan surat ini langsung ke arsip?"
+          confirmText="Arsipkan"
+          cancelText="Batal"
+          onConfirm={() => {
+            konfirmasiArsipkan();
+            setArsipTarget(null);
+          }}
+          onCancel={() => setArsipTarget(null)}
+        />
 
       </div>
 
