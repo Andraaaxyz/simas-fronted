@@ -88,18 +88,17 @@
 }
 
 .surat-actions button.btn-arsipkan {
-  background: #f1f5f9;
-  color: #475569;
+  background: #2563eb;
+  color: #ffffff;
   width: 34px;
   height: 34px;
   padding: 0;
-  font-size: 0;
   border-radius: 8px;
 }
 
 .surat-actions button.btn-arsipkan:hover {
-  background: #e2e8f0;
-  color: #334155;
+  background: #1d4ed8;
+  color: #ffffff;
 }
 
 /* =========================
