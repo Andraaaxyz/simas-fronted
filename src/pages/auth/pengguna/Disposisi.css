@@ -112,18 +112,18 @@
   width: 32px;
   height: 32px;
   border: none;
-  background: #0d9488;
+  background: #e6f7f5;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #ffffff;
+  color: #0d9488;
 }
 
 .aksi-disposisi button:hover {
-  background: #0f766e;
-  color: #ffffff;
+  background: #cdede7;
+  color: #0d9488;
 }
 
 /* EMPTY */

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
   Eye,
   X,
-  CheckCircle,
   ClipboardList,
   Send,
 } from "lucide-react";
@@ -11,7 +11,6 @@ import {
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./SuratMasuk.css";
 
-import FileDokumen from "../../../component/FileDokumen";
 import {
   formatTanggal,
   hariIniISO,
@@ -24,12 +23,11 @@ import {
 } from "../../../component/Pagination";
 
 function SuratMasuk() {
+  const navigate = useNavigate();
+
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [dataSurat, setDataSurat] = useState([]);
-  const [selectedSurat, setSelectedSurat] = useState(null);
-
-  const [keputusan, setKeputusan] = useState("");
 
   // =========================
   // DISPOSISI
@@ -115,48 +113,6 @@ function SuratMasuk() {
   // =========================
 
   const pag = usePagination(filteredData);
-
-  // =========================
-  // SIMPAN KEPUTUSAN
-  // =========================
-
-  const simpanKeputusan = () => {
-
-    if (!keputusan) {
-      alert("Silakan pilih keputusan terlebih dahulu!");
-      return;
-    }
-
-    const dataBaru = dataSurat.map((item) =>
-      item.id === selectedSurat.id
-        ? {
-            ...item,
-            keputusan: keputusan,
-            status:
-              keputusan === "Disetujui"
-                ? "Disetujui"
-                : "Ditolak",
-          }
-        : item
-    );
-
-    localStorage.setItem(
-      "dataSurat",
-      JSON.stringify(dataBaru)
-    );
-
-    setDataSurat(dataBaru);
-
-    const suratUpdate = dataBaru.find(
-      (item) => item.id === selectedSurat.id
-    );
-
-    setSelectedSurat(suratUpdate);
-
-    alert("Keputusan berhasil disimpan!");
-
-    setKeputusan("");
-  };
 
   // =========================
   // OPSI TUJUAN (DARI MASTER USER)
@@ -476,12 +432,9 @@ function SuratMasuk() {
                         <button
                           className="btn-eye"
                           title="Lihat Detail"
-                          onClick={() => {
-                            setSelectedSurat(item);
-                            setKeputusan(
-                              item.keputusan || ""
-                            );
-                          }}
+                          onClick={() =>
+                            navigate(`/pimpinan/surat-masuk/lihat/${item.id}`)
+                          }
                         >
                           <Eye size={17} />
                         </button>
@@ -541,347 +494,6 @@ function SuratMasuk() {
           end={pag.end}
           total={pag.total}
         />
-
-        {/* =========================
-            MODAL DETAIL
-        ========================= */}
-
-        {selectedSurat && (
-
-          <div
-            className="modal-overlay"
-            onClick={() =>
-              setSelectedSurat(null)
-            }
-          >
-
-            <div
-              className="detail-modal"
-              onClick={(e) =>
-                e.stopPropagation()
-              }
-            >
-
-              {/* HEADER */}
-
-              <div className="modal-header">
-
-                <div>
-
-                  <h2>
-                    Detail Surat
-                  </h2>
-
-                  <p>
-                    Informasi dan keputusan surat
-                  </p>
-
-                </div>
-
-                <button
-                  className="close-button"
-                  onClick={() =>
-                    setSelectedSurat(null)
-                  }
-                >
-                  <X size={18} />
-                </button>
-
-              </div>
-
-              {/* DETAIL */}
-
-              <div className="detail-content">
-
-                <div className="detail-row">
-
-                  <span>
-                    No. Agenda
-                  </span>
-
-                  <strong>
-                    {selectedSurat.noAgenda}
-                  </strong>
-
-                </div>
-
-                <div className="detail-row">
-
-                  <span>
-                    No. Surat
-                  </span>
-
-                  <strong>
-                    {selectedSurat.noSurat}
-                  </strong>
-
-                </div>
-
-                <div className="detail-row">
-
-                  <span>
-                    Tanggal Surat
-                  </span>
-
-                  <strong>
-                    {formatTanggal(
-                      selectedSurat.tanggalSurat
-                    )}
-                  </strong>
-
-                </div>
-
-                <div className="detail-row">
-
-                  <span>
-                    Tanggal Diterima
-                  </span>
-
-                  <strong>
-                    {formatTanggal(
-                      selectedSurat.tanggalDiterima
-                    )}
-                  </strong>
-
-                </div>
-
-                <div className="detail-row">
-
-                  <span>
-                    Jenis Surat
-                  </span>
-
-                  <strong>
-                    {selectedSurat.jenis || "-"}
-                  </strong>
-
-                </div>
-
-                <div className="detail-row">
-
-                  <span>
-                    Sifat Surat
-                  </span>
-
-                  <strong>
-                    {selectedSurat.sifat || "-"}
-                  </strong>
-
-                </div>
-
-                <div className="detail-row">
-
-                  <span>
-                    Asal Surat
-                  </span>
-
-                  <strong>
-                    {selectedSurat.asal}
-                  </strong>
-
-                </div>
-
-                <div className="detail-row">
-
-                  <span>
-                    Tujuan Surat
-                  </span>
-
-                  <strong>
-                    {selectedSurat.tujuan || "-"}
-                  </strong>
-
-                </div>
-
-                <div className="detail-row">
-
-                  <span>
-                    Perihal
-                  </span>
-
-                  <strong>
-                    {selectedSurat.perihal}
-                  </strong>
-
-                </div>
-
-                <div className="detail-row">
-
-                  <span>
-                    File Surat
-                  </span>
-
-                  <strong>
-                    <FileDokumen
-                      value={selectedSurat.file}
-                    />
-                  </strong>
-
-                </div>
-
-                <div className="detail-row">
-
-                  <span>
-                    Lampiran
-                  </span>
-
-                  <strong>
-                    {selectedSurat.lampiran || "-"}
-                  </strong>
-
-                </div>
-
-                <div className="detail-row">
-
-                  <span>
-                    Status
-                  </span>
-
-                  <strong>
-                    {selectedSurat.status}
-                  </strong>
-
-                </div>
-
-                {/* KEPUTUSAN */}
-
-                <div className="form-group">
-
-                  <label>
-                    Keputusan Pimpinan
-                  </label>
-
-                  <select
-                    value={keputusan}
-                    onChange={(e) =>
-                      setKeputusan(
-                        e.target.value
-                      )
-                    }
-                  >
-
-                    <option value="">
-                      Pilih Keputusan
-                    </option>
-
-                    <option value="Disetujui">
-                      Disetujui
-                    </option>
-
-                    <option value="Ditolak">
-                      Ditolak
-                    </option>
-
-                  </select>
-
-                </div>
-
-                {/* INFO DISPOSISI */}
-
-                {selectedSurat.disposisi && (
-                  <div className="detail-disposisi-info">
-
-                    <h3>
-                      Informasi Disposisi
-                    </h3>
-
-                    <div className="detail-row">
-                      <span>Tujuan</span>
-
-                      <strong>
-                        {selectedSurat.disposisi
-                          .tujuan || "-"}
-                      </strong>
-                    </div>
-
-                    <div className="detail-row">
-                      <span>Instruksi</span>
-
-                      <strong>
-                        {selectedSurat.disposisi
-                          .instruksi || "-"}
-                      </strong>
-                    </div>
-
-                    <div className="detail-row">
-                      <span>Catatan</span>
-
-                      <strong>
-                        {selectedSurat.disposisi
-                          .catatan || "-"}
-                      </strong>
-                    </div>
-
-                  </div>
-                )}
-
-                {/* TIMELINE */}
-
-                {selectedSurat.timeline &&
-                  selectedSurat.timeline.length > 0 && (
-                    <div className="detail-timeline">
-
-                      <h3>Riwayat</h3>
-
-                      {selectedSurat.timeline.map(
-                        (tl, i) => (
-                          <div
-                            className="timeline-item"
-                            key={i}
-                          >
-                            <div
-                              className="timeline-dot"
-                            />
-
-                            <div>
-                              <strong>
-                                {tl.label}
-                              </strong>
-
-                              <span>
-                                {formatTanggal(tl.tanggal)}
-                              </span>
-                            </div>
-                          </div>
-                        )
-                      )}
-
-                    </div>
-                  )}
-
-              </div>
-
-              {/* FOOTER */}
-
-              <div className="modal-footer">
-
-                <button
-                  className="btn-tutup"
-                  onClick={() =>
-                    setSelectedSurat(null)
-                  }
-                >
-                  Tutup
-                </button>
-
-                <button
-                  className="btn-simpan"
-                  onClick={simpanKeputusan}
-                >
-
-                  <CheckCircle size={17} />
-
-                  Simpan Keputusan
-
-                </button>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        )}
 
         {/* =========================
             MODAL BUAT DISPOSISI

@@ -243,17 +243,17 @@
 .arsip-btn-view {
   border: none;
 
-  background: #0d9488;
+  background: #e6f7f5;
 
-  color: #ffffff;
+  color: #0d9488;
 }
 
 .arsip-btn-view:hover {
-  background: #0f766e;
+  background: #cdede7;
 
-  border-color: #0f766e;
+  border-color: #cdede7;
 
-  color: #ffffff;
+  color: #0d9488;
 }
 
 .arsip-btn-delete {

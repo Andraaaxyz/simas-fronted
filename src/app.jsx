@@ -12,6 +12,8 @@ import Login from "./pages/auth/Login";
 // =========================
 import AdminDashboard from "./pages/auth/admin/Dashboard";
 import SuratMasuk from "./pages/auth/admin/SuratMasuk";
+import SuratFormPage from "./pages/auth/admin/SuratFormPage";
+import SuratDetailPage from "./pages/auth/admin/SuratDetailPage";
 import Arsip from "./pages/auth/admin/Arsip";
 import AdminProfil from "./pages/auth/admin/Profil";
 import Laporan from "./pages/auth/admin/Laporan";
@@ -27,6 +29,7 @@ import MasterBidang from "./pages/auth/admin/Bidang";
 // =========================
 import PimpinanDashboard from "./pages/auth/pimpinan/Dashboard";
 import PimpinanSuratMasuk from "./pages/auth/pimpinan/SuratMasuk";
+import PimpinanSuratDetailPage from "./pages/auth/pimpinan/SuratDetailPage";
 import PimpinanArsip from "./pages/auth/pimpinan/ArsipDigital";
 import PimpinanProfil from "./pages/auth/pimpinan/Profil";
 import PimpinanLaporan from "./pages/auth/pimpinan/Laporan";
@@ -36,6 +39,7 @@ import PimpinanLaporan from "./pages/auth/pimpinan/Laporan";
 // =========================
 import PenggunaDashboard from "./pages/auth/pengguna/Dashboard";
 import PenggunaSuratMasuk from "./pages/auth/pengguna/SuratMasuk";
+import PenggunaSuratDetailPage from "./pages/auth/pengguna/SuratDetailPage";
 import PenggunaDisposisi from "./pages/auth/pengguna/Disposisi";
 import PenggunaProfil from "./pages/auth/pengguna/Profil";
 import PenggunaArsip from "./pages/auth/pengguna/ArsipDigital";
@@ -79,6 +83,21 @@ function App() {
           <Route
             path="/admin/surat-masuk"
             element={<SuratMasuk />}
+          />
+
+          <Route
+            path="/admin/surat-masuk/tambah"
+            element={<SuratFormPage />}
+          />
+
+          <Route
+            path="/admin/surat-masuk/edit/:id"
+            element={<SuratFormPage />}
+          />
+
+          <Route
+            path="/admin/surat-masuk/lihat/:id"
+            element={<SuratDetailPage />}
           />
 
           <Route
@@ -145,6 +164,11 @@ function App() {
           />
 
           <Route
+            path="/pimpinan/surat-masuk/lihat/:id"
+            element={<PimpinanSuratDetailPage />}
+          />
+
+          <Route
             path="/pimpinan/arsip"
             element={<PimpinanArsip />}
           />
@@ -171,6 +195,11 @@ function App() {
           <Route
             path="/pengguna/surat-masuk"
             element={<PenggunaSuratMasuk />}
+          />
+
+          <Route
+            path="/pengguna/surat-masuk/lihat/:id"
+            element={<PenggunaSuratDetailPage />}
           />
 
           <Route

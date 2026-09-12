@@ -332,7 +332,7 @@ function Laporan() {
                 onClick={() => setShowRekap(true)}
                 title="Rekap Jumlah"
               >
-                <BarChart3 size={17} />
+                <BarChart3 size={19} />
                 Rekap
               </button>
 
@@ -341,7 +341,7 @@ function Laporan() {
                 onClick={exportLaporan}
                 title="Export Excel"
               >
-                <FileSpreadsheet size={17} />
+                <FileSpreadsheet size={19} />
                 Excel
               </button>
 
@@ -350,7 +350,7 @@ function Laporan() {
                 onClick={printLaporan}
                 title="Print Laporan"
               >
-                <Printer size={17} />
+                <Printer size={19} />
                 Print
               </button>
 

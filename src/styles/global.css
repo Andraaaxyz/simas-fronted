@@ -695,6 +695,45 @@ a {
   box-shadow: var(--shadow-lg);
 }
 
+/* ============================================
+   HALAMAN TAMBAH / EDIT / LIHAT SURAT
+============================================ */
+
+.page-content .action-page-card {
+  max-width: 760px;
+  margin: 0 auto;
+
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-modal);
+  box-shadow: var(--shadow);
+
+  overflow: hidden;
+}
+
+.page-content .action-page-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-bottom: 14px;
+
+  background: none;
+  border: none;
+
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.page-content .action-page-back:hover {
+  color: var(--primary);
+}
+
 .page-content .modal-header h2,
 .page-content .modal-header-disposisi h2,
 .page-content .laporan-modal-header h2,
@@ -799,10 +838,15 @@ textarea:focus-visible,
 .btn-delete,
 .master-edit,
 .master-delete,
-.notif-btn,
-.profile-btn .profile-avatar {
+.notif-btn {
   min-width: 40px;
   min-height: 40px;
+}
+
+/* Foto profil topbar — sedikit lebih kecil */
+.profile-btn .profile-avatar {
+  min-width: 32px;
+  min-height: 32px;
 }
 
 /* Kontras teks kecil dinaikkan */

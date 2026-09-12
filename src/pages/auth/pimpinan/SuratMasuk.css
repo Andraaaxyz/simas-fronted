@@ -250,8 +250,8 @@
   border: none;
   border-radius: 9px;
 
-  background: #0d9488;
-  color: #ffffff;
+  background: #e6f7f5;
+  color: #0d9488;
 
   cursor: pointer;
 
@@ -259,8 +259,8 @@
 }
 
 .btn-eye:hover {
-  background: #0f766e;
-  color: #ffffff;
+  background: #cdede7;
+  color: #0d9488;
 }
 
 .btn-disposisi-aksi {

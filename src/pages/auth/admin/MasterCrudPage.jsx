@@ -193,7 +193,7 @@ function MasterCrudPage({
               onClick={exportMaster}
               title="Export Excel"
             >
-              <FileSpreadsheet size={17} />
+              <FileSpreadsheet size={19} />
               Excel
             </button>
 
@@ -202,7 +202,7 @@ function MasterCrudPage({
               onClick={printMaster}
               title="Print"
             >
-              <Printer size={17} />
+              <Printer size={19} />
               Print
             </button>
 

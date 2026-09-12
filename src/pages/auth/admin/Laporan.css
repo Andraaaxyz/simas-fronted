@@ -132,15 +132,15 @@
 .btn-laporan-rekap,
 .btn-laporan-excel,
 .btn-laporan-print {
-  height: 42px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 0 14px;
+  gap: 8px;
+  padding: 0 16px;
   border-radius: 10px;
   border: 1px solid;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -386,8 +386,8 @@
 }
 
 .laporan-btn-view:hover {
-  background: #0d9488;
-  color: white;
+  background: #cdede7;
+  color: #0d9488;
 }
 
 /* =========================
