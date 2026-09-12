@@ -239,6 +239,30 @@
    TOMBOL DISPOSISI
 ========================= */
 
+.btn-eye {
+  width: 36px;
+  height: 36px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 9px;
+
+  background: #0d9488;
+  color: #ffffff;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.btn-eye:hover {
+  background: #0f766e;
+  color: #ffffff;
+}
+
 .btn-disposisi-aksi {
   width: 36px;
   height: 36px;
@@ -269,13 +293,13 @@
 
 .btn-download-arsip {
   text-decoration: none;
-  background: #eef7ff;
-  color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
 }
 
 .btn-download-arsip:hover {
-  background: #dbebff;
-  color: #1d4ed8;
+  background: #1d4ed8;
+  color: #ffffff;
 }
 
 /* =========================

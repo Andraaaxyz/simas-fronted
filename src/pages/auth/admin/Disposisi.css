@@ -101,20 +101,19 @@
 .detail-button-disposisi {
   width: 32px;
   height: 32px;
-  border: 1px solid #e3e7ef;
-  background: white;
+  border: none;
+  background: #0d9488;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #657083;
+  color: #ffffff;
 }
 
 .detail-button-disposisi:hover {
-  background: #f0faf8;
-  color: #0d9488;
-  border-color: #b7e3dc;
+  background: #0f766e;
+  color: #ffffff;
 }
 
 .empty-disposisi {

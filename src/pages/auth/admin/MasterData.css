@@ -89,14 +89,14 @@
 }
 
 .master-btn-print {
-  background: #ecfdf5;
-  border-color: #a7f3d0;
-  color: #047857;
+  background: #047857;
+  border-color: #047857;
+  color: #ffffff;
 }
 
 .master-btn-print:hover {
-  background: #d1fae5;
-  border-color: #6ee7b7;
+  background: #065f46;
+  border-color: #065f46;
 }
 
 /* SEARCH */
