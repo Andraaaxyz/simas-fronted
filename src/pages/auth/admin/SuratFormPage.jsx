@@ -558,6 +558,7 @@ function SuratFormPage() {
                   </span>
                 ) : (
                   isEdit &&
+                  selectedSurat &&
                   selectedSurat.file && (
                     <span className="file-terpilih">
                       File saat ini:{" "}
