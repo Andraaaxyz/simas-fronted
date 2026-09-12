@@ -87,12 +87,17 @@
   background: #dcfce7;
 }
 
-.btn-arsipkan {
+.surat-actions button.btn-arsipkan {
   background: #f1f5f9;
   color: #475569;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 0;
+  border-radius: 8px;
 }
 
-.btn-arsipkan:hover {
+.surat-actions button.btn-arsipkan:hover {
   background: #e2e8f0;
   color: #334155;
 }
