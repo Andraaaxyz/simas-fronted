@@ -273,30 +273,32 @@ function SuratFormPage() {
 
       <div className="surat-page">
 
-        <button
-          className="action-page-back"
-          onClick={() => navigate("/admin/surat-masuk")}
-        >
-          &larr; Kembali
-        </button>
+        <div className="surat-header">
 
-        <div className="action-page-card">
+          <div>
 
-          <div className="modal-header">
+            <h2>
+              {isEdit ? "Edit Surat" : "Tambah Surat"}
+            </h2>
 
-            <div>
-              <h2>
-                {isEdit ? "Edit Surat" : "Tambah Surat"}
-              </h2>
-
-              <p>
-                {isEdit
-                  ? "Perbarui data surat"
-                  : "Masukkan data surat baru"}
-              </p>
-            </div>
+            <p>
+              {isEdit
+                ? "Perbarui data surat"
+                : "Masukkan data surat baru"}
+            </p>
 
           </div>
+
+          <button
+            className="action-page-back"
+            onClick={() => navigate("/admin/surat-masuk")}
+          >
+            &larr; Kembali
+          </button>
+
+        </div>
+
+        <div className="action-page-card">
 
           <div className="form-content form-2kolom">
 

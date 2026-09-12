@@ -78,28 +78,30 @@ function PimpinanSuratDetailPage() {
 
       <div className="surat-page">
 
-        <button
-          className="action-page-back"
-          onClick={() => navigate("/pimpinan/surat-masuk")}
-        >
-          &larr; Kembali
-        </button>
+        <div className="surat-header">
 
-        <div className="action-page-card">
+          <div>
 
-          <div className="modal-header">
+            <h2>Detail Surat</h2>
 
-            <div>
-              <h2>Detail Surat</h2>
-
-              <p>
-                Informasi dan keputusan surat
-              </p>
-            </div>
+            <p>
+              Informasi dan keputusan surat
+            </p>
 
           </div>
 
-          <div className="detail-content">
+          <button
+            className="action-page-back"
+            onClick={() => navigate("/pimpinan/surat-masuk")}
+          >
+            &larr; Kembali
+          </button>
+
+        </div>
+
+        <div className="action-page-card">
+
+          <div className="detail-content detail-grid">
 
             <div className="detail-row">
               <span>No. Agenda</span>

@@ -700,12 +700,9 @@ a {
 ============================================ */
 
 .page-content .action-page-card {
-  max-width: 760px;
-  margin: 0 auto;
-
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-modal);
+  border-radius: var(--radius);
   box-shadow: var(--shadow);
 
   overflow: hidden;
@@ -716,12 +713,14 @@ a {
   align-items: center;
   gap: 6px;
 
-  margin-bottom: 14px;
+  height: 42px;
+  padding: 0 18px;
 
-  background: none;
-  border: none;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
 
-  color: var(--muted);
+  color: var(--text-body);
   font-size: 14px;
   font-weight: 600;
 
@@ -731,7 +730,22 @@ a {
 }
 
 .page-content .action-page-back:hover {
+  background: #f9fafb;
   color: var(--primary);
+}
+
+/* SUSUNAN DETAIL 2 KOLOM (KIRI - KANAN) */
+
+.page-content .detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 32px;
+}
+
+@media (max-width: 720px) {
+  .page-content .detail-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .page-content .modal-header h2,
