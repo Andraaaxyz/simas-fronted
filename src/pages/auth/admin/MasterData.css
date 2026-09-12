@@ -78,25 +78,25 @@
 }
 
 .master-btn-excel {
-  background: #eef7ff;
-  border-color: #bfdbfe;
-  color: #1d4ed8;
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
 }
 
 .master-btn-excel:hover {
-  background: #dbeafe;
-  border-color: #93c5fd;
+  background: #1e40af;
+  border-color: #1e40af;
 }
 
 .master-btn-print {
-  background: #ecfdf5;
-  border-color: #a7f3d0;
-  color: #047857;
+  background: #047857;
+  border-color: #047857;
+  color: #ffffff;
 }
 
 .master-btn-print:hover {
-  background: #d1fae5;
-  border-color: #6ee7b7;
+  background: #065f46;
+  border-color: #065f46;
 }
 
 /* SEARCH */
@@ -154,9 +154,9 @@
 .master-table th {
   padding: 15px 18px;
   text-align: left;
-  color: #68768a;
-  font-size: 13px;
-  font-weight: 600;
+  color: #1f2937;
+  font-size: 15px;
+  font-weight: 700;
   border-bottom: 1px solid #e7ebf2;
   white-space: nowrap;
 }
@@ -164,7 +164,7 @@
 .master-table td {
   padding: 16px 18px;
   color: #40516a;
-  font-size: 14px;
+  font-size: 16px;
   border-top: 1px solid #f0f2f5;
 }
 
@@ -183,7 +183,7 @@
   justify-content: center;
   padding: 6px 12px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -220,21 +220,21 @@
 }
 
 .master-edit {
-  background: #e6f7f5;
-  color: #0d9488;
+  background: #ea580c;
+  color: #ffffff;
 }
 
 .master-edit:hover {
-  background: #cdede7;
+  background: #c2410c;
 }
 
 .master-delete {
-  background: #fef2f2;
-  color: #dc2626;
+  background: #dc2626;
+  color: #ffffff;
 }
 
 .master-delete:hover {
-  background: #fee2e2;
+  background: #b91c1c;
 }
 
 /* EMPTY */

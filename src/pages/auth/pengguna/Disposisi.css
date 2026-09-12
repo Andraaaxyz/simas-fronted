@@ -62,15 +62,16 @@
 
 .disposisi-card th {
   background: #f8f9fc;
-  color: #6d7686;
-  font-size: 12px;
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 700;
   padding: 14px 16px;
   text-align: left;
 }
 
 .disposisi-card td {
   padding: 15px 16px;
-  font-size: 13px;
+  font-size: 15px;
   color: #525b6b;
   border-top: 1px solid #f0f1f4;
 }
@@ -110,20 +111,19 @@
 .aksi-disposisi button {
   width: 32px;
   height: 32px;
-  border: 1px solid #e3e7ef;
-  background: white;
+  border: none;
+  background: #0d9488;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #657083;
+  color: #ffffff;
 }
 
 .aksi-disposisi button:hover {
-  background: #f0faf8;
-  color: #0d9488;
-  border-color: #b7e3dc;
+  background: #0f766e;
+  color: #ffffff;
 }
 
 /* EMPTY */

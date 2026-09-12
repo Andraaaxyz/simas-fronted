@@ -141,11 +141,11 @@
 
   text-align: left;
 
-  color: #65738a;
+  color: #1f2937;
 
-  font-size: 14px;
+  font-size: 16px;
 
-  font-weight: 600;
+  font-weight: 700;
 
   border-bottom: 1px solid #e7ebf2;
 }
@@ -157,7 +157,7 @@
 
   color: #3c4a61;
 
-  font-size: 14px;
+  font-size: 16px;
 
   border-bottom: 1px solid #edf0f4;
 }
@@ -200,7 +200,7 @@
 
   color: #0f766e;
 
-  font-size: 13px;
+  font-size: 15px;
 
   font-weight: 600;
 }
@@ -241,45 +241,51 @@
 }
 
 .arsip-btn-view {
-  border: 1px solid #dce4ef;
+  border: none;
 
-  color: #65748b;
+  background: #0d9488;
+
+  color: #ffffff;
 }
 
 .arsip-btn-view:hover {
-  background: #e6f7f5;
+  background: #0f766e;
 
-  border-color: #b7e3dc;
+  border-color: #0f766e;
 
-  color: #0d9488;
+  color: #ffffff;
 }
 
 .arsip-btn-delete {
-  border: 1px solid #f0dada;
+  border: none;
 
-  color: #e05b5b;
+  background: #dc2626;
+
+  color: #ffffff;
 }
 
 .arsip-btn-delete:hover {
-  background: #fff1f1;
+  background: #b91c1c;
 
-  border-color: #efbcbc;
+  border-color: #b91c1c;
 
-  color: #dc3f3f;
+  color: #ffffff;
 }
 
 .arsip-btn-download {
-  border: 1px solid #dce4ef;
+  border: none;
 
-  color: #65748b;
+  background: #2563eb;
+
+  color: #ffffff;
 }
 
 .arsip-btn-download:hover {
-  background: #eef7ff;
+  background: #1d4ed8;
 
-  border-color: #bfd9ef;
+  border-color: #1d4ed8;
 
-  color: #2563eb;
+  color: #ffffff;
 }
 
 

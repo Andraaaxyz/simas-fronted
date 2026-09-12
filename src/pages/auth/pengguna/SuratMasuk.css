@@ -81,9 +81,9 @@
 
 .table-card th {
   background: #f8f9fc;
-  color: #6d7686;
-  font-size: 12px;
-  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 700;
   text-align: left;
   padding: 14px 16px;
   border-bottom: 1px solid #e8ebf0;
@@ -92,7 +92,7 @@
 
 .table-card td {
   padding: 15px 16px;
-  font-size: 13px;
+  font-size: 15px;
   color: #525b6b;
   border-bottom: 1px solid #f0f1f4;
   vertical-align: middle;
@@ -264,23 +264,41 @@
 }
 
 .aksi button {
-  width: 32px;
-  height: 32px;
-  border: 1px solid #e3e7ef;
-  background: white;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #0d9488;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #657083;
+  color: #ffffff;
   transition: 0.2s;
 }
 
 .aksi button:hover {
-  background: #f0faf8;
-  color: #0d9488;
-  border-color: #b7e3dc;
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.btn-eye {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #0d9488;
+  color: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-eye:hover {
+  background: #0f766e;
+  color: #ffffff;
 }
 
 .empty {

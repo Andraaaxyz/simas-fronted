@@ -138,8 +138,9 @@
 
 .arsip-digital-table th {
   background: #f8fafc;
-  color: #68768a;
-  font-size: 13px;
+  color: #1f2937;
+  font-size: 15px;
+  font-weight: 700;
   text-align: left;
   padding: 16px 18px;
   white-space: nowrap;
@@ -149,7 +150,7 @@
   padding: 17px 18px;
   border-top: 1px solid #edf0f5;
   color: #40516a;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .arsip-digital-table td strong {
@@ -166,7 +167,7 @@
   display: inline-flex;
   padding: 6px 11px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -187,8 +188,8 @@
   height: 36px;
   border: none;
   border-radius: 9px;
-  background: #e6f7f5;
-  color: #0d9488;
+  background: #0d9488;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -196,8 +197,8 @@
 }
 
 .arsip-view-btn:hover {
-  background: #0d9488;
-  color: white;
+  background: #0f766e;
+  color: #ffffff;
 }
 
 /* EMPTY */

@@ -252,36 +252,36 @@
 }
 
 .btn-laporan-rekap {
-  background: #f5f3ff;
-  border-color: #ddd6fe;
-  color: #6d28d9;
+  background: #6d28d9;
+  border-color: #6d28d9;
+  color: #ffffff;
 }
 
 .btn-laporan-rekap:hover {
-  background: #ede9fe;
-  border-color: #c4b5fd;
+  background: #5b21b6;
+  border-color: #5b21b6;
 }
 
 .btn-laporan-excel {
-  background: #eef7ff;
-  border-color: #bfdbfe;
-  color: #1d4ed8;
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
 }
 
 .btn-laporan-excel:hover {
-  background: #dbeafe;
-  border-color: #93c5fd;
+  background: #1e40af;
+  border-color: #1e40af;
 }
 
 .btn-laporan-print {
-  background: #ecfdf5;
-  border-color: #a7f3d0;
-  color: #047857;
+  background: #047857;
+  border-color: #047857;
+  color: #ffffff;
 }
 
 .btn-laporan-print:hover {
-  background: #d1fae5;
-  border-color: #6ee7b7;
+  background: #065f46;
+  border-color: #065f46;
 }
 
 /* =========================
@@ -301,15 +301,15 @@
   padding: 12px 14px;
   text-align: left;
   background: #f8fafc;
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 600;
+  color: #1f2937;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .laporan-rekap-body td {
   padding: 12px 14px;
   border-bottom: 1px solid #eef2f7;
-  font-size: 14px;
+  font-size: 16px;
   color: #334155;
 }
 
@@ -351,8 +351,8 @@
 
   background: #f8fafc;
 
-  color: #64748b;
-  font-size: 10px;
+  color: #1f2937;
+  font-size: 12px;
   font-weight: 700;
 
   white-space: nowrap;
@@ -364,7 +364,7 @@
   border-top: 1px solid #eef2f7;
 
   color: #475569;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .laporan-table tbody tr {
@@ -394,7 +394,7 @@
 
   border-radius: 7px;
 
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -447,8 +447,8 @@
   border: none;
   border-radius: 8px;
 
-  background: #e6f7f5;
-  color: #0d9488;
+  background: #0d9488;
+  color: #ffffff;
 
   display: flex;
   align-items: center;
@@ -459,8 +459,8 @@
 }
 
 .laporan-eye:hover {
-  background: #0d9488;
-  color: white;
+  background: #0f766e;
+  color: #ffffff;
 }
 
 /* EMPTY */
