@@ -5,6 +5,7 @@ import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./SuratMasuk.css";
 
 import { useToast } from "../../../component/Toast";
+import { ubahKeISO } from "../../../utils/tanggal";
 
 // =========================
 // BACA FILE JADI BASE64
@@ -118,8 +119,8 @@ function SuratFormPage() {
 
     setFormSurat({
       noSurat: cari.noSurat || "",
-      tanggalSurat: cari.tanggalSurat || "",
-      tanggalDiterima: cari.tanggalDiterima || "",
+      tanggalSurat: ubahKeISO(cari.tanggalSurat) || "",
+      tanggalDiterima: ubahKeISO(cari.tanggalDiterima) || "",
       jenis: cari.jenis || "",
       sifat: cari.sifat || "",
       asal: cari.asal || "",
