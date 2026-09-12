@@ -241,51 +241,45 @@
 }
 
 .arsip-btn-view {
-  border: none;
+  border: 1px solid #dce4ef;
 
-  background: #0d9488;
-
-  color: #ffffff;
+  color: #65748b;
 }
 
 .arsip-btn-view:hover {
-  background: #0f766e;
+  background: #e6f7f5;
 
-  border-color: #0f766e;
+  border-color: #b7e3dc;
 
-  color: #ffffff;
+  color: #0d9488;
 }
 
 .arsip-btn-delete {
-  border: none;
+  border: 1px solid #f0dada;
 
-  background: #dc2626;
-
-  color: #ffffff;
+  color: #e05b5b;
 }
 
 .arsip-btn-delete:hover {
-  background: #b91c1c;
+  background: #fff1f1;
 
-  border-color: #b91c1c;
+  border-color: #efbcbc;
 
-  color: #ffffff;
+  color: #dc3f3f;
 }
 
 .arsip-btn-download {
-  border: none;
+  border: 1px solid #dce4ef;
 
-  background: #2563eb;
-
-  color: #ffffff;
+  color: #65748b;
 }
 
 .arsip-btn-download:hover {
-  background: #1d4ed8;
+  background: #eef7ff;
 
-  border-color: #1d4ed8;
+  border-color: #bfd9ef;
 
-  color: #ffffff;
+  color: #2563eb;
 }
 
 

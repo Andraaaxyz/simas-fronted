@@ -252,14 +252,14 @@
 }
 
 .btn-laporan-rekap {
-  background: #6d28d9;
-  border-color: #6d28d9;
-  color: #ffffff;
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+  color: #6d28d9;
 }
 
 .btn-laporan-rekap:hover {
-  background: #5b21b6;
-  border-color: #5b21b6;
+  background: #ede9fe;
+  border-color: #c4b5fd;
 }
 
 .btn-laporan-excel {
@@ -274,14 +274,14 @@
 }
 
 .btn-laporan-print {
-  background: #047857;
-  border-color: #047857;
-  color: #ffffff;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #047857;
 }
 
 .btn-laporan-print:hover {
-  background: #065f46;
-  border-color: #065f46;
+  background: #d1fae5;
+  border-color: #6ee7b7;
 }
 
 /* =========================
@@ -447,8 +447,8 @@
   border: none;
   border-radius: 8px;
 
-  background: #0d9488;
-  color: #ffffff;
+  background: #e6f7f5;
+  color: #0d9488;
 
   display: flex;
   align-items: center;
@@ -459,8 +459,8 @@
 }
 
 .laporan-eye:hover {
-  background: #0f766e;
-  color: #ffffff;
+  background: #0d9488;
+  color: white;
 }
 
 /* EMPTY */

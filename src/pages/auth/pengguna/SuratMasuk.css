@@ -264,41 +264,23 @@
 }
 
 .aksi button {
-  width: 36px;
-  height: 36px;
-  border: none;
-  background: #0d9488;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e3e7ef;
+  background: white;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #ffffff;
+  color: #657083;
   transition: 0.2s;
 }
 
 .aksi button:hover {
-  background: #0f766e;
-  color: #ffffff;
-}
-
-.btn-eye {
-  width: 36px;
-  height: 36px;
-  border: none;
-  background: #0d9488;
-  color: #ffffff;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.btn-eye:hover {
-  background: #0f766e;
-  color: #ffffff;
+  background: #f0faf8;
+  color: #0d9488;
+  border-color: #b7e3dc;
 }
 
 .empty {

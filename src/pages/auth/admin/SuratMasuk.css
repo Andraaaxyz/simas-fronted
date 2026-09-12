@@ -52,44 +52,44 @@
 }
 
 .btn-eye {
-  background: #0d9488;
-  color: #ffffff;
+  background: #e6f7f5;
+  color: #0d9488;
 }
 
 .btn-eye:hover {
-  background: #0f766e;
+  background: #cdede7;
 }
 
 .btn-edit {
-  background: #ea580c;
-  color: #ffffff;
+  background: #fff7ed;
+  color: #ea580c;
 }
 
 .btn-edit:hover {
-  background: #c2410c;
+  background: #ffedd5;
 }
 
 .btn-delete {
-  background: #dc2626;
-  color: #ffffff;
+  background: #fef2f2;
+  color: #dc2626;
 }
 
 .btn-delete:hover {
-  background: #b91c1c;
+  background: #fee2e2;
 }
 
 .btn-disposisi {
-  background: #16a34a;
-  color: #ffffff;
+  background: #f0fdf4;
+  color: #16a34a;
 }
 
 .btn-disposisi:hover {
-  background: #15803d;
+  background: #dcfce7;
 }
 
 .surat-actions button.btn-arsipkan {
-  background: #475569;
-  color: #ffffff;
+  background: #f1f5f9;
+  color: #475569;
   width: 34px;
   height: 34px;
   padding: 0;
