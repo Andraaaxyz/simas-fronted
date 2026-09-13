@@ -421,9 +421,9 @@
 }
 
 .profile-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   background: var(--primary-soft);
   display: flex;
   align-items: center;
@@ -445,7 +445,7 @@
 }
 
 .profile-role {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text);
   line-height: 1.2;
