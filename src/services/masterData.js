@@ -111,6 +111,15 @@ seedData();
 localStorage.removeItem("undefined");
 
 // =========================
+// GET DATA
+// =========================
+export const getMasterData = (key) => {
+  const data = localStorage.getItem(key);
+
+  return data ? JSON.parse(data) : [];
+};
+
+// =========================
 // MIGRASI USERNAME USER
 // =========================
 // Data lama tidak memiliki field username pada
@@ -201,15 +210,6 @@ export const simpanSesi = (role, username) => {
 
 export const hapusSesi = () => {
   localStorage.removeItem(KEY_SESI);
-};
-
-// =========================
-// GET DATA
-// =========================
-export const getMasterData = (key) => {
-  const data = localStorage.getItem(key);
-
-  return data ? JSON.parse(data) : [];
 };
 
 // =========================
