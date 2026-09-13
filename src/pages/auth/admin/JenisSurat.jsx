@@ -1,13 +1,12 @@
 import MasterCrudPage from "./MasterCrudPage";
 import "./MasterData.css";
-import { MASTER_KEYS } from "../../../services/masterData";
 
 function JenisSurat() {
   return (
     <MasterCrudPage
       title="Jenis Surat"
       subtitle="Kelola jenis surat pada sistem SIMAS"
-      storageKey={MASTER_KEYS.jenisSurat}
+      endpoint="/jenis-surat"
       columns={[{ key: "nama", label: "Nama" }]}
       fields={[
         {
@@ -18,6 +17,12 @@ function JenisSurat() {
       ]}
       hasStatus={false}
       emptyMessage="Belum ada data jenis surat."
+      rowMapper={(item) => ({
+        id: item.id,
+        nama: item.nama_jenis || "-",
+      })}
+      editMapper={(item) => ({ nama: item.nama_jenis || "" })}
+      payloadMapper={(form) => ({ nama_jenis: form.nama.trim() })}
     />
   );
 }

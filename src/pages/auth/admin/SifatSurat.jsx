@@ -1,13 +1,12 @@
 import MasterCrudPage from "./MasterCrudPage";
 import "./MasterData.css";
-import { MASTER_KEYS } from "../../../services/masterData";
 
 function SifatSurat() {
   return (
     <MasterCrudPage
       title="Sifat Surat"
       subtitle="Kelola sifat surat pada sistem SIMAS"
-      storageKey={MASTER_KEYS.sifatSurat}
+      endpoint="/sifat-surat"
       columns={[{ key: "nama", label: "Nama" }]}
       fields={[
         {
@@ -18,6 +17,12 @@ function SifatSurat() {
       ]}
       hasStatus={false}
       emptyMessage="Belum ada data sifat surat."
+      rowMapper={(item) => ({
+        id: item.id,
+        nama: item.nama_sifat || "-",
+      })}
+      editMapper={(item) => ({ nama: item.nama_sifat || "" })}
+      payloadMapper={(form) => ({ nama_sifat: form.nama.trim() })}
     />
   );
 }

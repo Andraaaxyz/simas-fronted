@@ -1,13 +1,12 @@
 import MasterCrudPage from "./MasterCrudPage";
 import "./MasterData.css";
-import { MASTER_KEYS } from "../../../services/masterData";
 
 function Bidang() {
   return (
     <MasterCrudPage
       title="Bidang"
       subtitle="Kelola bidang pada sistem SIMAS"
-      storageKey={MASTER_KEYS.bidang}
+      endpoint="/bidangs"
       columns={[{ key: "nama", label: "Nama" }]}
       fields={[
         {
@@ -18,6 +17,12 @@ function Bidang() {
       ]}
       hasStatus={false}
       emptyMessage="Belum ada data bidang."
+      rowMapper={(item) => ({
+        id: item.id,
+        nama: item.nama_bidang || "-",
+      })}
+      editMapper={(item) => ({ nama: item.nama_bidang || "" })}
+      payloadMapper={(form) => ({ nama_bidang: form.nama.trim() })}
     />
   );
 }

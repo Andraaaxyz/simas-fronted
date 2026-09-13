@@ -24,20 +24,37 @@ import {
   PaginationBar,
 } from "../../../component/Pagination";
 
-import {
-  getMasterData,
-  tambahMasterData,
-  updateMasterData,
-  hapusMasterData,
-} from "../../../services/masterData";
+import { api } from "../../../services/apiClient";
+
+const ambilOptions = async (field) => {
+  if (!field.fromEndpoint) return field.options || [];
+
+  try {
+    const { data } = await api.get(field.fromEndpoint);
+    const list = Array.isArray(data.data)
+      ? data.data
+      : data.data?.data || [];
+
+    return list.map((item) => ({
+      value: item[field.valueField || "id"],
+      label: item[field.labelField || "nama"],
+    }));
+  } catch {
+    return [];
+  }
+};
 
 function MasterCrudPage({
   title,
   subtitle,
-  storageKey,
+  endpoint,
+  params = {},
   columns,
   fields,
   emptyMessage,
+  rowMapper,
+  editMapper,
+  payloadMapper,
   hasStatus = true,
   filters = [],
 }) {
@@ -47,6 +64,8 @@ function MasterCrudPage({
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const [filterValues, setFilterValues] = useState(() => {
     const initial = {};
@@ -60,19 +79,34 @@ function MasterCrudPage({
     return initial;
   });
 
+  const [dynamicOptions, setDynamicOptions] = useState({});
+
+  useEffect(() => {
+    fields.forEach((f) => {
+      if (!f.fromEndpoint) return;
+      ambilOptions(f).then((opts) =>
+        setDynamicOptions((prev) => ({ ...prev, [f.name]: opts }))
+      );
+    });
+  }, []);
+
   const ambilData = () => {
-    setData(getMasterData(storageKey));
+    api
+      .get(endpoint, { params })
+      .then((res) => {
+        const raw = res.data?.data;
+        const list = Array.isArray(raw) ? raw : raw?.data || [];
+        setData(list.map(rowMapper));
+      })
+      .catch(() => setData([]));
   };
 
   useEffect(() => {
+    setLoading(true);
     ambilData();
-    window.addEventListener("storage", ambilData);
-    const interval = setInterval(ambilData, 1000);
-    return () => {
-      window.removeEventListener("storage", ambilData);
-      clearInterval(interval);
-    };
-  }, []);
+    setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [endpoint]);
 
   const keyword = search.toLowerCase();
 
@@ -101,38 +135,56 @@ function MasterCrudPage({
   };
 
   const bukaEdit = (item) => {
-    const init = {};
-    fields.forEach((f) => {
-      init[f.name] = item[f.name] || "";
-    });
-    setForm(init);
+    setForm(editMapper(item));
     setEditId(item.id);
     setShowModal(true);
   };
 
-  const simpan = () => {
-    const kosong = fields.some((f) => !form[f.name]);
+  const simpan = async () => {
+    const kosong = fields.some((f) => !form[f.name] && f.required !== false);
 
     if (kosong) {
       showToast("warning", "Semua data wajib diisi!");
       return;
     }
 
-    if (editId) {
-      updateMasterData(storageKey, editId, form);
-      showToast("success", "Data berhasil diperbarui!");
-    } else {
-      tambahMasterData(storageKey, form);
-      showToast("success", "Data berhasil ditambahkan!");
-    }
+    setSaving(true);
 
-    setShowModal(false);
+    try {
+      if (editId) {
+        await api.put(`${endpoint}/${editId}`, payloadMapper(form, true));
+        showToast("success", "Data berhasil diperbarui!");
+      } else {
+        await api.post(endpoint, payloadMapper(form, false));
+        showToast("success", "Data berhasil ditambahkan!");
+      }
+
+      setShowModal(false);
+      ambilData();
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        Object.values(err.response?.data?.errors || {}).flat()[0] ||
+        "Gagal menyimpan data!";
+      showToast("error", msg);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const konfirmasiHapus = () => {
-    hapusMasterData(storageKey, deleteTarget);
-    setDeleteTarget(null);
-    showToast("success", "Data berhasil dihapus!");
+  const konfirmasiHapus = async () => {
+    try {
+      await api.delete(`${endpoint}/${deleteTarget}`);
+      setDeleteTarget(null);
+      showToast("success", "Data berhasil dihapus!");
+      ambilData();
+    } catch (err) {
+      setDeleteTarget(null);
+      showToast(
+        "error",
+        err.response?.data?.message || "Gagal menghapus data!"
+      );
+    }
   };
 
   // =========================
@@ -150,7 +202,7 @@ function MasterCrudPage({
     exportExcel({
       rows: filteredData,
       columns: kolomExport,
-      filename: `master-${storageKey.toLowerCase()}`,
+      filename: `master-${title.toLowerCase()}`,
     });
   };
 
@@ -173,6 +225,26 @@ function MasterCrudPage({
       rows: filteredData,
       footer: `Total data: ${filteredData.length}`,
     });
+  };
+
+  const renderOptions = (f) => {
+    const opts = f.fromEndpoint
+      ? dynamicOptions[f.name] || []
+      : f.options || [];
+
+    if (opts.length === 0 || typeof opts[0] !== "object") {
+      return opts.map((opt) => (
+        <option key={opt} value={opt}>
+          {opt}
+        </option>
+      ));
+    }
+
+    return opts.map((opt) => (
+      <option key={opt.value} value={opt.value}>
+        {opt.label}
+      </option>
+    ));
   };
 
   return (
@@ -206,7 +278,11 @@ function MasterCrudPage({
               Print
             </button>
 
-            <button className="master-btn-add" onClick={bukaTambah}>
+            <button
+              className="master-btn-add"
+              onClick={bukaTambah}
+              disabled={loading}
+            >
               <Plus size={18} />
               Tambah {title}
             </button>
@@ -241,7 +317,9 @@ function MasterCrudPage({
               >
                 <option value="">Semua {f.label}</option>
                 {opsiDinamis.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
                 ))}
               </select>
             );
@@ -278,8 +356,8 @@ function MasterCrudPage({
                     {hasStatus && (
                       <td>
                         {item.status ? (
-                          <span className={`master-status ${item.status === "Aktif" ? "aktif" : "nonaktif"}`}>
-                            {item.status}
+                          <span className={`master-status ${item.status === "aktif" ? "aktif" : "nonaktif"}`}>
+                            {item.status === "aktif" ? "Aktif" : item.status === "nonaktif" ? "Nonaktif" : item.status}
                           </span>
                         ) : (
                           <span className="master-status-baru">-</span>
@@ -346,9 +424,7 @@ function MasterCrudPage({
                         onChange={(e) => setForm({ ...form, [f.name]: e.target.value })}
                       >
                         <option value="">Pilih {f.label}</option>
-                        {f.options.map((opt) => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
+                        {renderOptions(f)}
                       </select>
                     ) : (
                       <input
@@ -366,8 +442,8 @@ function MasterCrudPage({
                 <button className="master-btn-batal" onClick={() => setShowModal(false)}>
                   Batal
                 </button>
-                <button className="master-btn-simpan" onClick={simpan}>
-                  {editId ? "Simpan Perubahan" : "Simpan Data"}
+                <button className="master-btn-simpan" onClick={simpan} disabled={saving}>
+                  {saving ? "Menyimpan..." : editId ? "Simpan Perubahan" : "Simpan Data"}
                 </button>
               </div>
             </div>
