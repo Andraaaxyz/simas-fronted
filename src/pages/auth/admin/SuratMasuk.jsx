@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -14,246 +14,117 @@ import "./SuratMasuk.css";
 
 import ConfirmDialog from "../../../component/ConfirmDialog";
 import { useToast } from "../../../component/Toast";
-import {
-  formatTanggal,
-  hariIniISO,
-} from "../../../utils/tanggal";
+import { formatTanggal } from "../../../utils/tanggal";
 
 import {
-  usePagination,
+  useServerPagination,
   EntriesSelect,
   PaginationBar,
 } from "../../../component/Pagination";
 
+import { api } from "../../../services/apiClient";
+
+const STATUS_SURAT = ["baru", "didisposisi", "diarsipkan"];
+
+const labelStatus = (status) =>
+  status === "baru"
+    ? "Baru"
+    : status === "didisposisi"
+    ? "Didisposisikan"
+    : status === "diarsipkan"
+    ? "Diarsipkan"
+    : status || "-";
+
 function SuratMasuk() {
   const navigate = useNavigate();
   const showToast = useToast();
+  const fileRef = useRef(null);
+
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [dataSurat, setDataSurat] = useState([]);
 
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [arsipTarget, setArsipTarget] = useState(null);
+  const [arsipLoading, setArsipLoading] = useState(false);
 
   // =========================
-  // MIGRASI DATA LAMA
+  // AMPIL DATA SURAT (API)
   // =========================
+  const fetcher = (page, perPage) =>
+    api
+      .get("/surat-masuk", {
+        params: {
+          page,
+          per_page: perPage,
+          search: search || undefined,
+          status: filterStatus || undefined,
+        },
+      })
+      .then((res) => res.data.data);
 
-  const migrasiData = (data) =>
-    data.map((item) => {
-      if (item.perihal !== undefined) return item;
-
-      return {
-        ...item,
-        noAgenda: item.noAgenda || "",
-        tanggalSurat: item.tanggalSurat || "",
-        tanggalDiterima: item.tanggalDiterima || item.tanggal || "",
-        jenis: item.jenis || "",
-        sifat: item.sifat || "",
-        tujuan: item.tujuan || "",
-        perihal: item.perihal || item.isi || "",
-        file: item.file || "",
-        lampiran: item.lampiran || "",
-      };
-    });
-
-  // =========================
-  // AMBIL DATA SURAT
-  // =========================
-  useEffect(() => {
-    const ambilData = () => {
-      const data =
-        JSON.parse(localStorage.getItem("dataSurat")) || [];
-
-      if (data.length === 0) {
-        const dataAwal = [
-          {
-            id: 1,
-            noAgenda: "001",
-            noSurat: "001/089/SK/2026",
-            tanggalSurat: "2026-08-19",
-            tanggalDiterima: "2026-08-20",
-            jenis: "Surat Undangan",
-            sifat: "Penting",
-            asal: "Dinas Pendidikan",
-            tujuan: "Bidang Tata Usaha",
-            perihal: "Undangan Rapat Koordinasi",
-            file: "undangan-rapat.pdf",
-            lampiran: "Agenda rapat",
-            status: "Baru",
-            disposisi: null,
-            timeline: [
-              {
-                label: "Surat diterima",
-                tanggal: "2026-08-20",
-              },
-            ],
-          },
-          {
-            id: 2,
-            noAgenda: "002",
-            noSurat: "002/090/SK/2026",
-            tanggalSurat: "2026-08-20",
-            tanggalDiterima: "2026-08-21",
-            jenis: "Surat Edaran",
-            sifat: "Biasa",
-            asal: "Dinas Kesehatan",
-            tujuan: "Ir. Ahmad Fauzi, M.Si",
-            perihal: "Pemberitahuan Kegiatan Senam",
-            file: "edaran-kegiatan.pdf",
-            lampiran: "-",
-            status: "Didisposisikan",
-            disposisi: {
-              tujuan: "Budi Santoso, S.E",
-              instruksi: "Segera ditindaklanjuti",
-              catatan: "Mohon diproses dengan baik.",
-              tanggalDisposisi: "2026-08-22",
-            },
-            timeline: [
-              {
-                label: "Surat diterima",
-                tanggal: "2026-08-21",
-              },
-              {
-                label: "Disposisi dibuat",
-                tanggal: "2026-08-22",
-              },
-            ],
-          },
-          {
-            id: 3,
-            noAgenda: "003",
-            noSurat: "003/091/SK/2026",
-            tanggalSurat: "2026-08-21",
-            tanggalDiterima: "2026-08-22",
-            jenis: "Surat Permohonan",
-            sifat: "Biasa",
-            asal: "Dinas Sosial",
-            tujuan: "Bidang Umum",
-            perihal: "Surat Permohonan Bantuan",
-            file: "permohonan-bantuan.pdf",
-            lampiran: "Proposal bantuan",
-            status: "Selesai",
-            disposisi: {
-              tujuan: "Siti Aminah",
-              instruksi: "Dilaporkan ke pimpinan",
-              catatan: "Sudah diproses.",
-              tanggalDisposisi: "2026-08-23",
-            },
-            timeline: [
-              {
-                label: "Surat diterima",
-                tanggal: "2026-08-22",
-              },
-              {
-                label: "Disposisi dibuat",
-                tanggal: "2026-08-23",
-              },
-              {
-                label: "Diproses pegawai",
-                tanggal: "2026-08-24",
-              },
-              {
-                label: "Selesai diproses",
-                tanggal: "2026-08-25",
-              },
-            ],
-          },
-        ];
-
-        localStorage.setItem(
-          "dataSurat",
-          JSON.stringify(dataAwal)
-        );
-
-        setDataSurat(dataAwal);
-      } else {
-        setDataSurat(migrasiData(data));
-      }
-    };
-
-    ambilData();
-
-    window.addEventListener("storage", ambilData);
-
-    const interval = setInterval(ambilData, 1000);
-
-    return () => {
-      window.removeEventListener("storage", ambilData);
-      clearInterval(interval);
-    };
-  }, []);
-
-  // =========================
-  // SEARCH + FILTER
-  // =========================
-  const filteredData = dataSurat.filter((item) => {
-    const cocokSearch = `${item.noSurat || ""} ${
-      item.perihal || ""
-    } ${item.asal || ""} ${item.noAgenda || ""}`
-      .toLowerCase()
-      .includes(search.toLowerCase());
-
-    const cocokStatus =
-      !filterStatus || item.status === filterStatus;
-
-    return cocokSearch && cocokStatus;
-  });
-
-  // =========================
-  // PAGINATION
-  // =========================
-  const pag = usePagination(filteredData);
+  const pag = useServerPagination(fetcher, [search, filterStatus]);
 
   // =========================
   // HAPUS SURAT
   // =========================
-  const konfirmasiHapus = () => {
-    const dataBaru = dataSurat.filter(
-      (item) => item.id !== deleteTarget
-    );
-
-    setDataSurat(dataBaru);
-
-    localStorage.setItem(
-      "dataSurat",
-      JSON.stringify(dataBaru)
-    );
-
-    showToast("success", "Surat berhasil dihapus!");
+  const konfirmasiHapus = async () => {
+    try {
+      await api.delete(`/surat-masuk/${deleteTarget}`);
+      showToast("success", "Surat berhasil dihapus!");
+      pag.reload();
+    } catch (err) {
+      showToast(
+        "error",
+        err.response?.data?.message || "Gagal menghapus surat!"
+      );
+    }
   };
 
   // =========================
-  // ARSIPKAN LANGSUNG
+  // ARSIPKAN LANGSUNG (UPLOAD)
   // =========================
-  const konfirmasiArsipkan = () => {
-    const tanggalISO = hariIniISO();
+  const pilihFileArsip = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
 
-    const dataBaru = dataSurat.map((item) =>
-      item.id === arsipTarget
-        ? {
-            ...item,
-            status: "Diarsipkan",
-            timeline: [
-              ...(item.timeline || []),
-              {
-                label: "Surat diarsipkan",
-                tanggal: tanggalISO,
-              },
-            ],
-          }
-        : item
-    );
+    if (!file) return;
 
-    setDataSurat(dataBaru);
+    setArsipLoading(true);
 
-    localStorage.setItem(
-      "dataSurat",
-      JSON.stringify(dataBaru)
-    );
+    const body = new FormData();
+    body.append("surat_masuk_id", arsipTarget);
+    body.append("file", file);
 
-    showToast("success", "Surat berhasil diarsipkan!");
+    api
+      .post("/arsip-digital", body)
+      .then(() => {
+        showToast("success", "Surat berhasil diarsipkan!");
+        setArsipTarget(null);
+        pag.reload();
+      })
+      .catch((err) => {
+        showToast(
+          "error",
+          err.response?.data?.message ||
+            "Gagal mengarsipkan surat!"
+        );
+      })
+      .finally(() => setArsipLoading(false));
   };
+
+  const formatData = (item) => ({
+    id: item.id,
+    noAgenda: item.no_agenda,
+    noSurat: item.no_surat,
+    tanggalSurat: item.tanggal_surat,
+    sifat: item.sifat_surat?.nama_sifat,
+    asal: item.asal_surat,
+    tujuan: item.tujuan_surat,
+    perihal: item.perihal,
+    status: item.status,
+  });
+
+  const listSurat = pag.pageData.map(formatData);
 
   return (
     <DashboardLayout title="Surat Masuk">
@@ -311,15 +182,9 @@ function SuratMasuk() {
               Semua Status
             </option>
 
-            {[
-              ...new Set(
-                dataSurat
-                  .map((d) => d.status)
-                  .filter(Boolean)
-              ),
-            ].map((st) => (
+            {STATUS_SURAT.map((st) => (
               <option key={st} value={st}>
-                {st}
+                {labelStatus(st)}
               </option>
             ))}
           </select>
@@ -353,9 +218,9 @@ function SuratMasuk() {
 
             <tbody>
 
-              {pag.pageData.length > 0 ? (
+              {listSurat.length > 0 ? (
 
-                pag.pageData.map((item, index) => (
+                listSurat.map((item, index) => (
 
                   <tr key={item.id}>
 
@@ -410,7 +275,7 @@ function SuratMasuk() {
                             )
                         }`}
                       >
-                        {item.status}
+                        {labelStatus(item.status)}
                       </span>
                     </td>
 
@@ -441,16 +306,13 @@ function SuratMasuk() {
                         </button>
 
                         {/* ARSIPKAN LANGSUNG */}
-                        {!["Diarsipkan", "Selesai", "Disetujui", "Ditolak"].includes(
-                          item.status
-                        ) && (
+                        {item.status !== "diarsipkan" && (
                           <button
                             className="btn-arsipkan"
-                            title="Arsipkan Langsung"
+                            title="Arsipkan Surat"
+                            disabled={arsipLoading}
                             onClick={() =>
-                              setArsipTarget(
-                                item.id
-                              )
+                              setArsipTarget(item.id)
                             }
                           >
                             <Archive size={17} />
@@ -462,9 +324,7 @@ function SuratMasuk() {
                           className="btn-delete"
                           title="Hapus Surat"
                           onClick={() =>
-                            setDeleteTarget(
-                              item.id
-                            )
+                            setDeleteTarget(item.id)
                           }
                         >
                           <Trash2 size={17} />
@@ -509,8 +369,17 @@ function SuratMasuk() {
           total={pag.total}
         />
 
+        {/* INPUT FILE TERSEMBUNYI UNTUK ARSIP */}
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+          style={{ display: "none" }}
+          onChange={pilihFileArsip}
+        />
+
         <ConfirmDialog
-          open={!!deleteTarget}
+          open={!!deleteTarget && !arsipLoading}
           title="Hapus Surat"
           message="Yakin ingin menghapus surat ini? Data yang dihapus tidak dapat dikembalikan."
           confirmText="Hapus"
@@ -524,14 +393,13 @@ function SuratMasuk() {
         />
 
         <ConfirmDialog
-          open={!!arsipTarget}
+          open={!!arsipTarget && !arsipLoading}
           title="Arsipkan Surat"
-          message="Arsipkan surat ini langsung ke arsip?"
-          confirmText="Arsipkan"
+          message="Pilih file dokumen surat untuk diarsipkan."
+          confirmText="Pilih File"
           cancelText="Batal"
           onConfirm={() => {
-            konfirmasiArsipkan();
-            setArsipTarget(null);
+            fileRef.current?.click();
           }}
           onCancel={() => setArsipTarget(null)}
         />

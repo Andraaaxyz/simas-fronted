@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   Eye,
   X,
   FileText,
   Clock,
-  CheckCircle2,
-  XCircle,
+  CheckCircle,
   Archive,
   FileSpreadsheet,
   Printer,
   BarChart3,
+  Users,
 } from "lucide-react";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
@@ -22,170 +22,129 @@ import {
 } from "../../../utils/report";
 
 import {
-  usePagination,
+  useServerPagination,
   EntriesSelect,
   PaginationBar,
 } from "../../../component/Pagination";
 
+import { api } from "../../../services/apiClient";
+
+const STATUS_MAP = {
+  baru: { label: "Baru", className: "baru" },
+  didisposisi: { label: "Didisposisi", className: "didisposisikan" },
+  diarsipkan: { label: "Diarsipkan", className: "diarsipkan" },
+};
+
+const ubahStatus = (status) => STATUS_MAP[status] || { label: status, className: "" };
+
+const aman = (v) => v || "";
+
 function Laporan() {
-  const [dataSurat, setDataSurat] = useState([]);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("Semua");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterJenis, setFilterJenis] = useState("");
+  const [filterSifat, setFilterSifat] = useState("");
+  const [tanggalAwal, setTanggalAwal] = useState("");
+  const [tanggalAkhir, setTanggalAkhir] = useState("");
   const [selectedSurat, setSelectedSurat] = useState(null);
   const [showRekap, setShowRekap] = useState(false);
+  const [summary, setSummary] = useState(null);
 
-  // =========================
-  // AMBIL DATA SURAT
-  // =========================
-  useEffect(() => {
-    const ambilData = () => {
-      const dataLama =
-        JSON.parse(localStorage.getItem("dataSurat")) || [];
-
-      const data = dataLama.map((item) =>
-        item.perihal !== undefined
-          ? item
-          : {
-              ...item,
-              perihal: item.perihal || item.isi || "",
-              tanggalDiterima:
-                item.tanggalDiterima ||
-                item.tanggal ||
-                "",
-            }
-      );
-
-      setDataSurat(data);
-
-      setSelectedSurat((prev) => {
-        if (!prev) return null;
-
-        const update = data.find(
-          (item) => item.id === prev.id
-        );
-
-        return update || null;
+  const fetcher = (page, perPage) =>
+    api
+      .get("/laporan/surat-masuk", {
+        params: {
+          page,
+          per_page: perPage,
+          search,
+          status: filterStatus,
+          jenis_surat_id: filterJenis,
+          sifat_surat_id: filterSifat,
+          tanggal_awal: tanggalAwal,
+          tanggal_akhir: tanggalAkhir,
+        },
+      })
+      .then((res) => {
+        const pag = res.data?.data;
+        return {
+          data: pag?.data || [],
+          total: pag?.total || 0,
+          last_page: pag?.last_page || 1,
+          current_page: pag?.current_page,
+          per_page: pag?.per_page,
+        };
       });
-    };
 
-    ambilData();
+  const pag = useServerPagination(fetcher, [search, filterStatus, filterJenis, filterSifat, tanggalAwal, tanggalAkhir]);
 
-    window.addEventListener("storage", ambilData);
+  useEffect(() => {
+    if (summary !== null) return;
+    api
+      .get("/dashboard")
+      .then((r) => setSummary(r.data?.data?.summary || null))
+      .catch(() => setSummary(null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [summary]);
 
-    const interval = setInterval(ambilData, 1000);
+  const ambilSemua = async () => {
+    const res = await api.get("/laporan/surat-masuk", {
+      params: {
+        per_page: 1000,
+        search,
+        status: filterStatus,
+        jenis_surat_id: filterJenis,
+        sifat_surat_id: filterSifat,
+        tanggal_awal: tanggalAwal,
+        tanggal_akhir: tanggalAkhir,
+      },
+    });
+    return res.data?.data?.data || [];
+  };
 
-    return () => {
-      window.removeEventListener("storage", ambilData);
-      clearInterval(interval);
-    };
-  }, []);
-
-  // =========================
-  // FILTER DATA
-  // =========================
-  const filteredData = dataSurat.filter((item) => {
-    const cocokSearch =
-      `${item.noSurat || ""} ${item.perihal || ""} ${
-        item.asal || ""
-      } ${item.tanggalDiterima || ""}`
-        .toLowerCase()
-        .includes(search.toLowerCase());
-
-    const cocokStatus =
-      filterStatus === "Semua" ||
-      item.status === filterStatus;
-
-    return cocokSearch && cocokStatus;
-  });
-
-  // =========================
-  // PAGINATION
-  // =========================
-  const pag = usePagination(filteredData, 10);
-
-  // =========================
-  // STATISTIK
-  // =========================
-  const totalSurat = dataSurat.length;
-
-  const suratDiproses = dataSurat.filter(
-    (item) => item.status === "Diproses"
-  ).length;
-
-  const suratSelesai = dataSurat.filter(
-    (item) => item.status === "Selesai"
-  ).length;
-
-  const suratDisetujui = dataSurat.filter(
-    (item) => item.status === "Disetujui"
-  ).length;
-
-  const suratDitolak = dataSurat.filter(
-    (item) => item.status === "Ditolak"
-  ).length;
-
-  // =========================
-  // REKAP PER STATUS
-  // =========================
-  const rekapPerStatus = () => {
-    const statusList = [
-      "Baru",
-      "Menunggu Disposisi",
-      "Didisposisikan",
-      "Diproses",
-      "Selesai",
-      "Diarsipkan",
-      "Disetujui",
-      "Ditolak",
-    ];
-
+  const kolomRekap = (rows = []) => {
+    const statusList = ["baru", "didisposisi", "diarsipkan"];
     return statusList
       .map((status) => ({
-        status,
-        jumlah: dataSurat.filter(
-          (item) => item.status === status
-        ).length,
+        status: STATUS_MAP[status].label,
+        className: STATUS_MAP[status].className,
+        jumlah: rows.filter((r) => r.status === status).length,
       }))
       .filter((r) => r.jumlah > 0);
   };
 
-  // =========================
-  // EXPORT EXCEL
-  // =========================
-  const exportLaporan = () => {
+  const exportLaporan = async () => {
+    const rows = await ambilSemua();
     const columns = [
-      { key: "noSurat", label: "No. Surat" },
+      { key: "no_surat", label: "No. Surat" },
       { key: "perihal", label: "Perihal" },
-      { key: "asal", label: "Asal Surat" },
-      { key: "tanggalDiterima", label: "Tanggal Diterima", render: (r) => formatTanggal(r.tanggalDiterima) },
-      { key: "status", label: "Status" },
+      { key: "asal_surat", label: "Asal Surat" },
+      { key: "tanggal_terima", label: "Tanggal Diterima", render: (r) => formatTanggal(r.tanggal_terima) },
+      { key: "status", label: "Status", render: (r) => ubahStatus(r.status).label },
     ];
 
     exportExcel({
-      rows: filteredData,
+      rows,
       columns,
       filename: "laporan-surat",
     });
   };
 
-  // =========================
-  // PRINT LAPORAN
-  // =========================
-  const printLaporan = () => {
+  const printLaporan = async () => {
+    const rows = await ambilSemua();
     const columns = [
-      { key: "noSurat", label: "No. Surat" },
+      { key: "no_surat", label: "No. Surat" },
       { key: "perihal", label: "Perihal" },
-      { key: "asal", label: "Asal Surat" },
-      { key: "tanggalDiterima", label: "Tanggal Diterima", render: (r) => formatTanggal(r.tanggalDiterima) },
-      { key: "status", label: "Status" },
+      { key: "asal_surat", label: "Asal Surat" },
+      { key: "tanggal_terima", label: "Tanggal Diterima", render: (r) => formatTanggal(r.tanggal_terima) },
+      { key: "status", label: "Status", render: (r) => ubahStatus(r.status).label },
     ];
 
     buatHTMLPrint({
       title: "Laporan Surat",
-      subtitle: `Rekapitulasi data surat masuk - ${filterStatus === "Semua" ? "Semua Status" : filterStatus}`,
+      subtitle: `Rekapitulasi data surat masuk - ${filterStatus ? ubahStatus(filterStatus).label : "Semua Status"}`,
       columns,
-      rows: filteredData,
-      footer: `Total surat: ${filteredData.length}`,
+      rows,
+      footer: `Total surat: ${rows.length}`,
     });
   };
 
@@ -202,12 +161,8 @@ function Laporan() {
             <div className="laporan-breadcrumb">
               Laporan / Rekap Surat
             </div>
-
             <h1>Laporan Surat</h1>
-
-            <p>
-              Rekapitulasi data surat masuk
-            </p>
+            <p>Rekapitulasi data surat masuk</p>
           </div>
         </div>
 
@@ -220,10 +175,9 @@ function Laporan() {
             <div className="stat-icon">
               <FileText size={24} />
             </div>
-
             <div>
               <span>Total Surat</span>
-              <strong>{totalSurat}</strong>
+              <strong>{summary?.total_surat ?? pag.total}</strong>
             </div>
           </div>
 
@@ -231,21 +185,19 @@ function Laporan() {
             <div className="stat-icon">
               <Clock size={24} />
             </div>
-
             <div>
-              <span>Diproses</span>
-              <strong>{suratDiproses}</strong>
+              <span>Baru</span>
+              <strong>{summary?.surat_baru ?? 0}</strong>
             </div>
           </div>
 
           <div className="laporan-stat-card">
             <div className="stat-icon">
-              <CheckCircle2 size={24} />
+              <CheckCircle size={24} />
             </div>
-
             <div>
-              <span>Selesai</span>
-              <strong>{suratSelesai}</strong>
+              <span>Didisposisi</span>
+              <strong>{summary?.surat_didisposisi ?? 0}</strong>
             </div>
           </div>
 
@@ -253,21 +205,19 @@ function Laporan() {
             <div className="stat-icon">
               <Archive size={24} />
             </div>
-
             <div>
-              <span>Disetujui</span>
-              <strong>{suratDisetujui}</strong>
+              <span>Diarsipkan</span>
+              <strong>{summary?.surat_diarsipkan ?? 0}</strong>
             </div>
           </div>
 
           <div className="laporan-stat-card">
             <div className="stat-icon">
-              <XCircle size={24} />
+              <Users size={24} />
             </div>
-
             <div>
-              <span>Ditolak</span>
-              <strong>{suratDitolak}</strong>
+              <span>Total User</span>
+              <strong>{summary?.total_user ?? 0}</strong>
             </div>
           </div>
 
@@ -282,96 +232,95 @@ function Laporan() {
 
             <div>
               <h2>Rekap Surat Masuk</h2>
-              <p>
-                Data surat masuk berdasarkan status
-              </p>
-            </div>
+              <p>Data surat masuk berdasarkan status</p>
 
-            <div className="laporan-toolbar">
+              <div className="laporan-toolbar">
+                <div className="laporan-search">
+                  <Search size={18} />
+                  <input
+                    type="text"
+                    placeholder="Cari surat..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
 
-              {/* SEARCH */}
-              <div className="laporan-search">
-                <Search size={18} />
+                <select
+                  className="laporan-filter"
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                >
+                  <option value="">Semua Status</option>
+                  <option value="baru">Baru</option>
+                  <option value="didisposisi">Didisposisi</option>
+                  <option value="diarsipkan">Diarsipkan</option>
+                </select>
+
+                <select
+                  className="laporan-filter"
+                  value={filterJenis}
+                  onChange={(e) => setFilterJenis(e.target.value)}
+                >
+                  <option value="">Semua Jenis</option>
+                  <option value="1">Surat Edaran</option>
+                  <option value="2">Surat Undangan</option>
+                  <option value="3">Surat Keputusan</option>
+                  <option value="4">Surat Tugas</option>
+                </select>
+
+                <select
+                  className="laporan-filter"
+                  value={filterSifat}
+                  onChange={(e) => setFilterSifat(e.target.value)}
+                >
+                  <option value="">Semua Sifat</option>
+                  <option value="1">Penting</option>
+                  <option value="2">Biasa</option>
+                  <option value="3">Rahasia</option>
+                </select>
 
                 <input
-                  type="text"
-                  placeholder="Cari surat..."
-                  value={search}
-                  onChange={(e) =>
-                    setSearch(e.target.value)
-                  }
+                  type="date"
+                  className="laporan-filter"
+                  value={tanggalAwal}
+                  onChange={(e) => setTanggalAwal(e.target.value)}
                 />
+                <input
+                  type="date"
+                  className="laporan-filter"
+                  value={tanggalAkhir}
+                  onChange={(e) => setTanggalAkhir(e.target.value)}
+                />
+
+                <div className="laporan-actions">
+                  <button
+                    className="btn-laporan-rekap"
+                    onClick={() => setShowRekap(true)}
+                    title="Rekap Jumlah"
+                  >
+                    <BarChart3 size={19} />
+                    Rekap
+                  </button>
+                  <button
+                    className="btn-laporan-excel"
+                    onClick={exportLaporan}
+                    title="Export Excel"
+                  >
+                    <FileSpreadsheet size={19} />
+                    Excel
+                  </button>
+                  <button
+                    className="btn-laporan-print"
+                    onClick={printLaporan}
+                    title="Print Laporan"
+                  >
+                    <Printer size={19} />
+                    Print
+                  </button>
+                </div>
+
+                <EntriesSelect value={pag.entries} onChange={pag.changeEntries} />
               </div>
-
-              {/* FILTER */}
-              <select
-                className="laporan-filter"
-                value={filterStatus}
-                onChange={(e) =>
-                  setFilterStatus(e.target.value)
-                }
-              >
-                <option value="Semua">Semua Status</option>
-                <option value="Baru">Baru</option>
-                <option value="Menunggu Disposisi">
-                  Menunggu Disposisi
-                </option>
-                <option value="Didisposisikan">
-                  Didisposisikan
-                </option>
-                <option value="Diproses">Diproses</option>
-                <option value="Selesai">Selesai</option>
-                <option value="Diarsipkan">
-                  Diarsipkan
-                </option>
-                <option value="Disetujui">
-                  Disetujui
-                </option>
-                <option value="Ditolak">
-                  Ditolak
-                </option>
-              </select>
-
-              {/* AKSI LAPORAN */}
-              <div className="laporan-actions">
-
-                <button
-                  className="btn-laporan-rekap"
-                  onClick={() =>
-                    setShowRekap(true)
-                  }
-                  title="Rekap Jumlah"
-                >
-                  <BarChart3 size={19} />
-                  Rekap
-                </button>
-
-                <button
-                  className="btn-laporan-excel"
-                  onClick={exportLaporan}
-                  title="Export Excel"
-                >
-                  <FileSpreadsheet size={19} />
-                  Excel
-                </button>
-
-                <button
-                  className="btn-laporan-print"
-                  onClick={printLaporan}
-                  title="Print Laporan"
-                >
-                  <Printer size={19} />
-                  Print
-                </button>
-
-              </div>
-
-              {/* ENTRIES */}
-              <EntriesSelect
-                value={pag.entries}
-                onChange={pag.changeEntries}
-              />
-
             </div>
           </div>
 
@@ -383,8 +332,10 @@ function Laporan() {
                 <tr>
                   <th>No</th>
                   <th>No. Surat</th>
+                  <th>No. Agenda</th>
                   <th>Perihal</th>
                   <th>Asal Surat</th>
+                  <th>Jenis</th>
                   <th>Tanggal</th>
                   <th>Status</th>
                   <th>Aksi</th>
@@ -394,71 +345,37 @@ function Laporan() {
               <tbody>
 
                 {pag.pageData.length > 0 ? (
-                  pag.pageData.map((surat, index) => (
-                    <tr key={surat.id}>
-
-                      <td>
-                        {(pag.page - 1) *
-                          pag.entries +
-                          index +
-                          1}
-                      </td>
-
-                      <td>
-                        <strong>
-                          {surat.noSurat}
-                        </strong>
-                      </td>
-
-                      <td>
-                        {surat.perihal}
-                      </td>
-
-                      <td>
-                        {surat.asal}
-                      </td>
-
-                      <td>
-                        {formatTanggal(
-                          surat.tanggalDiterima
-                        )}
-                      </td>
-
-                      <td>
-                        <span
-                          className={`status-badge ${
-                            surat.status
-                              ?.toLowerCase()
-                              .replace(
-                                /\s+/g,
-                                "-"
-                              )
-                          }`}
-                        >
-                          {surat.status || "Baru"}
-                        </span>
-                      </td>
-
-                      <td>
-                        <button
-                          className="laporan-btn-view"
-                          onClick={() =>
-                            setSelectedSurat(surat)
-                          }
-                          title="Lihat Detail"
-                        >
-                          <Eye size={17} />
-                        </button>
-                      </td>
-
-                    </tr>
-                  ))
+                  pag.pageData.map((surat, index) => {
+                    const st = ubahStatus(surat.status);
+                    return (
+                      <tr key={surat.id}>
+                        <td>{(pag.page - 1) * pag.entries + index + 1}</td>
+                        <td><strong>{aman(surat.no_surat)}</strong></td>
+                        <td>{aman(surat.no_agenda)}</td>
+                        <td>{aman(surat.perihal)}</td>
+                        <td>{aman(surat.asal_surat)}</td>
+                        <td>{surat.jenisSurat?.nama_jenis || "-"}</td>
+                        <td>{formatTanggal(surat.tanggal_terima)}</td>
+                        <td>
+                          <span className={`status-badge ${st.className}`}>
+                            {st.label}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            className="laporan-btn-view"
+                            onClick={() => setSelectedSurat(surat)}
+                            title="Lihat Detail"
+                          >
+                            <Eye size={17} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
-                    <td
-                      colSpan="7"
-                      className="laporan-empty"
-                    >
+                    <td colSpan="9" className="laporan-empty">
                       Tidak ada data surat
                     </td>
                   </tr>
@@ -498,16 +415,12 @@ function Laporan() {
 
               <div>
                 <h2>Detail Surat</h2>
-                <p>
-                  Informasi lengkap surat masuk
-                </p>
+                <p>Informasi lengkap surat masuk</p>
               </div>
 
               <button
                 className="laporan-close"
-                onClick={() =>
-                  setSelectedSurat(null)
-                }
+                onClick={() => setSelectedSurat(null)}
               >
                 <X size={22} />
               </button>
@@ -518,47 +431,44 @@ function Laporan() {
 
               <div className="laporan-detail-item">
                 <span>Nomor Surat</span>
-                <strong>
-                  {selectedSurat.noSurat}
-                </strong>
+                <strong>{aman(selectedSurat.no_surat)}</strong>
+              </div>
+
+              <div className="laporan-detail-item">
+                <span>No. Agenda</span>
+                <strong>{aman(selectedSurat.no_agenda)}</strong>
               </div>
 
               <div className="laporan-detail-item">
                 <span>Perihal</span>
-                <strong>
-                  {selectedSurat.perihal}
-                </strong>
+                <strong>{aman(selectedSurat.perihal)}</strong>
               </div>
 
               <div className="laporan-detail-item">
                 <span>Asal Surat</span>
-                <strong>
-                  {selectedSurat.asal}
-                </strong>
+                <strong>{aman(selectedSurat.asal_surat)}</strong>
+              </div>
+
+              <div className="laporan-detail-item">
+                <span>Jenis Surat</span>
+                <strong>{selectedSurat.jenisSurat?.nama_jenis || "-"}</strong>
+              </div>
+
+              <div className="laporan-detail-item">
+                <span>Sifat Surat</span>
+                <strong>{selectedSurat.sifatSurat?.nama_sifat || "-"}</strong>
               </div>
 
               <div className="laporan-detail-item">
                 <span>Tanggal Diterima</span>
-                <strong>
-                  {formatTanggal(
-                    selectedSurat.tanggalDiterima
-                  )}
-                </strong>
+                <strong>{formatTanggal(selectedSurat.tanggal_terima)}</strong>
               </div>
 
               <div className="laporan-detail-item">
                 <span>Status</span>
-
                 <strong>
-                  <span
-                    className={`status-badge ${
-                      selectedSurat.status
-                        ?.toLowerCase()
-                        .replace(/\s+/g, "-")
-                    }`}
-                  >
-                    {selectedSurat.status ||
-                      "Baru"}
+                  <span className={`status-badge ${ubahStatus(selectedSurat.status).className}`}>
+                    {ubahStatus(selectedSurat.status).label}
                   </span>
                 </strong>
               </div>
@@ -569,9 +479,7 @@ function Laporan() {
 
               <button
                 className="laporan-btn-close"
-                onClick={() =>
-                  setSelectedSurat(null)
-                }
+                onClick={() => setSelectedSurat(null)}
               >
                 Tutup
               </button>
@@ -598,9 +506,7 @@ function Laporan() {
             <div className="laporan-modal-header">
               <div>
                 <h2>Rekap Jumlah Surat</h2>
-                <p>
-                  Jumlah surat berdasarkan status
-                </p>
+                <p>Jumlah surat berdasarkan status</p>
               </div>
 
               <button
@@ -622,36 +528,32 @@ function Laporan() {
                 </thead>
 
                 <tbody>
-                  {rekapPerStatus().map(
-                    (r, index) => (
-                      <tr key={r.status}>
-                        <td>{index + 1}</td>
-                        <td>
-                          <span
-                            className={`status-badge ${
-                              r.status
-                                .toLowerCase()
-                                .replace(
-                                  /\s+/g,
-                                  "-"
-                                )
-                            }`}
-                          >
-                            {r.status}
-                          </span>
-                        </td>
-                        <td>
-                          <strong>{r.jumlah}</strong>
-                        </td>
-                      </tr>
-                    )
+                  {kolomRekap(pag.pageData).map((r, index) => (
+                    <tr key={r.status}>
+                      <td>{index + 1}</td>
+                      <td>
+                        <span className={`status-badge ${r.className}`}>
+                          {r.status}
+                        </span>
+                      </td>
+                      <td>
+                        <strong>{r.jumlah}</strong>
+                      </td>
+                    </tr>
+                  ))}
+                  {kolomRekap(pag.pageData).length === 0 && (
+                    <tr>
+                      <td colSpan="3" className="laporan-empty">
+                        Belum ada data surat
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>
 
               <div className="laporan-rekap-total">
                 <span>Total Surat</span>
-                <strong>{dataSurat.length}</strong>
+                <strong>{pag.total}</strong>
               </div>
             </div>
 

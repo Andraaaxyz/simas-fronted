@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-import DashboardLayout from "../../../layouts/DashboardLayout";
-import {
-  formatTanggal,
-  ubahKeISO,
-} from "../../../utils/tanggal";
-
 import {
   Mail,
   Send,
@@ -15,14 +8,27 @@ import {
   Clock,
   CheckCircle,
   Calendar,
+  Trash2,
 } from "lucide-react";
+
+import DashboardLayout from "../../../layouts/DashboardLayout";
+import { formatTanggal } from "../../../utils/tanggal";
+import { api } from "../../../services/apiClient";
+
+const BULAN = [
+  "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+  "Jul", "Agu", "Sep", "Okt", "Nov", "Des",
+];
 
 function Dashboard() {
   const navigate = useNavigate();
 
-  const [jumlahSurat, setJumlahSurat] = useState(0);
-  const [jumlahDisposisi, setJumlahDisposisi] = useState(0);
-  const [jumlahArsip, setJumlahArsip] = useState(0);
+  const [summary, setSummary] = useState({
+    total_surat: 0,
+    total_disposisi: 0,
+    total_arsip: 0,
+  });
+
   const [aktivitas, setAktivitas] = useState([]);
   const [chartData, setChartData] = useState([]);
 
@@ -41,84 +47,56 @@ function Dashboard() {
     year: "numeric",
   });
 
-  const ambilData = () => {
-    const dataSurat =
-      JSON.parse(localStorage.getItem("dataSurat")) || [];
-    const dataDisposisi =
-      JSON.parse(localStorage.getItem("dataDisposisi")) || [];
+  const ambilData = async () => {
+    const [resDash, resLog] = await Promise.allSettled([
+      api.get("/dashboard"),
+      api.get("/log-aktivitas"),
+    ]);
 
-    const dataArsip = dataDisposisi.filter(
-      (item) => item.status === "Selesai"
-    );
+    if (resDash.status === "fulfilled") {
+      const s = resDash.value.data?.data || {};
+      setSummary(s.summary || {});
 
-    setJumlahSurat(dataSurat.length);
-    setJumlahDisposisi(dataDisposisi.length);
-    setJumlahArsip(dataArsip.length);
+      const perBulan = s.surat_per_bulan || [];
+      const byBulan = {};
+      perBulan.forEach((b) => (byBulan[b.bulan] = b.jumlah));
 
-    // AKTIVITAS
-    const aktivitasBaru = [];
-
-    dataSurat.slice(-3).forEach((item) => {
-      aktivitasBaru.push({
-        id: `surat-${item.id}`,
-        type: "surat",
-        icon: <Mail size={18} />,
-        title: "Surat masuk baru",
-        description: `Surat dengan nomor ${item.noSurat}`,
-        time: item.tanggalDiterima,
-      });
-    });
-
-    dataDisposisi.slice(-3).forEach((item) => {
-      aktivitasBaru.push({
-        id: `disposisi-${item.id}`,
-        type: "disposisi",
-        icon: <Send size={18} />,
-        title: "Disposisi surat",
-        description: `Surat diberikan kepada ${item.pengguna}`,
-        time: ubahKeISO(item.tanggal),
-      });
-    });
-
-    dataArsip.slice(-3).forEach((item) => {
-      aktivitasBaru.push({
-        id: `arsip-${item.id}`,
-        type: "arsip",
-        icon: <Archive size={18} />,
-        title: "Arsip digital",
-        description: `Surat ${item.noSurat} telah selesai`,
-        time: ubahKeISO(item.tanggal),
-      });
-    });
-
-    setAktivitas(aktivitasBaru.reverse().slice(0, 5));
-
-    // CHART — hitung surat per bulan (6 bulan terakhir)
-    const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-    const now = new Date();
-    const chart = [];
-
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const m = d.getMonth();
-      const y = d.getFullYear();
-
-      const count = dataSurat.filter((s) => {
-        const t = new Date(s.tanggalDiterima);
-        return t.getMonth() === m && t.getFullYear() === y;
-      }).length;
-
-      chart.push({ label: bulan[m], value: count });
+      setChartData(
+        BULAN.map((label, i) => ({
+          label,
+          value: byBulan[i + 1] || 0,
+        }))
+      );
     }
 
-    setChartData(chart);
+    if (resLog.status === "fulfilled") {
+      const logs = (resLog.value.data?.data?.data || []).slice(0, 5);
+
+      let icon = <Mail size={18} />;
+      const items = logs.map((log) => {
+        const teks = log.aktivitas || "";
+        if (/hapus/i.test(teks)) icon = <Trash2 size={18} />;
+        else if (/disposisi/i.test(teks)) icon = <Send size={18} />;
+        else if (/arsip/i.test(teks)) icon = <Archive size={18} />;
+        else icon = <Mail size={18} />;
+
+        return {
+          id: `log-${log.id}`,
+          icon,
+          title: "Aktivitas sistem",
+          description: teks,
+          time: log.created_at,
+          user: log.user?.nama,
+        };
+      });
+
+      setAktivitas(items);
+    }
   };
 
   useEffect(() => {
     ambilData();
-    const updateData = () => ambilData();
-    window.addEventListener("storage", updateData);
-    return () => window.removeEventListener("storage", updateData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const maxChart = Math.max(...chartData.map((c) => c.value), 1);
@@ -138,7 +116,6 @@ function Dashboard() {
         </div>
       </div>
 
-
       {/* STATISTIK */}
       <div className="stats-grid">
 
@@ -151,7 +128,7 @@ function Dashboard() {
           </div>
           <div>
             <p>Surat Masuk</p>
-            <h3>{jumlahSurat}</h3>
+            <h3>{summary.total_surat}</h3>
             <span>
               <TrendingUp size={14} />
               Total surat masuk
@@ -168,10 +145,10 @@ function Dashboard() {
           </div>
           <div>
             <p>Disposisi</p>
-            <h3>{jumlahDisposisi}</h3>
+            <h3>{summary.total_disposisi}</h3>
             <span>
               <Clock size={14} />
-              Menunggu proses
+              Total disposisi
             </span>
           </div>
         </div>
@@ -185,7 +162,7 @@ function Dashboard() {
           </div>
           <div>
             <p>Arsip Digital</p>
-            <h3>{jumlahArsip}</h3>
+            <h3>{summary.total_arsip}</h3>
             <span>
               <CheckCircle size={14} />
               Arsip tersimpan
@@ -195,13 +172,12 @@ function Dashboard() {
 
       </div>
 
-
       {/* CHART BULANAN */}
       <div className="chart-card">
         <div className="chart-header">
           <div>
             <h3>Surat per Bulan</h3>
-            <p>6 bulan terakhir</p>
+            <p>Tahun berjalan</p>
           </div>
           <div className="stat-trend up">
             <TrendingUp size={12} />
@@ -224,7 +200,6 @@ function Dashboard() {
           ))}
         </div>
       </div>
-
 
       {/* AKTIVITAS */}
       <div className="activity-card">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Eye,
   X,
@@ -9,105 +9,78 @@ import {
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./Disposisi.css";
-import {
-  formatTanggal,
-  ubahKeISO,
-} from "../../../utils/tanggal";
+import { formatTanggal } from "../../../utils/tanggal";
 
 import {
-  usePagination,
+  useServerPagination,
   EntriesSelect,
   PaginationBar,
 } from "../../../component/Pagination";
 
+import { api } from "../../../services/apiClient";
+
+const STATUS_DISPOSISI = [
+  "menunggu",
+  "dibaca",
+  "diproses",
+  "selesai",
+];
+
+const labelStatus = (status) =>
+  status === "menunggu"
+    ? "Menunggu"
+    : status === "dibaca"
+    ? "Dibaca"
+    : status === "diproses"
+    ? "Diproses"
+    : status === "selesai"
+    ? "Selesai"
+    : status || "-";
+
 function Disposisi() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [dataDisposisi, setDataDisposisi] = useState([]);
   const [selectedDisposisi, setSelectedDisposisi] =
     useState(null);
 
-  // =========================
-  // AMBIL DATA DISPOSISI
-  // =========================
-  useEffect(() => {
-    const ambilData = () => {
-      const data =
-        JSON.parse(
-          localStorage.getItem("dataDisposisi")
-        ) || [];
+  const fetcher = (page, perPage) =>
+    api
+      .get("/disposisi", {
+        params: {
+          page,
+          per_page: perPage,
+        },
+      })
+      .then((res) => res.data.data);
 
-      const dataRapi = data.map((item) => ({
-        ...item,
-        tanggal: ubahKeISO(item.tanggal),
-        tanggalDisposisi: ubahKeISO(
-          item.tanggalDisposisi
-        ),
-      }));
+  const pag = useServerPagination(fetcher, [filterStatus]);
 
-      setDataDisposisi(dataRapi);
+  const listDisposisi = pag.pageData.map((item) => ({
+    id: item.id,
+    noSurat: item.surat_masuk?.no_surat || "-",
+    asal: item.surat_masuk?.asal_surat || "-",
+    perihal: item.surat_masuk?.perihal || "-",
+    pengguna: item.penerima?.nama || "-",
+    tanggalDisposisi: item.tanggal_disposisi,
+    status: item.status,
+    instruksi: item.instruksi,
+    catatan: item.catatan,
+  }));
 
-      // Update detail jika sedang dibuka
-      setSelectedDisposisi((prev) => {
-        if (!prev) return null;
+  const cocokSearch = (item) =>
+    `${item.noSurat} ${item.asal} ${item.pengguna} ${item.perihal}`
+      .toLowerCase()
+      .includes(search.toLowerCase());
 
-        const update = dataRapi.find(
-          (item) => item.id === prev.id
-        );
+  const filteredData = listDisposisi.filter(
+    (item) =>
+      cocokSearch(item) &&
+      (!filterStatus || item.status === filterStatus)
+  );
 
-        return update || null;
-      });
-    };
-
-    // Ambil data pertama kali
-    ambilData();
-
-    // Dengarkan perubahan localStorage
-    window.addEventListener(
-      "storage",
-      ambilData
-    );
-
-    // Cek perubahan setiap 1 detik
-    const interval = setInterval(
-      ambilData,
-      1000
-    );
-
-    return () => {
-      window.removeEventListener(
-        "storage",
-        ambilData
-      );
-
-      clearInterval(interval);
-    };
-  }, []);
-
-  // =========================
-  // SEARCH + FILTER
-  // =========================
-  const filteredData = dataDisposisi.filter((item) => {
-    const cocokSearch =
-      `${item.noSurat || ""} ${
-        item.asal || ""
-      } ${item.pengguna || ""} ${
-        item.perihal || ""
-      }`
-        .toLowerCase()
-        .includes(search.toLowerCase());
-
-    const cocokStatus =
-      !filterStatus ||
-      item.status === filterStatus;
-
-    return cocokSearch && cocokStatus;
-  });
-
-  // =========================
-  // PAGINATION
-  // =========================
-  const pag = usePagination(filteredData);
+  const detail =
+    selectedDisposisi &&
+    filteredData.find((d) => d.id === selectedDisposisi.id);
 
   return (
     <DashboardLayout title="Disposisi">
@@ -163,15 +136,9 @@ function Disposisi() {
               Semua Status
             </option>
 
-            {[
-              ...new Set(
-                dataDisposisi
-                  .map((d) => d.status)
-                  .filter(Boolean)
-              ),
-            ].map((st) => (
+            {STATUS_DISPOSISI.map((st) => (
               <option key={st} value={st}>
-                {st}
+                {labelStatus(st)}
               </option>
             ))}
           </select>
@@ -207,9 +174,9 @@ function Disposisi() {
 
             <tbody>
 
-              {pag.pageData.length > 0 ? (
+              {filteredData.length > 0 ? (
 
-                pag.pageData.map((item, index) => (
+                filteredData.map((item, index) => (
 
                   <tr key={item.id}>
 
@@ -248,14 +215,14 @@ function Disposisi() {
                       <span
                         className={
                           item.status ===
-                          "Selesai"
+                          "selesai"
                             ? "status-selesai"
                             : "status-menunggu"
                         }
                       >
 
                         {item.status ===
-                        "Selesai" ? (
+                        "selesai" ? (
 
                           <CheckCircle
                             size={14}
@@ -269,7 +236,7 @@ function Disposisi() {
 
                         )}
 
-                        {item.status}
+                        {labelStatus(item.status)}
 
                       </span>
 
@@ -335,7 +302,7 @@ function Disposisi() {
         {/* =========================
             MODAL DETAIL
         ========================= */}
-        {selectedDisposisi && (
+        {detail && (
 
           <div className="modal-overlay">
 
@@ -377,7 +344,7 @@ function Disposisi() {
                   </span>
 
                   <strong>
-                    {selectedDisposisi.noSurat}
+                    {detail.noSurat}
                   </strong>
 
                 </div>
@@ -389,7 +356,7 @@ function Disposisi() {
                   </span>
 
                   <strong>
-                    {selectedDisposisi.asal}
+                    {detail.asal}
                   </strong>
 
                 </div>
@@ -401,7 +368,7 @@ function Disposisi() {
                   </span>
 
                   <strong>
-                    {selectedDisposisi.perihal}
+                    {detail.perihal}
                   </strong>
 
                 </div>
@@ -413,7 +380,7 @@ function Disposisi() {
                   </span>
 
                   <strong>
-                    {selectedDisposisi.pengguna}
+                    {detail.pengguna}
                   </strong>
 
                 </div>
@@ -425,7 +392,7 @@ function Disposisi() {
                   </span>
 
                   <strong>
-                    {selectedDisposisi.instruksi}
+                    {detail.instruksi}
                   </strong>
 
                 </div>
@@ -437,8 +404,7 @@ function Disposisi() {
                   </span>
 
                   <strong>
-                    {selectedDisposisi.catatan ||
-                      "-"}
+                    {detail.catatan || "-"}
                   </strong>
 
                 </div>
@@ -450,7 +416,7 @@ function Disposisi() {
                   </span>
 
                   <strong>
-                    {formatTanggal(selectedDisposisi.tanggalDisposisi)}
+                    {formatTanggal(detail.tanggalDisposisi)}
                   </strong>
 
                 </div>
@@ -462,7 +428,7 @@ function Disposisi() {
                   </span>
 
                   <strong>
-                    {selectedDisposisi.status}
+                    {labelStatus(detail.status)}
                   </strong>
 
                 </div>

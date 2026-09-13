@@ -7,73 +7,7 @@ import "./SuratMasuk.css";
 import { useToast } from "../../../component/Toast";
 import { ubahKeISO } from "../../../utils/tanggal";
 
-// =========================
-// BACA FILE JADI BASE64
-// =========================
-
-const bacaFile = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () =>
-      resolve({
-        nama: file.name,
-        tipe: file.type,
-        data: reader.result,
-      });
-
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-
-// =========================
-// HELPER OPSI MASTER
-// =========================
-
-function opsiJenisSurat() {
-  const data =
-    JSON.parse(
-      localStorage.getItem("masterJenisSurat")
-    ) || [];
-
-  return data;
-}
-
-function opsiSifatSurat() {
-  const data =
-    JSON.parse(
-      localStorage.getItem("masterSifatSurat")
-    ) || [];
-
-  return data;
-}
-
-function opsiTujuan() {
-  const pimpinan =
-    JSON.parse(localStorage.getItem("masterPimpinan")) || [];
-  const bidang =
-    JSON.parse(localStorage.getItem("masterBidang")) || [];
-
-  const daftar = [
-    ...pimpinan.map((p) => p.nama),
-    ...bidang.map((b) => b.nama),
-  ];
-
-  const unik = [...new Set(daftar.filter(Boolean))];
-
-  if (unik.length > 0) {
-    return unik;
-  }
-
-  return [
-    "Ir. Ahmad Fauzi, M.Si",
-    "Dra. Siti Rahayu, M.M",
-    "Tata Usaha",
-    "Kepegawaian",
-    "Umum",
-    "Keuangan",
-  ];
-}
+import { api } from "../../../services/apiClient";
 
 function SuratFormPage() {
   const { id } = useParams();
@@ -83,190 +17,258 @@ function SuratFormPage() {
   const isEdit = Boolean(id);
 
   const [formSurat, setFormSurat] = useState({
+    noAgenda: "",
     noSurat: "",
     tanggalSurat: "",
     tanggalDiterima: "",
-    jenis: "",
-    sifat: "",
+    jenisId: "",
+    sifatId: "",
     asal: "",
     tujuan: "",
     perihal: "",
-    file: "",
+    file: null,
     lampiran: "",
   });
 
+  const [jenisOptions, setJenisOptions] = useState([]);
+  const [sifatOptions, setSifatOptions] = useState([]);
+  const [tujuanOptions, setTujuanOptions] = useState([]);
   const [selectedSurat, setSelectedSurat] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  // =========================
+  // AMBIL MASTER TERKAIT
+  // =========================
+  useEffect(() => {
+    Promise.all([
+      api.get("/jenis-surat"),
+      api.get("/sifat-surat"),
+      api.get("/bidangs"),
+    ])
+      .then(([jenisRes, sifatRes, bidangRes]) => {
+        const jenis =
+          jenisRes.data?.data ||
+          jenisRes.data ||
+          [];
+        const sifat =
+          sifatRes.data?.data ||
+          sifatRes.data ||
+          [];
+        const bidang =
+          bidangRes.data?.data ||
+          bidangRes.data ||
+          [];
+
+        setJenisOptions(jenis);
+        setSifatOptions(sifat);
+
+        const namaBidang = bidang.map(
+          (b) => b.nama_bidang
+        );
+
+        api
+          .get("/users", {
+            params: { role: "Pimpinan", per_page: 50 },
+          })
+          .then((usersRes) => {
+            const pimpinan =
+              usersRes.data?.data?.data ||
+              usersRes.data?.data ||
+              [];
+
+            setTujuanOptions([
+              ...new Set([
+                ...pimpinan.map((p) => p.nama),
+                ...namaBidang,
+              ]),
+            ]);
+          })
+          .catch(() => setTujuanOptions(namaBidang));
+      })
+      .catch(() => {
+        showToast("error", "Gagal memuat data master!");
+      });
+  }, []);
 
   // =========================
   // AMBIL DATA SURAT (UTK EDIT)
   // =========================
+  const ambilSurat = async (suratId) => {
+    try {
+      const { data } = await api.get(
+        `/surat-masuk/${suratId}`
+      );
+      const cari = data.data || data;
 
-  useEffect(() => {
-    if (!isEdit) return;
+      setSelectedSurat(cari);
 
-    const data =
-      JSON.parse(localStorage.getItem("dataSurat")) || [];
-
-    const cari = data.find((s) => String(s.id) === String(id));
-
-    if (!cari) {
+      setFormSurat({
+        noAgenda: cari.no_agenda || "",
+        noSurat: cari.no_surat || "",
+        tanggalSurat:
+          ubahKeISO(cari.tanggal_surat) || "",
+        tanggalDiterima:
+          ubahKeISO(cari.tanggal_terima) || "",
+        jenisId: cari.jenis_surat_id || "",
+        sifatId: cari.sifat_surat_id || "",
+        asal: cari.asal_surat || "",
+        tujuan: cari.tujuan_surat || "",
+        perihal: cari.perihal || "",
+        file: null,
+        lampiran: cari.lampiran || "",
+      });
+    } catch {
       showToast("error", "Surat tidak ditemukan!");
       navigate("/admin/surat-masuk", { replace: true });
-      return;
+    }
+  };
+
+  useEffect(() => {
+    if (isEdit && id) {
+      ambilSurat(id);
+    }
+  }, [id, isEdit]);
+
+  // =========================
+  // GENERATE NO AGENDA (BARU)
+  // =========================
+  const generateNoAgenda = () => {
+    api
+      .get("/surat-masuk", { params: { page: 1, per_page: 50 } })
+      .then((res) => {
+        const meta = res.data?.data;
+        const total = meta?.total || 0;
+
+        setFormSurat((prev) => ({
+          ...prev,
+          noAgenda: String(total + 1).padStart(3, "0"),
+        }));
+      })
+      .catch(() => {
+        setFormSurat((prev) => ({
+          ...prev,
+          noAgenda: "001",
+        }));
+      });
+  };
+
+  useEffect(() => {
+    if (!isEdit) generateNoAgenda();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const validasi = () => {
+    if (
+      !formSurat.noAgenda.trim() ||
+      !formSurat.noSurat.trim() ||
+      !formSurat.tanggalSurat ||
+      !formSurat.tanggalDiterima ||
+      !formSurat.jenisId ||
+      !formSurat.sifatId ||
+      !formSurat.asal.trim() ||
+      !formSurat.tujuan.trim() ||
+      !formSurat.perihal.trim() ||
+      (!formSurat.file && !isEdit) ||
+      !formSurat.lampiran.trim()
+    ) {
+      showToast("warning", "Semua data surat wajib diisi!");
+      return false;
     }
 
-    setSelectedSurat(cari);
+    if (formSurat.file && formSurat.file.size > 5 * 1024 * 1024) {
+      showToast("warning", "Ukuran file maksimal 5MB.");
+      return false;
+    }
 
-    setFormSurat({
-      noSurat: cari.noSurat || "",
-      tanggalSurat: ubahKeISO(cari.tanggalSurat) || "",
-      tanggalDiterima: ubahKeISO(cari.tanggalDiterima) || "",
-      jenis: cari.jenis || "",
-      sifat: cari.sifat || "",
-      asal: cari.asal || "",
-      tujuan: cari.tujuan || "",
-      perihal: cari.perihal || "",
-      file: "",
-      lampiran: cari.lampiran || "",
-    });
-  }, [id, isEdit, navigate, showToast]);
-
-  // =========================
-  // GENERATE NO AGENDA
-  // =========================
-
-  const generateNoAgenda = (data) => {
-    const max = data.reduce((acc, item) => {
-      const n = parseInt(item.noAgenda, 10) || 0;
-      return n > acc ? n : acc;
-    }, 0);
-
-    return String(max + 1).padStart(3, "0");
+    return true;
   };
 
   // =========================
   // TAMBAH SURAT
   // =========================
-
   const tambahSurat = async () => {
-    if (
-      !formSurat.noSurat ||
-      !formSurat.tanggalSurat ||
-      !formSurat.tanggalDiterima ||
-      !formSurat.jenis ||
-      !formSurat.sifat ||
-      !formSurat.asal ||
-      !formSurat.tujuan ||
-      !formSurat.perihal ||
-      !formSurat.file ||
-      !formSurat.lampiran
-    ) {
-      showToast("warning", "Semua data surat wajib diisi!");
-      return;
-    }
+    if (!validasi()) return;
 
-    const dataSurat =
-      JSON.parse(localStorage.getItem("dataSurat")) || [];
+    setSaving(true);
 
-    const fileSimpan = await bacaFile(formSurat.file);
-
-    const suratBaru = {
-      id: Date.now(),
-      noAgenda: generateNoAgenda(dataSurat),
-      noSurat: formSurat.noSurat,
-      tanggalSurat: formSurat.tanggalSurat,
-      tanggalDiterima: formSurat.tanggalDiterima,
-      jenis: formSurat.jenis,
-      sifat: formSurat.sifat,
-      asal: formSurat.asal,
-      tujuan: formSurat.tujuan,
-      perihal: formSurat.perihal,
-      file: fileSimpan,
-      lampiran: formSurat.lampiran,
-      status: "Baru",
-      disposisi: null,
-      timeline: [
-        {
-          label: "Surat diterima",
-          tanggal: formSurat.tanggalDiterima,
-        },
-      ],
-    };
-
-    const dataBaru = [...dataSurat, suratBaru];
+    const body = new FormData();
+    body.append("jenis_surat_id", formSurat.jenisId);
+    body.append("sifat_surat_id", formSurat.sifatId);
+    body.append("no_agenda", formSurat.noAgenda.trim());
+    body.append("no_surat", formSurat.noSurat.trim());
+    body.append("asal_surat", formSurat.asal.trim());
+    body.append("tujuan_surat", formSurat.tujuan.trim());
+    body.append("perihal", formSurat.perihal.trim());
+    body.append("tanggal_surat", formSurat.tanggalSurat);
+    body.append("tanggal_terima", formSurat.tanggalDiterima);
+    body.append("lampiran", formSurat.lampiran.trim());
+    body.append("file_surat", formSurat.file);
 
     try {
-      localStorage.setItem(
-        "dataSurat",
-        JSON.stringify(dataBaru)
-      );
-    } catch {
-      showToast("error", "Gagal menyimpan: file terlalu besar untuk penyimpanan lokal.");
-      return;
+      await api.post("/surat-masuk", body, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      showToast("success", "Surat berhasil ditambahkan!");
+      navigate("/admin/surat-masuk");
+    } catch (err) {
+      const msg =
+        err.response?.data?.errors?.file_surat?.[0] ||
+        err.response?.data?.errors?.no_agenda?.[0] ||
+        err.response?.data?.errors?.no_surat?.[0] ||
+        err.response?.data?.message ||
+        "Gagal menambahkan surat!";
+      showToast("error", msg);
+    } finally {
+      setSaving(false);
     }
-
-    showToast("success", "Surat berhasil ditambahkan!");
-    navigate("/admin/surat-masuk");
   };
 
   // =========================
   // SIMPAN EDIT
   // =========================
-
   const simpanEdit = async () => {
-    if (
-      !formSurat.noSurat ||
-      !formSurat.tanggalSurat ||
-      !formSurat.tanggalDiterima ||
-      !formSurat.jenis ||
-      !formSurat.sifat ||
-      !formSurat.asal ||
-      !formSurat.tujuan ||
-      !formSurat.perihal ||
-      (!formSurat.file && !selectedSurat.file) ||
-      !formSurat.lampiran
-    ) {
-      showToast("warning", "Semua data surat wajib diisi!");
-      return;
+    if (!validasi()) return;
+
+    setSaving(true);
+
+    const body = new FormData();
+    body.append("jenis_surat_id", formSurat.jenisId);
+    body.append("sifat_surat_id", formSurat.sifatId);
+    body.append("no_agenda", formSurat.noAgenda.trim());
+    body.append("no_surat", formSurat.noSurat.trim());
+    body.append("asal_surat", formSurat.asal.trim());
+    body.append("tujuan_surat", formSurat.tujuan.trim());
+    body.append("perihal", formSurat.perihal.trim());
+    body.append("tanggal_surat", formSurat.tanggalSurat);
+    body.append("tanggal_terima", formSurat.tanggalDiterima);
+    body.append("lampiran", formSurat.lampiran.trim());
+    body.append("_method", "PUT");
+
+    if (formSurat.file) {
+      body.append("file_surat", formSurat.file);
     }
-
-    const dataSurat =
-      JSON.parse(localStorage.getItem("dataSurat")) || [];
-
-    const fileSimpan = formSurat.file
-      ? await bacaFile(formSurat.file)
-      : selectedSurat.file;
-
-    const dataBaru = dataSurat.map((item) =>
-      String(item.id) === String(selectedSurat.id)
-        ? {
-            ...item,
-            noSurat: formSurat.noSurat,
-            tanggalSurat: formSurat.tanggalSurat,
-            tanggalDiterima: formSurat.tanggalDiterima,
-            jenis: formSurat.jenis,
-            sifat: formSurat.sifat,
-            asal: formSurat.asal,
-            tujuan: formSurat.tujuan,
-            perihal: formSurat.perihal,
-            file: fileSimpan,
-            lampiran: formSurat.lampiran,
-          }
-        : item
-    );
 
     try {
-      localStorage.setItem(
-        "dataSurat",
-        JSON.stringify(dataBaru)
-      );
-    } catch {
-      showToast("error", "Gagal menyimpan: file terlalu besar untuk penyimpanan lokal.");
-      return;
+      await api.post(`/surat-masuk/${selectedSurat.id}`, body, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      showToast("success", "Surat berhasil diperbarui!");
+      navigate("/admin/surat-masuk");
+    } catch (err) {
+      const msg =
+        err.response?.data?.errors?.file_surat?.[0] ||
+        err.response?.data?.errors?.no_agenda?.[0] ||
+        err.response?.data?.errors?.no_surat?.[0] ||
+        err.response?.data?.message ||
+        "Gagal memperbarui surat!";
+      showToast("error", msg);
+    } finally {
+      setSaving(false);
     }
+  };
 
-    showToast("success", "Surat berhasil diperbarui!");
-    navigate("/admin/surat-masuk");
+  const ubah = (field, value) => {
+    setFormSurat((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -308,6 +310,23 @@ function SuratFormPage() {
               <div className="form-group">
 
                 <label>
+                  No. Agenda
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Contoh: 001"
+                  value={formSurat.noAgenda}
+                  onChange={(e) =>
+                    ubah("noAgenda", e.target.value)
+                  }
+                />
+
+              </div>
+
+              <div className="form-group">
+
+                <label>
                   No. Surat
                 </label>
 
@@ -316,11 +335,7 @@ function SuratFormPage() {
                   placeholder="Contoh: 001/089/SK/2026"
                   value={formSurat.noSurat}
                   onChange={(e) =>
-                    setFormSurat({
-                      ...formSurat,
-                      noSurat:
-                        e.target.value,
-                    })
+                    ubah("noSurat", e.target.value)
                   }
                 />
 
@@ -333,37 +348,51 @@ function SuratFormPage() {
                 </label>
 
                 <select
-                  value={formSurat.jenis}
+                  value={formSurat.jenisId}
                   onChange={(e) =>
-                    setFormSurat({
-                      ...formSurat,
-                      jenis: e.target.value,
-                    })
+                    ubah("jenisId", e.target.value)
                   }
                 >
                   <option value="">
                     Pilih Jenis Surat
                   </option>
 
-                  {opsiJenisSurat().length > 0
-                    ? opsiJenisSurat().map((j) => (
-                        <option
-                          key={j.id}
-                          value={j.nama}
-                        >
-                          {j.nama}
-                        </option>
-                      ))
-                    : [
-                        "Surat Edaran",
-                        "Surat Undangan",
-                        "Surat Keputusan",
-                        "Surat Permohonan",
-                      ].map((j) => (
-                        <option key={j} value={j}>
-                          {j}
-                        </option>
-                      ))}
+                  {jenisOptions.map((j) => (
+                    <option
+                      key={j.id}
+                      value={j.id}
+                    >
+                      {j.nama_jenis}
+                    </option>
+                  ))}
+                </select>
+
+              </div>
+
+              <div className="form-group">
+
+                <label>
+                  Sifat Surat
+                </label>
+
+                <select
+                  value={formSurat.sifatId}
+                  onChange={(e) =>
+                    ubah("sifatId", e.target.value)
+                  }
+                >
+                  <option value="">
+                    Pilih Sifat Surat
+                  </option>
+
+                  {sifatOptions.map((s) => (
+                    <option
+                      key={s.id}
+                      value={s.id}
+                    >
+                      {s.nama_sifat}
+                    </option>
+                  ))}
                 </select>
 
               </div>
@@ -378,11 +407,7 @@ function SuratFormPage() {
                   type="date"
                   value={formSurat.tanggalSurat}
                   onChange={(e) =>
-                    setFormSurat({
-                      ...formSurat,
-                      tanggalSurat:
-                        e.target.value,
-                    })
+                    ubah("tanggalSurat", e.target.value)
                   }
                 />
 
@@ -398,55 +423,9 @@ function SuratFormPage() {
                   type="date"
                   value={formSurat.tanggalDiterima}
                   onChange={(e) =>
-                    setFormSurat({
-                      ...formSurat,
-                      tanggalDiterima:
-                        e.target.value,
-                    })
+                    ubah("tanggalDiterima", e.target.value)
                   }
                 />
-
-              </div>
-
-              <div className="form-group">
-
-                <label>
-                  Sifat Surat
-                </label>
-
-                <select
-                  value={formSurat.sifat}
-                  onChange={(e) =>
-                    setFormSurat({
-                      ...formSurat,
-                      sifat: e.target.value,
-                    })
-                  }
-                >
-                  <option value="">
-                    Pilih Sifat Surat
-                  </option>
-
-                  {opsiSifatSurat().length > 0
-                    ? opsiSifatSurat().map((s) => (
-                        <option
-                          key={s.id}
-                          value={s.nama}
-                        >
-                          {s.nama}
-                        </option>
-                      ))
-                    : [
-                        "Biasa",
-                        "Penting",
-                        "Segera",
-                        "Rahasia",
-                      ].map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                </select>
 
               </div>
 
@@ -461,10 +440,7 @@ function SuratFormPage() {
                   placeholder="Contoh: Dinas Pendidikan"
                   value={formSurat.asal}
                   onChange={(e) =>
-                    setFormSurat({
-                      ...formSurat,
-                      asal: e.target.value,
-                    })
+                    ubah("asal", e.target.value)
                   }
                 />
 
@@ -479,17 +455,14 @@ function SuratFormPage() {
                 <select
                   value={formSurat.tujuan}
                   onChange={(e) =>
-                    setFormSurat({
-                      ...formSurat,
-                      tujuan: e.target.value,
-                    })
+                    ubah("tujuan", e.target.value)
                   }
                 >
                   <option value="">
                     Pilih Tujuan
                   </option>
 
-                  {opsiTujuan().map((t) => (
+                  {tujuanOptions.map((t) => (
                     <option key={t} value={t}>
                       {t}
                     </option>
@@ -509,10 +482,7 @@ function SuratFormPage() {
                   placeholder="Masukkan perihal surat"
                   value={formSurat.perihal}
                   onChange={(e) =>
-                    setFormSurat({
-                      ...formSurat,
-                      perihal: e.target.value,
-                    })
+                    ubah("perihal", e.target.value)
                   }
                 />
 
@@ -526,29 +496,23 @@ function SuratFormPage() {
 
                 <input
                   type="file"
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                  accept=".pdf"
                   onChange={(e) => {
                     const f =
                       e.target.files &&
                       e.target.files[0];
 
-                    if (
-                      f &&
-                      f.size > 2 * 1024 * 1024
-                    ) {
+                    if (f && f.size > 5 * 1024 * 1024) {
                       showToast(
                         "warning",
-                        "Ukuran file maksimal 2MB."
+                        "Ukuran file maksimal 5MB."
                       );
 
                       e.target.value = "";
                       return;
                     }
 
-                    setFormSurat({
-                      ...formSurat,
-                      file: f || "",
-                    });
+                    ubah("file", f || null);
                   }}
                 />
 
@@ -560,13 +524,10 @@ function SuratFormPage() {
                 ) : (
                   isEdit &&
                   selectedSurat &&
-                  selectedSurat.file && (
+                  selectedSurat.file_surat && (
                     <span className="file-terpilih">
                       File saat ini:{" "}
-                      {typeof selectedSurat.file ===
-                      "string"
-                        ? selectedSurat.file
-                        : selectedSurat.file.nama}
+                      {selectedSurat.file_surat}
                     </span>
                   )
                 )}
@@ -584,11 +545,7 @@ function SuratFormPage() {
                   placeholder="Lampiran surat"
                   value={formSurat.lampiran}
                   onChange={(e) =>
-                    setFormSurat({
-                      ...formSurat,
-                      lampiran:
-                        e.target.value,
-                    })
+                    ubah("lampiran", e.target.value)
                   }
                 />
 
@@ -610,8 +567,11 @@ function SuratFormPage() {
             <button
               className="btn-simpan"
               onClick={isEdit ? simpanEdit : tambahSurat}
+              disabled={saving}
             >
-              {isEdit
+              {saving
+                ? "Menyimpan..."
+                : isEdit
                 ? "Simpan Perubahan"
                 : "Tambah Surat"}
             </button>
