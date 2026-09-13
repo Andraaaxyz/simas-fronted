@@ -104,8 +104,7 @@ export function buatHTMLPrint({
     color: #0d9488;
     letter-spacing: 1px;
   }
-  .kop h2 { font-size: 17px; margin-top: 6px; }
-  .kop p { font-size: 13px; color: #64748b; margin-top: 4px; }
+  .kop p { font-size: 13px; color: #64748b; margin-top: 6px; }
   table {
     width: 100%;
     border-collapse: collapse;
@@ -132,8 +131,7 @@ export function buatHTMLPrint({
 </head>
 <body>
   <div class="kop">
-    <h1>SISTEM INFORMASI MANAJEMEN ARSIP SURAT (SIMAS)</h1>
-    <h2>${eskape(title)}</h2>
+    <h1>${eskape(title)}</h1>
     <p>${eskape(subtitle)}</p>
   </div>
   <table>

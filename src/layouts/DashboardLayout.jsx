@@ -318,7 +318,6 @@ function DashboardLayout({ title, children }) {
                     </div>
                     <div>
                       <strong>{roleLabel}</strong>
-                      <span>SIMAS</span>
                     </div>
                   </div>
 

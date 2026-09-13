@@ -181,8 +181,8 @@ function Laporan() {
     ];
 
     buatHTMLPrint({
-      title: "Laporan Surat Masuk",
-      subtitle: `Rekapitulasi data surat masuk SIMAS - ${filterStatus === "Semua" ? "Semua Status" : filterStatus}`,
+      title: "Laporan Surat",
+      subtitle: `Rekapitulasi data surat masuk - ${filterStatus === "Semua" ? "Semua Status" : filterStatus}`,
       columns,
       rows: filteredData,
       footer: `Total surat: ${filteredData.length}`,
@@ -206,7 +206,7 @@ function Laporan() {
             <h1>Laporan Surat</h1>
 
             <p>
-              Rekapitulasi data surat masuk SIMAS
+              Rekapitulasi data surat masuk
             </p>
           </div>
         </div>

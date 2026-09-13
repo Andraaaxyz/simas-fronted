@@ -171,7 +171,7 @@ function Laporan() {
     ];
 
     buatHTMLPrint({
-      title: "Laporan Surat Pimpinan",
+      title: "Laporan Surat",
       subtitle: `Monitoring dan rekapitulasi administrasi surat - ${filterStatus === "Semua" ? "Semua Status" : filterStatus}`,
       columns,
       rows: filteredData,
