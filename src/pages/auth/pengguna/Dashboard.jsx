@@ -12,7 +12,7 @@ import {
   Calendar,
 } from "lucide-react";
 
-import { api } from "../../../services/apiClient";
+import { api, getAuth } from "../../../services/apiClient";
 
 const BULAN = [
   "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
@@ -36,6 +36,8 @@ function Dashboard() {
     if (jam < 18) return "Selamat sore";
     return "Selamat malam";
   };
+
+  const namaUser = getAuth()?.user?.nama || "Pengguna";
 
   const hariIni = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
@@ -75,7 +77,7 @@ function Dashboard() {
 
       <div className="welcome-card">
         <div>
-          <h2>Selamat Datang, Pengguna</h2>
+          <h2>Selamat Datang, {namaUser}</h2>
           <p>{getSapaan()}! Have a nice day today, you can do it! 💪</p>
           <div className="welcome-date">
             <Calendar size={14} />
