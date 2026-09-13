@@ -893,3 +893,66 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text);
   letter-spacing: -0.3px;
 }
+
+/* ============================================
+   GESER TABEL (HORIZONTAL SCROLL)
+   - kartu tabel bisa digeser horizontal
+   - penggaris geser (custom scrollbar) selalu tampil
+============================================ */
+
+.page-content .table-card {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.disposisi-card,
+.arsip-table-card,
+.master-card,
+.arsip-table-wrapper,
+.laporan-table-wrapper,
+.table-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.table-card::-webkit-scrollbar,
+.disposisi-card::-webkit-scrollbar,
+.arsip-table-card::-webkit-scrollbar,
+.master-card::-webkit-scrollbar,
+.arsip-table-wrapper::-webkit-scrollbar,
+.laporan-table-wrapper::-webkit-scrollbar,
+.table-wrapper::-webkit-scrollbar {
+  height: 10px;
+}
+
+.table-card::-webkit-scrollbar-track,
+.disposisi-card::-webkit-scrollbar-track,
+.arsip-table-card::-webkit-scrollbar-track,
+.master-card::-webkit-scrollbar-track,
+.arsip-table-wrapper::-webkit-scrollbar-track,
+.laporan-table-wrapper::-webkit-scrollbar-track,
+.table-wrapper::-webkit-scrollbar-track {
+  background: #eef2f7;
+  border-radius: 999px;
+}
+
+.table-card::-webkit-scrollbar-thumb,
+.disposisi-card::-webkit-scrollbar-thumb,
+.arsip-table-card::-webkit-scrollbar-thumb,
+.master-card::-webkit-scrollbar-thumb,
+.arsip-table-wrapper::-webkit-scrollbar-thumb,
+.laporan-table-wrapper::-webkit-scrollbar-thumb,
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #c3ccda;
+  border-radius: 999px;
+}
+
+.table-card::-webkit-scrollbar-thumb:hover,
+.disposisi-card::-webkit-scrollbar-thumb:hover,
+.arsip-table-card::-webkit-scrollbar-thumb:hover,
+.master-card::-webkit-scrollbar-thumb:hover,
+.arsip-table-wrapper::-webkit-scrollbar-thumb:hover,
+.laporan-table-wrapper::-webkit-scrollbar-thumb:hover,
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
