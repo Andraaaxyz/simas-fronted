@@ -30,6 +30,7 @@ import MasterBidang from "./pages/auth/admin/Bidang";
 import PimpinanDashboard from "./pages/auth/pimpinan/Dashboard";
 import PimpinanSuratMasuk from "./pages/auth/pimpinan/SuratMasuk";
 import PimpinanSuratDetailPage from "./pages/auth/pimpinan/SuratDetailPage";
+import PimpinanDisposisiFormPage from "./pages/auth/pimpinan/DisposisiFormPage";
 import PimpinanArsip from "./pages/auth/pimpinan/ArsipDigital";
 import PimpinanProfil from "./pages/auth/pimpinan/Profil";
 import PimpinanLaporan from "./pages/auth/pimpinan/Laporan";
@@ -166,6 +167,11 @@ function App() {
           <Route
             path="/pimpinan/surat-masuk/lihat/:id"
             element={<PimpinanSuratDetailPage />}
+          />
+
+          <Route
+            path="/pimpinan/surat-masuk/disposisi/:id"
+            element={<PimpinanDisposisiFormPage />}
           />
 
           <Route
