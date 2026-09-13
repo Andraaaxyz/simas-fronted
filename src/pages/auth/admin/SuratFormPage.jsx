@@ -66,24 +66,7 @@ function SuratFormPage() {
           (b) => b.nama_bidang
         );
 
-        api
-          .get("/users", {
-            params: { role: "Pimpinan", per_page: 50 },
-          })
-          .then((usersRes) => {
-            const pimpinan =
-              usersRes.data?.data?.data ||
-              usersRes.data?.data ||
-              [];
-
-            setTujuanOptions([
-              ...new Set([
-                ...pimpinan.map((p) => p.nama),
-                ...namaBidang,
-              ]),
-            ]);
-          })
-          .catch(() => setTujuanOptions(namaBidang));
+        setTujuanOptions(namaBidang);
       })
       .catch(() => {
         showToast("error", "Gagal memuat data master!");
