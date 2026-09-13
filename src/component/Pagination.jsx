@@ -1,10 +1,112 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 
 import "./Pagination.css";
+
+// =========================
+// HOOK USE SERVER PAGINATION
+// =========================
+/* eslint-disable react-hooks/exhaustive-deps */
+export function useServerPagination(fetcher, deps = []) {
+  const [entries, setEntries] = useState(5);
+  const [page, setPage] = useState(1);
+  const [tabel, setTabel] = useState({
+    data: [],
+    total: 0,
+    last_page: 1,
+    per_page: 0,
+  });
+  const [loading, setLoading] = useState(false);
+  const [muatUlang, setMuatUlang] = useState(0);
+
+  const reload = () => setMuatUlang((x) => x + 1);
+
+  const setHalaman = (hal) => {
+    setPage(Math.max(1, hal));
+  };
+
+  useEffect(() => {
+    setPage(1);
+  }, deps);
+
+  useEffect(() => {
+    let aktif = true;
+
+    setLoading(true);
+
+    fetcher(page, entries)
+      .then((res) => {
+        if (!aktif) return;
+
+        const current = res.current_page || 1;
+        const last = res.last_page || 1;
+
+        setTabel({
+          data: res.data || [],
+          total: res.total || 0,
+          last_page: last,
+          per_page: res.per_page || entries,
+        });
+
+        if (current > last) {
+          setPage(last);
+        }
+      })
+      .catch(() => {
+        if (aktif) {
+          setTabel({
+            data: [],
+            total: 0,
+            last_page: 1,
+            per_page: entries,
+          });
+        }
+      })
+      .finally(() => {
+        if (aktif) setLoading(false);
+      });
+
+    return () => {
+      aktif = false;
+    };
+  }, [page, entries, muatUlang, ...deps]);
+
+  const totalPage =
+    tabel.per_page > 0
+      ? Math.max(1, Math.ceil(tabel.total / tabel.per_page))
+      : 1;
+
+  const start =
+    tabel.total === 0
+      ? 0
+      : (page - 1) * (tabel.per_page || entries) + 1;
+
+  const end = Math.min(
+    page * (tabel.per_page || entries),
+    tabel.total
+  );
+
+  return {
+    entries,
+    changeEntries: (e) => {
+      setEntries(Number(e.target.value) || 5);
+      setPage(1);
+    },
+    page,
+    goToPage: setHalaman,
+    totalPages: totalPage,
+    start,
+    end,
+    total: tabel.total,
+    pageData: tabel.data,
+    loading,
+    reload,
+  };
+}
+/* eslint-enable react-hooks/exhaustive-deps */
 
 // =========================
 // HOOK USE PAGINATION
