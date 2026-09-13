@@ -12,12 +12,21 @@ import {
   Calendar,
 } from "lucide-react";
 
+import { api } from "../../../services/apiClient";
+
+const BULAN = [
+  "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+  "Jul", "Agu", "Sep", "Okt", "Nov", "Des",
+];
+
 function Dashboard() {
   const navigate = useNavigate();
 
-  const [jumlahSurat, setJumlahSurat] = useState(0);
-  const [jumlahDisposisi, setJumlahDisposisi] = useState(0);
-  const [jumlahArsip, setJumlahArsip] = useState(0);
+  const [summary, setSummary] = useState({
+    total_surat: 0,
+    total_disposisi: 0,
+    total_arsip: 0,
+  });
   const [chartData, setChartData] = useState([]);
 
   const getSapaan = () => {
@@ -35,45 +44,28 @@ function Dashboard() {
     year: "numeric",
   });
 
-  const ambilData = () => {
-    const dataSurat =
-      JSON.parse(localStorage.getItem("dataSurat")) || [];
-    const dataDisposisi =
-      JSON.parse(localStorage.getItem("dataDisposisi")) || [];
-
-    const dataArsip = dataDisposisi.filter(
-      (item) => item.status === "Selesai"
-    );
-
-    setJumlahSurat(dataSurat.length);
-    setJumlahDisposisi(dataDisposisi.length);
-    setJumlahArsip(dataArsip.length);
-
-    const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-    const now = new Date();
-    const chart = [];
-
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const m = d.getMonth();
-      const y = d.getFullYear();
-
-      const count = dataSurat.filter((s) => {
-        const t = new Date(s.tanggalDiterima);
-        return t.getMonth() === m && t.getFullYear() === y;
-      }).length;
-
-      chart.push({ label: bulan[m], value: count });
-    }
-
-    setChartData(chart);
-  };
-
   useEffect(() => {
-    ambilData();
-    const updateData = () => ambilData();
-    window.addEventListener("storage", updateData);
-    return () => window.removeEventListener("storage", updateData);
+    api
+      .get("/dashboard")
+      .then((res) => {
+        const d = res.data?.data || {};
+
+        setSummary(d.summary || {});
+
+        const perBulan = d.surat_per_bulan || [];
+        const byBulan = {};
+        perBulan.forEach((b) => (byBulan[b.bulan] = b.jumlah));
+
+        setChartData(
+          BULAN.map((label, i) => ({
+            label,
+            value: byBulan[i + 1] || 0,
+          }))
+        );
+      })
+      .catch(() =>
+        setSummary({ total_surat: 0, total_disposisi: 0, total_arsip: 0 })
+      );
   }, []);
 
   const maxChart = Math.max(...chartData.map((c) => c.value), 1);
@@ -97,7 +89,7 @@ function Dashboard() {
           <div className="stat-icon blue"><Mail size={25} /></div>
           <div>
             <p>Surat Masuk</p>
-            <h3>{jumlahSurat}</h3>
+            <h3>{summary.total_surat}</h3>
             <span><TrendingUp size={14} /> Total surat masuk</span>
           </div>
         </div>
@@ -105,9 +97,9 @@ function Dashboard() {
         <div className="stat-card" onClick={() => navigate("/pengguna/disposisi")}>
           <div className="stat-icon orange"><Clock size={25} /></div>
           <div>
-            <p>Menunggu</p>
-            <h3>{jumlahDisposisi}</h3>
-            <span><Clock size={14} /> Dalam proses</span>
+            <p>Disposisi</p>
+            <h3>{summary.total_disposisi}</h3>
+            <span><Clock size={14} /> Total disposisi</span>
           </div>
         </div>
 
@@ -115,7 +107,7 @@ function Dashboard() {
           <div className="stat-icon green"><Archive size={25} /></div>
           <div>
             <p>Arsip Digital</p>
-            <h3>{jumlahArsip}</h3>
+            <h3>{summary.total_arsip}</h3>
             <span><CheckCircle size={14} /> Telah diproses</span>
           </div>
         </div>
@@ -125,7 +117,7 @@ function Dashboard() {
         <div className="chart-header">
           <div>
             <h3>Surat per Bulan</h3>
-            <p>6 bulan terakhir</p>
+            <p>Tahun berjalan</p>
           </div>
         </div>
         <div className="chart-bars">

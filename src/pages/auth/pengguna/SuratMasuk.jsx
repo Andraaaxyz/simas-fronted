@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -11,10 +11,18 @@ import "./SuratMasuk.css";
 import { formatTanggal } from "../../../utils/tanggal";
 
 import {
-  usePagination,
+  useServerPagination,
   EntriesSelect,
   PaginationBar,
 } from "../../../component/Pagination";
+
+import { api } from "../../../services/apiClient";
+
+const STATUS_MAP = {
+  baru: { label: "Baru", className: "status-baru" },
+  didisposisi: { label: "Didisposisi", className: "status-didisposisikan" },
+  diarsipkan: { label: "Diarsipkan", className: "status-diarsipkan" },
+};
 
 function SuratMasuk() {
   const navigate = useNavigate();
@@ -22,168 +30,14 @@ function SuratMasuk() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
 
-  const [dataSurat, setDataSurat] = useState([]);
+  const fetcher = (page, perPage) =>
+    api
+      .get("/surat-masuk", {
+        params: { page, per_page: perPage, search, status: filterStatus },
+      })
+      .then((res) => res.data?.data || { data: [] });
 
-  // =========================
-  // MIGRASI DATA LAMA
-  // =========================
-
-  const migrasiData = (data) =>
-    data.map((item) => {
-      if (item.perihal !== undefined) return item;
-
-      return {
-        ...item,
-        noAgenda: item.noAgenda || "",
-        tanggalSurat: item.tanggalSurat || "",
-        tanggalDiterima: item.tanggalDiterima || item.tanggal || "",
-        jenis: item.jenis || "",
-        sifat: item.sifat || "",
-        tujuan: item.tujuan || "",
-        perihal: item.perihal || item.isi || "",
-        file: item.file || "",
-        lampiran: item.lampiran || "",
-      };
-    });
-
-  // =========================
-  // AMBIL DATA SURAT
-  // =========================
-
-  useEffect(() => {
-    const dataLama =
-      JSON.parse(localStorage.getItem("dataSurat")) || [];
-
-    if (dataLama.length > 0) {
-      setDataSurat(migrasiData(dataLama));
-    } else {
-      const dataAwal = [
-        {
-          id: 1,
-          noAgenda: "001",
-          noSurat: "001/089/SK/2026",
-          tanggalSurat: "2026-08-19",
-          tanggalDiterima: "2026-08-20",
-          jenis: "Surat Undangan",
-          sifat: "Penting",
-asal: "Dinas Pendidikan",
-            tujuan: "Bidang Tata Usaha",
-            perihal: "Undangan Rapat Koordinasi",
-          file: "undangan-rapat.pdf",
-          lampiran: "Agenda rapat",
-          status: "Baru",
-          disposisi: null,
-          timeline: [
-            {
-              label: "Surat diterima",
-              tanggal: "2026-08-20",
-            },
-          ],
-        },
-        {
-          id: 2,
-          noAgenda: "002",
-          noSurat: "002/090/SK/2026",
-          tanggalSurat: "2026-08-20",
-          tanggalDiterima: "2026-08-21",
-          jenis: "Surat Edaran",
-          sifat: "Biasa",
-asal: "Dinas Kesehatan",
-            tujuan: "Ir. Ahmad Fauzi, M.Si",
-            perihal: "Pemberitahuan Kegiatan Senam",
-          file: "edaran-kegiatan.pdf",
-          lampiran: "-",
-          status: "Didisposisikan",
-          disposisi: {
-            tujuan: "Budi Santoso, S.E",
-            instruksi: "Segera ditindaklanjuti",
-            catatan: "Mohon diproses dengan baik.",
-            tanggalDisposisi: "2026-08-22",
-          },
-          timeline: [
-            {
-              label: "Surat diterima",
-              tanggal: "2026-08-21",
-            },
-            {
-              label: "Disposisi dibuat",
-              tanggal: "2026-08-22",
-            },
-          ],
-        },
-        {
-          id: 3,
-          noAgenda: "003",
-          noSurat: "003/091/SK/2026",
-          tanggalSurat: "2026-08-21",
-          tanggalDiterima: "2026-08-22",
-          jenis: "Surat Permohonan",
-          sifat: "Biasa",
-asal: "Dinas Sosial",
-            tujuan: "Bidang Umum",
-            perihal: "Surat Permohonan Bantuan",
-          file: "permohonan-bantuan.pdf",
-          lampiran: "Proposal bantuan",
-          status: "Selesai",
-          disposisi: {
-            tujuan: "Siti Aminah",
-            instruksi: "Dilaporkan ke pimpinan",
-            catatan: "Sudah diproses.",
-            tanggalDisposisi: "2026-08-23",
-          },
-          timeline: [
-            {
-              label: "Surat diterima",
-              tanggal: "2026-08-22",
-            },
-            {
-              label: "Disposisi dibuat",
-              tanggal: "2026-08-23",
-            },
-            {
-              label: "Diproses pegawai",
-              tanggal: "2026-08-24",
-            },
-            {
-              label: "Selesai diproses",
-              tanggal: "2026-08-25",
-            },
-          ],
-        },
-      ];
-
-      setDataSurat(dataAwal);
-
-      localStorage.setItem(
-        "dataSurat",
-        JSON.stringify(dataAwal)
-      );
-    }
-  }, []);
-
-  // =========================
-  // SEARCH + FILTER
-  // =========================
-
-  const filteredData = dataSurat.filter((item) => {
-    const cocokSearch =
-      `${item.noAgenda || ""} ${item.noSurat || ""} ${
-        item.perihal || ""
-      } ${item.asal || ""}`
-        .toLowerCase()
-        .includes(search.toLowerCase());
-
-    const cocokStatus =
-      !filterStatus || item.status === filterStatus;
-
-    return cocokSearch && cocokStatus;
-  });
-
-  // =========================
-  // PAGINATION
-  // =========================
-
-  const pag = usePagination(filteredData);
+  const pag = useServerPagination(fetcher, [search, filterStatus]);
 
   return (
     <DashboardLayout title="Surat Masuk">
@@ -233,18 +87,9 @@ asal: "Dinas Sosial",
             <option value="">
               Semua Status
             </option>
-
-            {[
-              ...new Set(
-                dataSurat
-                  .map((d) => d.status)
-                  .filter(Boolean)
-              ),
-            ].map((st) => (
-              <option key={st} value={st}>
-                {st}
-              </option>
-            ))}
+            <option value="baru">Baru</option>
+            <option value="didisposisi">Didisposisi</option>
+            <option value="diarsipkan">Diarsipkan</option>
           </select>
 
           <EntriesSelect
@@ -279,90 +124,85 @@ asal: "Dinas Sosial",
 
               {pag.pageData.length > 0 ? (
 
-                pag.pageData.map((item, index) => (
+                pag.pageData.map((item, index) => {
+                  const st = STATUS_MAP[item.status] || { label: item.status || "-", className: "" };
 
-                  <tr key={item.id}>
+                  return (
+                    <tr key={item.id}>
 
-                    <td>
-                      {(pag.page - 1) *
-                        pag.entries +
-                        index +
-                        1}
-                    </td>
+                      <td>
+                        {(pag.page - 1) *
+                          pag.entries +
+                          index +
+                          1}
+                      </td>
 
-                    <td>
-                      <strong>
-                        {item.noAgenda}
-                      </strong>
-                    </td>
+                      <td>
+                        <strong>
+                          {item.no_agenda}
+                        </strong>
+                      </td>
 
-                    <td>
-                      {item.noSurat}
-                    </td>
+                      <td>
+                        {item.no_surat}
+                      </td>
 
-                    <td>
-                      {formatTanggal(
-                        item.tanggalSurat
-                      )}
-                    </td>
+                      <td>
+                        {formatTanggal(
+                          item.tanggal_surat
+                        )}
+                      </td>
 
-                    <td>
-                      {item.sifat || "-"}
-                    </td>
+                      <td>
+                        {item.sifat_surat?.nama_sifat || "-"}
+                      </td>
 
-                    <td>
-                      {item.asal}
-                    </td>
+                      <td>
+                        {item.asal_surat}
+                      </td>
 
-                    <td>
-                      {item.tujuan || "-"}
-                    </td>
+                      <td>
+                        {item.tujuan_surat || "-"}
+                      </td>
 
-                    <td>
-                      {item.perihal}
-                    </td>
+                      <td>
+                        {item.perihal}
+                      </td>
 
-                    <td>
-                      <span
-                        className={`status ${
-                          item.status
-                            ?.toLowerCase()
-                            .replace(
-                              /\s+/g,
-                              "-"
-                            )
-                        }`}
-                      >
-                        {item.status}
-                      </span>
-                    </td>
-
-                    <td>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                        }}
-                      >
-
-                        <button
-                          className="btn-eye"
-                          title="Lihat Detail"
-                          onClick={() =>
-                            navigate(`/pengguna/surat-masuk/lihat/${item.id}`)
-                          }
+                      <td>
+                        <span
+                          className={`status ${st.className}`}
                         >
-                          <Eye size={17} />
-                        </button>
+                          {st.label}
+                        </span>
+                      </td>
 
-                      </div>
+                      <td>
 
-                    </td>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                          }}
+                        >
 
-                  </tr>
+                          <button
+                            className="btn-eye"
+                            title="Lihat Detail"
+                            onClick={() =>
+                              navigate(`/pengguna/surat-masuk/lihat/${item.id}`)
+                            }
+                          >
+                            <Eye size={17} />
+                          </button>
 
-                ))
+                        </div>
+
+                      </td>
+
+                    </tr>
+                  );
+                })
 
               ) : (
 

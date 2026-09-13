@@ -1,105 +1,81 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Search,
   Eye,
   X,
   Archive,
+  Download,
 } from "lucide-react";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./ArsipDigital.css";
-import FileDokumen from "../../../component/FileDokumen";
 import { formatTanggal } from "../../../utils/tanggal";
 
 import {
-  usePagination,
+  useServerPagination,
   EntriesSelect,
   PaginationBar,
 } from "../../../component/Pagination";
 
+import { api } from "../../../services/apiClient";
+
 function ArsipDigital() {
-  const [dataArsip, setDataArsip] = useState([]);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("Semua");
   const [selectedArsip, setSelectedArsip] = useState(null);
 
-  // =========================
-  // AMBIL DATA SURAT
-  // =========================
-  useEffect(() => {
-    const ambilData = () => {
-      const dataSuratLama =
-        JSON.parse(localStorage.getItem("dataSurat")) || [];
+  const fetcher = (page, perPage) =>
+    api
+      .get("/arsip-digital", {
+        params: { page, per_page: perPage },
+      })
+      .then((res) => res.data.data);
 
-      const dataSurat = dataSuratLama.map((item) =>
-        item.perihal !== undefined
-          ? item
-          : {
-              ...item,
-              perihal: item.perihal || item.isi || "",
-              tanggalDiterima:
-                item.tanggalDiterima ||
-                item.tanggal ||
-                "",
-            }
+  const pag = useServerPagination(fetcher, []);
+
+  const listArsip = pag.pageData.map((item) => ({
+    id: item.id,
+    noSurat: item.surat_masuk?.no_surat || "-",
+    perihal: item.surat_masuk?.perihal || "-",
+    asal: item.surat_masuk?.asal_surat || "-",
+    tanggalDiterima: item.surat_masuk?.tanggal_terima,
+    namaFile: item.nama_file,
+  }));
+
+  const cocokSearch = (item) =>
+    `${item.noSurat} ${item.perihal} ${item.asal} ${item.tanggalDiterima}`
+      .toLowerCase()
+      .includes(search.toLowerCase());
+
+  const filteredData = listArsip.filter(cocokSearch);
+
+  const detail =
+    selectedArsip &&
+    filteredData.find((d) => d.id === selectedArsip.id);
+
+  const unduhFile = async (arsipId) => {
+    try {
+      const res = await api.get(
+        `/arsip-digital/${arsipId}/download`,
+        { responseType: "blob" }
       );
 
-      const arsip = dataSurat.filter(
-        (item) =>
-          item.status === "Selesai" ||
-          item.status === "Diarsipkan" ||
-          item.status === "Disetujui"
-      );
+      const disposition = res.headers["content-disposition"] || "";
+      const nama =
+        disposition.match(/filename="?([^";]+)"?/i)?.[1] ||
+        "arsip-file";
 
-      setDataArsip(arsip);
-
-      setSelectedArsip((prev) => {
-        if (!prev) return null;
-
-        const update = arsip.find(
-          (item) => item.id === prev.id
-        );
-
-        return update || null;
-      });
-    };
-
-    ambilData();
-
-    window.addEventListener("storage", ambilData);
-
-    const interval = setInterval(ambilData, 1000);
-
-    return () => {
-      window.removeEventListener("storage", ambilData);
-      clearInterval(interval);
-    };
-  }, []);
-
-  // =========================
-  // SEARCH + FILTER
-  // =========================
-  const filteredData = dataArsip.filter((item) => {
-    const keyword = search.toLowerCase();
-
-    const cocokSearch =
-      `${item.noSurat || ""} ${item.perihal || ""} ${
-        item.asal || ""
-      } ${item.tanggalDiterima || ""}`
-        .toLowerCase()
-        .includes(keyword);
-
-    const cocokStatus =
-      filterStatus === "Semua" ||
-      item.status === filterStatus;
-
-    return cocokSearch && cocokStatus;
-  });
-
-  // =========================
-  // PAGINATION
-  // =========================
-  const pag = usePagination(filteredData);
+      const url = URL.createObjectURL(res.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = nama;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch {
+      // abaikan kesalahan download
+    }
+  };
 
   return (
     <DashboardLayout title="Arsip Digital">
@@ -127,7 +103,7 @@ function ArsipDigital() {
 
             <div>
               <span>Total Arsip</span>
-              <strong>{dataArsip.length}</strong>
+              <strong>{pag.total}</strong>
             </div>
 
           </div>
@@ -151,26 +127,6 @@ function ArsipDigital() {
             />
 
           </div>
-
-          <select
-            className="arsip-digital-filter"
-            value={filterStatus}
-            onChange={(e) =>
-              setFilterStatus(e.target.value)
-            }
-          >
-            <option value="Semua">
-              Semua Status
-            </option>
-
-            <option value="Selesai">
-              Selesai
-            </option>
-
-            <option value="Disetujui">
-              Disetujui
-            </option>
-          </select>
 
           <EntriesSelect
             value={pag.entries}
@@ -213,9 +169,9 @@ function ArsipDigital() {
 
               <tbody>
 
-                {pag.pageData.length > 0 ? (
+                {filteredData.length > 0 ? (
 
-                  pag.pageData.map((arsip, index) => (
+                  filteredData.map((arsip, index) => (
 
                     <tr key={arsip.id}>
 
@@ -248,32 +204,35 @@ function ArsipDigital() {
 
                       <td>
 
-                        <span
-                          className={`arsip-status ${
-                            arsip.status
-                              ?.toLowerCase()
-                              .replace(
-                                /\s+/g,
-                                "-"
-                              )
-                          }`}
-                        >
-                          {arsip.status}
+                        <span className="arsip-status diarsipkan">
+                          Diarsipkan
                         </span>
 
                       </td>
 
                       <td>
 
-                        <button
-                          className="arsip-view-btn"
-                          onClick={() =>
-                            setSelectedArsip(arsip)
-                          }
-                          title="Lihat Detail"
-                        >
-                          <Eye size={17} />
-                        </button>
+                        <div className="arsip-actions" style={{ display: "flex", gap: "8px" }}>
+
+                          <button
+                            className="arsip-view-btn"
+                            onClick={() =>
+                              setSelectedArsip(arsip)
+                            }
+                            title="Lihat Detail"
+                          >
+                            <Eye size={17} />
+                          </button>
+
+                          <button
+                            className="arsip-view-btn"
+                            onClick={() => unduhFile(arsip.id)}
+                            title="Download File"
+                          >
+                            <Download size={17} />
+                          </button>
+
+                        </div>
 
                       </td>
 
@@ -326,7 +285,7 @@ function ArsipDigital() {
       </div>
 
       {/* MODAL DETAIL */}
-      {selectedArsip && (
+      {detail && (
 
         <div className="arsip-modal-overlay">
 
@@ -359,7 +318,7 @@ function ArsipDigital() {
                 <span>Nomor Surat</span>
 
                 <strong>
-                  {selectedArsip.noSurat}
+                  {detail.noSurat}
                 </strong>
               </div>
 
@@ -367,7 +326,7 @@ function ArsipDigital() {
                 <span>Perihal</span>
 
                 <strong>
-                  {selectedArsip.perihal}
+                  {detail.perihal}
                 </strong>
               </div>
 
@@ -375,7 +334,7 @@ function ArsipDigital() {
                 <span>Asal Surat</span>
 
                 <strong>
-                  {selectedArsip.asal}
+                  {detail.asal}
                 </strong>
               </div>
 
@@ -384,7 +343,7 @@ function ArsipDigital() {
 
                 <strong>
                   {formatTanggal(
-                    selectedArsip.tanggalDiterima
+                    detail.tanggalDiterima
                   )}
                 </strong>
               </div>
@@ -392,14 +351,8 @@ function ArsipDigital() {
               <div className="arsip-detail-item">
                 <span>Status</span>
 
-                <span
-                  className={`arsip-status ${
-                    selectedArsip.status
-                      ?.toLowerCase()
-                      .replace(/\s+/g, "-")
-                  }`}
-                >
-                  {selectedArsip.status}
+                <span className="arsip-status diarsipkan">
+                  Diarsipkan
                 </span>
               </div>
 
@@ -407,9 +360,7 @@ function ArsipDigital() {
                 <span>File Surat</span>
 
                 <strong>
-                  <FileDokumen
-                    value={selectedArsip.file}
-                  />
+                  {detail.namaFile || "-"}
                 </strong>
               </div>
 
@@ -425,6 +376,14 @@ function ArsipDigital() {
             </div>
 
             <div className="arsip-modal-footer">
+
+              <button
+                className="arsip-close-large"
+                onClick={() => unduhFile(detail.id)}
+              >
+                <Download size={16} />
+                Download
+              </button>
 
               <button
                 className="arsip-close-large"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Eye,
   X,
@@ -10,221 +10,100 @@ import {
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./Disposisi.css";
-import {
-  formatTanggal,
-  ubahKeISO,
-} from "../../../utils/tanggal";
+import { formatTanggal } from "../../../utils/tanggal";
 
 import {
-  usePagination,
+  useServerPagination,
   EntriesSelect,
   PaginationBar,
 } from "../../../component/Pagination";
 
+import { useToast } from "../../../component/Toast";
+
+import { api } from "../../../services/apiClient";
+
+const STATUS_META = {
+  menunggu: { label: "Menunggu", className: "status-menunggu" },
+  dibaca: { label: "Dibaca", className: "status-menunggu" },
+  diproses: { label: "Diproses", className: "status-diproses" },
+  selesai: { label: "Selesai", className: "status-selesai" },
+};
+
+const ubahStatus = (status) =>
+  STATUS_META[status] || { label: status || "-", className: "" };
+
 function Disposisi() {
+  const showToast = useToast();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [dataDisposisi, setDataDisposisi] = useState([]);
   const [selectedDisposisi, setSelectedDisposisi] =
     useState(null);
 
-  // =========================
-  // AMBIL DATA DISPOSISI
-  // =========================
-  useEffect(() => {
-    const ambilData = () => {
-      const data =
-        JSON.parse(
-          localStorage.getItem("dataDisposisi")
-        ) || [];
+  const fetcher = (page, perPage) =>
+    api
+      .get("/disposisi", {
+        params: { page, per_page: perPage },
+      })
+      .then((res) => res.data?.data || { data: [] });
 
-      const dataRapi = data.map((item) => ({
-        ...item,
-        tanggal: ubahKeISO(item.tanggal),
-        tanggalDisposisi: ubahKeISO(
-          item.tanggalDisposisi
-        ),
-      }));
+  const pag = useServerPagination(fetcher, [filterStatus]);
 
-      setDataDisposisi(dataRapi);
-    };
+  const listDisposisi = pag.pageData.map((item) => ({
+    id: item.id,
+    noSurat: item.surat_masuk?.no_surat || "-",
+    asal: item.surat_masuk?.asal_surat || "-",
+    perihal: item.surat_masuk?.perihal || "-",
+    penerima: item.penerima?.nama || "-",
+    pengirim: item.pengirim?.nama || "-",
+    tanggalDisposisi: item.tanggal_disposisi,
+    instruksi: item.instruksi || "-",
+    catatan: item.catatan || "-",
+    status: item.status || "menunggu",
+  }));
 
-    ambilData();
+  const cocokSearch = (item) =>
+    `${item.noSurat} ${item.asal} ${item.perihal} ${item.penerima}`
+      .toLowerCase()
+      .includes(search.toLowerCase());
 
-    window.addEventListener(
-      "storage",
-      ambilData
-    );
+  const filteredData = listDisposisi.filter(cocokSearch);
 
-    const interval = setInterval(
-      ambilData,
-      1000
-    );
+  const detail =
+    selectedDisposisi &&
+    filteredData.find((d) => d.id === selectedDisposisi.id);
 
-    return () => {
-      window.removeEventListener(
-        "storage",
-        ambilData
+  const ubahStatusDisposisi = async (statusBaru) => {
+    if (!detail) return;
+
+    try {
+      const res = await api.put(`/disposisi/${detail.id}`, {
+        status: statusBaru,
+      });
+
+      const update = res.data?.data;
+      const statusAkhir = update?.status || statusBaru;
+
+      setSelectedDisposisi({
+        ...detail,
+        status: statusAkhir,
+      });
+
+      showToast(
+        "success",
+        statusAkhir === "selesai"
+          ? "Disposisi berhasil diselesaikan!"
+          : statusAkhir === "diproses"
+          ? "Disposisi berhasil diproses!"
+          : "Disposisi berhasil diperbarui!"
       );
 
-      clearInterval(interval);
-    };
-  }, []);
-
-  // =========================
-  // SEARCH + FILTER
-  // =========================
-  const filteredData = dataDisposisi.filter(
-    (item) => {
-      const cocokSearch =
-        item.noSurat
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-        item.asal
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-        item.pengguna
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-        item.perihal
-          ?.toLowerCase()
-          .includes(search.toLowerCase());
-
-      const cocokStatus =
-        !filterStatus ||
-        item.status === filterStatus;
-
-      return cocokSearch && cocokStatus;
+      pag.reload();
+    } catch (err) {
+      showToast(
+        "error",
+        err.response?.data?.message || "Gagal memperbarui disposisi!"
+      );
     }
-  );
-
-  // =========================
-  // PAGINATION
-  // =========================
-  const pag = usePagination(filteredData);
-
-  // =========================
-  // PROSES DISPOSISI
-  // =========================
-  const prosesDisposisi = () => {
-    if (!selectedDisposisi) return;
-
-    // =========================
-    // UPDATE DISPOSISI
-    // =========================
-    const dataBaru = dataDisposisi.map(
-      (item) =>
-        item.id === selectedDisposisi.id
-          ? {
-              ...item,
-              status: "Diproses",
-            }
-          : item
-    );
-
-    localStorage.setItem(
-      "dataDisposisi",
-      JSON.stringify(dataBaru)
-    );
-
-    setDataDisposisi(dataBaru);
-
-    // =========================
-    // UPDATE STATUS SURAT
-    // =========================
-    const dataSurat =
-      JSON.parse(
-        localStorage.getItem("dataSurat")
-      ) || [];
-
-    const suratUpdate = dataSurat.map(
-      (surat) =>
-        surat.noSurat ===
-        selectedDisposisi.noSurat
-          ? {
-              ...surat,
-              status: "Diproses",
-            }
-          : surat
-    );
-
-    localStorage.setItem(
-      "dataSurat",
-      JSON.stringify(suratUpdate)
-    );
-
-    // =========================
-    // UPDATE MODAL
-    // =========================
-    setSelectedDisposisi({
-      ...selectedDisposisi,
-      status: "Diproses",
-    });
-
-    alert("Disposisi berhasil diproses!");
-  };
-
-  // =========================
-  // SELESAIKAN DISPOSISI
-  // =========================
-  const selesaikanDisposisi = () => {
-    if (!selectedDisposisi) return;
-
-    // =========================
-    // UPDATE DISPOSISI
-    // =========================
-    const dataBaru = dataDisposisi.map(
-      (item) =>
-        item.id === selectedDisposisi.id
-          ? {
-              ...item,
-              status: "Selesai",
-            }
-          : item
-    );
-
-    localStorage.setItem(
-      "dataDisposisi",
-      JSON.stringify(dataBaru)
-    );
-
-    setDataDisposisi(dataBaru);
-
-    // =========================
-    // UPDATE STATUS SURAT
-    // =========================
-    const dataSurat =
-      JSON.parse(
-        localStorage.getItem("dataSurat")
-      ) || [];
-
-    const suratUpdate = dataSurat.map(
-      (surat) =>
-        surat.noSurat ===
-        selectedDisposisi.noSurat
-          ? {
-              ...surat,
-              status: "Selesai",
-            }
-          : surat
-    );
-
-    localStorage.setItem(
-      "dataSurat",
-      JSON.stringify(suratUpdate)
-    );
-
-    // =========================
-    // UPDATE MODAL
-    // =========================
-    setSelectedDisposisi({
-      ...selectedDisposisi,
-      status: "Selesai",
-    });
-
-    alert(
-      "Disposisi berhasil diselesaikan!"
-    );
   };
 
   return (
@@ -276,18 +155,10 @@ function Disposisi() {
             <option value="">
               Semua Status
             </option>
-
-            {[
-              ...new Set(
-                dataDisposisi
-                  .map((d) => d.status)
-                  .filter(Boolean)
-              ),
-            ].map((st) => (
-              <option key={st} value={st}>
-                {st}
-              </option>
-            ))}
+            <option value="menunggu">Menunggu</option>
+            <option value="dibaca">Dibaca</option>
+            <option value="diproses">Diproses</option>
+            <option value="selesai">Selesai</option>
           </select>
 
           <EntriesSelect
@@ -317,94 +188,87 @@ function Disposisi() {
 
             <tbody>
 
-              {pag.pageData.length > 0 ? (
+              {filteredData.length > 0 ? (
 
-                pag.pageData.map((item, index) => (
+                filteredData.map((item, index) => {
+                  const st = ubahStatus(item.status);
 
-                  <tr key={item.id}>
+                  return (
+                    <tr key={item.id}>
 
-                    <td>
-                      {(pag.page - 1) *
-                        pag.entries +
-                        index +
-                        1}
-                    </td>
+                      <td>
+                        {(pag.page - 1) *
+                          pag.entries +
+                          index +
+                          1}
+                      </td>
 
-                    <td>
-                      <strong>
-                        {item.noSurat}
-                      </strong>
-                    </td>
+                      <td>
+                        <strong>
+                          {item.noSurat}
+                        </strong>
+                      </td>
 
-                    <td>
-                      {item.asal}
-                    </td>
+                      <td>
+                        {item.asal}
+                      </td>
 
-                    <td>
-                      {item.perihal}
-                    </td>
+                      <td>
+                        {item.perihal}
+                      </td>
 
-                    <td>
-                      {item.pengguna}
-                    </td>
+                      <td>
+                        {item.penerima}
+                      </td>
 
-                    <td>
-                      {formatTanggal(item.tanggalDisposisi)}
-                    </td>
+                      <td>
+                        {formatTanggal(item.tanggalDisposisi)}
+                      </td>
 
-                    <td>
+                      <td>
 
-                      <span
-                        className={
-                          item.status ===
-                          "Selesai"
-                            ? "status-selesai"
-                            : item.status ===
-                              "Diproses"
-                            ? "status-diproses"
-                            : "status-menunggu"
-                        }
-                      >
-
-                        {item.status ===
-                        "Selesai" ? (
-                          <CheckCircle
-                            size={14}
-                          />
-                        ) : (
-                          <Clock
-                            size={14}
-                          />
-                        )}
-
-                        {item.status}
-
-                      </span>
-
-                    </td>
-
-                    <td>
-
-                      <div className="aksi-disposisi">
-
-                        <button
-                          title="Lihat Detail"
-                          onClick={() =>
-                            setSelectedDisposisi(
-                              item
-                            )
-                          }
+                        <span
+                          className={st.className}
                         >
-                          <Eye size={17} />
-                        </button>
 
-                      </div>
+                          {item.status === "selesai" ? (
+                            <CheckCircle
+                              size={14}
+                            />
+                          ) : (
+                            <Clock
+                              size={14}
+                            />
+                          )}
 
-                    </td>
+                          {st.label}
 
-                  </tr>
+                        </span>
 
-                ))
+                      </td>
+
+                      <td>
+
+                        <div className="aksi-disposisi">
+
+                          <button
+                            title="Lihat Detail"
+                            onClick={() =>
+                              setSelectedDisposisi(
+                                item
+                              )
+                            }
+                          >
+                            <Eye size={17} />
+                          </button>
+
+                        </div>
+
+                      </td>
+
+                    </tr>
+                  );
+                })
 
               ) : (
 
@@ -442,7 +306,7 @@ function Disposisi() {
         {/* =========================
             MODAL DETAIL
         ========================= */}
-        {selectedDisposisi && (
+        {detail && (
 
           <div className="modal-overlay">
 
@@ -478,57 +342,56 @@ function Disposisi() {
                 <div className="detail-row-disposisi">
                   <span>No. Surat</span>
                   <strong>
-                    {selectedDisposisi.noSurat}
+                    {detail.noSurat}
                   </strong>
                 </div>
 
                 <div className="detail-row-disposisi">
                   <span>Asal Surat</span>
                   <strong>
-                    {selectedDisposisi.asal}
+                    {detail.asal}
                   </strong>
                 </div>
 
                 <div className="detail-row-disposisi">
                   <span>Perihal</span>
                   <strong>
-                    {selectedDisposisi.perihal}
+                    {detail.perihal}
                   </strong>
                 </div>
 
                 <div className="detail-row-disposisi">
-                  <span>Penerima Disposisi</span>
+                  <span>Pengirim</span>
                   <strong>
-                    {selectedDisposisi.pengguna}
+                    {detail.pengirim}
                   </strong>
                 </div>
 
                 <div className="detail-row-disposisi">
                   <span>Instruksi</span>
                   <strong>
-                    {selectedDisposisi.instruksi}
+                    {detail.instruksi}
                   </strong>
                 </div>
 
                 <div className="detail-row-disposisi">
                   <span>Catatan</span>
                   <strong>
-                    {selectedDisposisi.catatan ||
-                      "-"}
+                    {detail.catatan}
                   </strong>
                 </div>
 
                 <div className="detail-row-disposisi">
                   <span>Tanggal Disposisi</span>
                   <strong>
-                    {formatTanggal(selectedDisposisi.tanggalDisposisi)}
+                    {formatTanggal(detail.tanggalDisposisi)}
                   </strong>
                 </div>
 
                 <div className="detail-row-disposisi">
                   <span>Status</span>
                   <strong>
-                    {selectedDisposisi.status}
+                    {ubahStatus(detail.status).label}
                   </strong>
                 </div>
 
@@ -545,12 +408,29 @@ function Disposisi() {
                   Tutup
                 </button>
 
-                {selectedDisposisi.status ===
-                  "Menunggu" && (
+                {detail.status ===
+                  "menunggu" && (
 
                   <button
                     className="btn-proses-disposisi"
-                    onClick={prosesDisposisi}
+                    onClick={() =>
+                      ubahStatusDisposisi("dibaca")
+                    }
+                  >
+                    <Clock size={16} />
+                    Tandai Dibaca
+                  </button>
+
+                )}
+
+                {detail.status ===
+                  "dibaca" && (
+
+                  <button
+                    className="btn-proses-disposisi"
+                    onClick={() =>
+                      ubahStatusDisposisi("diproses")
+                    }
                   >
                     <Clock size={16} />
                     Proses Disposisi
@@ -558,13 +438,13 @@ function Disposisi() {
 
                 )}
 
-                {selectedDisposisi.status ===
-                  "Diproses" && (
+                {detail.status ===
+                  "diproses" && (
 
                   <button
                     className="btn-selesai-disposisi"
-                    onClick={
-                      selesaikanDisposisi
+                    onClick={() =>
+                      ubahStatusDisposisi("selesai")
                     }
                   >
                     <Check size={16} />
