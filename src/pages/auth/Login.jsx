@@ -9,12 +9,7 @@ import {
   EyeOff,
 } from "lucide-react";
 
-import {
-  getProfilAdmin,
-  getMasterData,
-  simpanSesi,
-  MASTER_KEYS,
-} from "../../services/masterData";
+import { api, simpanAuth, mapRole } from "../../services/apiClient";
 
 function Login() {
   const navigate = useNavigate();
@@ -25,6 +20,8 @@ function Login() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setForm({
@@ -33,57 +30,36 @@ function Login() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // =====================
-    // LOGIN ADMIN
-    // =====================
-    const profilAdmin = getProfilAdmin();
+    setLoading(true);
+    setError("");
 
-    if (
-      form.username === profilAdmin.username &&
-      form.password === profilAdmin.password
-    ) {
-      simpanSesi("admin", profilAdmin.username);
-      navigate("/admin/dashboard");
-      return;
+    try {
+      const { data } = await api.post("/login", form);
+
+      simpanAuth(data.token, data.user);
+
+      const role = mapRole(data.user.role);
+
+      navigate(`/${role}/dashboard`);
+    } catch (err) {
+      const status = err.response?.status;
+
+      if (status === 403) {
+        setError(err.response?.data?.message || "Akun tidak aktif");
+      } else if (status === 429) {
+        setError("Terlalu banyak percobaan. Coba lagi beberapa saat.");
+      } else {
+        setError(
+          err.response?.data?.message ||
+            "Username atau password salah!"
+        );
+      }
+    } finally {
+      setLoading(false);
     }
-
-    // =====================
-    // LOGIN PIMPINAN
-    // =====================
-    const cari = (key) =>
-      getMasterData(key).find(
-        (u) =>
-          u.username === form.username &&
-          u.password === form.password &&
-          u.status === "Aktif"
-      );
-
-    let akun = cari(MASTER_KEYS.pimpinan);
-
-    if (akun) {
-      simpanSesi("pimpinan", akun.username);
-      navigate("/pimpinan/dashboard");
-      return;
-    }
-
-    // =====================
-    // LOGIN PENGGUNA
-    // =====================
-    akun = cari(MASTER_KEYS.user);
-
-    if (akun) {
-      simpanSesi("pengguna", akun.username);
-      navigate("/pengguna/dashboard");
-      return;
-    }
-
-    // =====================
-    // LOGIN SALAH
-    // =====================
-    alert("Username atau password salah!");
   };
 
   return (
@@ -244,18 +220,21 @@ function Login() {
                 Ingat Saya
               </label>
 
-              <button type="button">
-                Lupa Password?
-              </button>
-
             </div>
+
+            {error && (
+              <div className="login-error">
+                {error}
+              </div>
+            )}
 
             {/* BUTTON LOGIN */}
             <button
               className="login-button"
               type="submit"
+              disabled={loading}
             >
-              Masuk
+              {loading ? "Memproses..." : "Masuk"}
             </button>
 
           </form>

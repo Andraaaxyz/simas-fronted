@@ -27,29 +27,36 @@ import {
 
 import { useState, useRef, useEffect } from "react";
 
-import { hapusSesi } from "../services/masterData";
+import { getAuth, hapusAuth, api, mapRole } from "../services/apiClient";
 
 function DashboardLayout({ title, children }) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const sesi = getAuth();
+  const userSesi = sesi?.user || null;
+  const roleAktif = userSesi ? mapRole(userSesi.role) : "";
+
   const [showNotif, setShowNotif] = useState(false);
   const [showMaster, setShowMaster] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [notifikasi, setNotifikasi] = useState([]);
 
   const profileRef = useRef(null);
 
   const isPimpinan =
-    location.pathname.startsWith("/pimpinan");
+    roleAktif === "pimpinan" || location.pathname.startsWith("/pimpinan");
 
   const isPengguna =
-    location.pathname.startsWith("/pengguna");
+    roleAktif === "pengguna" || location.pathname.startsWith("/pengguna");
 
   const roleLabel = isPimpinan
     ? "Pimpinan"
     : isPengguna
     ? "Pengguna"
     : "Administrator";
+
+  const namaUser = userSesi?.nama || roleLabel;
 
   const profilePath = isPimpinan
     ? "/pimpinan/profil"
@@ -74,9 +81,27 @@ function DashboardLayout({ title, children }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  // Ambil notifikasi
+  useEffect(() => {
+    api
+      .get("/notifikasi")
+      .then((res) => setNotifikasi(res.data?.data || []))
+      .catch(() => setNotifikasi([]));
+  }, [location.pathname]);
+
   const handleNotifClick = () => {
     setShowNotif(false);
     navigate("/pengguna/disposisi");
+  };
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/logout");
+    } catch {
+      // abaikan error logout
+    }
+    hapusAuth();
+    navigate("/login");
   };
 
   return (
@@ -258,8 +283,10 @@ function DashboardLayout({ title, children }) {
                 onClick={() => setShowNotif(!showNotif)}
               >
                 <Bell size={20} />
-                {isPengguna && (
-                  <span className="notif-badge">1</span>
+                {notifikasi.filter((n) => !n.is_read).length > 0 && (
+                  <span className="notif-badge">
+                    {notifikasi.filter((n) => !n.is_read).length}
+                  </span>
                 )}
               </button>
 
@@ -275,17 +302,33 @@ function DashboardLayout({ title, children }) {
                     </button>
                   </div>
 
-                  {isPengguna ? (
-                    <div className="notification-item" onClick={handleNotifClick}>
-                      <div className="notification-icon">
-                        <ClipboardList size={18} />
+                  {notifikasi.length > 0 ? (
+                    notifikasi.map((n) => (
+                      <div
+                        className={`notification-item ${n.is_read ? "notification-read" : ""}`}
+                        key={n.id}
+                        onClick={() => {
+                          if (!n.is_read) {
+                            api.put(`/notifikasi/${n.id}/read`).then(() => {
+                              setNotifikasi((prev) =>
+                                prev.map((x) =>
+                                  x.id === n.id ? { ...x, is_read: 1 } : x
+                                )
+                              );
+                            });
+                          }
+                          if (isPengguna) handleNotifClick();
+                        }}
+                      >
+                        <div className="notification-icon">
+                          <ClipboardList size={18} />
+                        </div>
+                        <div className="notification-text">
+                          <strong>{n.judul}</strong>
+                          <p>{n.pesan}</p>
+                        </div>
                       </div>
-                      <div className="notification-text">
-                        <strong>Disposisi baru</strong>
-                        <p>Anda menerima disposisi surat baru dari Admin.</p>
-                        <small>Baru saja</small>
-                      </div>
-                    </div>
+                    ))
                   ) : (
                     <div className="notification-empty">
                       Tidak ada notifikasi baru.
@@ -307,7 +350,7 @@ function DashboardLayout({ title, children }) {
                   <img src="/images/user-profile.png" alt={roleLabel} />
                 </div>
                 <div className="profile-info">
-                  <span className="profile-role">{roleLabel}</span>
+                  <span className="profile-role">{namaUser}</span>
                 </div>
                 <ChevronDown size={16} className={`profile-chevron ${showProfile ? "open" : ""}`} />
               </button>
@@ -338,11 +381,7 @@ function DashboardLayout({ title, children }) {
 
                   <button
                     className="profile-dropdown-item profile-logout"
-                    onClick={() => {
-                      setShowProfile(false);
-                      hapusSesi();
-                      navigate("/login");
-                    }}
+                    onClick={handleLogout}
                   >
                     <LogOut size={17} />
                     Keluar

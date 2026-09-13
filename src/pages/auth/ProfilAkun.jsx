@@ -24,14 +24,11 @@ import "./admin/Profil.css";
 import { useToast } from "../../component/Toast";
 
 import {
-  getMasterData,
-  updateMasterData,
-  simpanProfilAdmin,
-  getProfilAdmin,
-  getSesi,
-  hapusSesi,
-  MASTER_KEYS,
-} from "../../services/masterData";
+  api,
+  getAuth,
+  mapRole,
+  hapusAuth,
+} from "../../services/apiClient";
 
 function ProfilAkun({ role }) {
   const navigate = useNavigate();
@@ -41,64 +38,62 @@ function ProfilAkun({ role }) {
   const [mode, setMode] = useState(null); // "edit" | "password" | null
   const [form, setForm] = useState({ nama: "", email: "" });
   const [passForm, setPassForm] = useState({
-    lama: "",
     baru: "",
     konfirmasi: "",
   });
   const [showPass, setShowPass] = useState({
-    lama: false,
     baru: false,
     konfirmasi: false,
   });
+  const [saving, setSaving] = useState(false);
 
   // =========================
   // AMBIL DATA PROFIL
   // =========================
 
-  const ambilProfil = () => {
-    const sesi = getSesi();
+  const cekSesi = () => {
+    const sesi = getAuth();
 
-    if (!sesi || sesi.role !== role) {
-      hapusSesi();
+    if (!sesi || !sesi.user) {
+      hapusAuth();
       navigate("/login", { replace: true });
-      return null;
+      return false;
     }
 
-    if (role === "admin") {
-      return {
-        ...getProfilAdmin(),
-        role: "ADMIN",
-        jabatan: "Administrator",
-      };
-    }
-
-    const key =
-      role === "pimpinan"
-        ? MASTER_KEYS.pimpinan
-        : MASTER_KEYS.user;
-
-    const akun = getMasterData(key).find(
-      (u) => u.username === sesi.username
-    );
-
-    if (!akun) {
-      hapusSesi();
+    if (mapRole(sesi.user.role) !== role) {
+      hapusAuth();
       navigate("/login", { replace: true });
-      return null;
+      return false;
     }
 
-    return {
-      ...akun,
-      role: role.toUpperCase(),
-      jabatan:
-        role === "pimpinan"
-          ? "Kepala Dinas"
-          : akun.bidang || "Staff Administrasi",
-    };
+    return true;
+  };
+
+  const ambilProfil = async () => {
+    if (!cekSesi()) return;
+
+    try {
+      const { data } = await api.get("/profile");
+      const user = data.data || data.user || data;
+
+      setProfil({
+        id: user.id,
+        nama: user.nama,
+        nip: user.nip || "-",
+        email: user.email,
+        username: user.username,
+        status: user.status || "aktif",
+        role: user.role?.nama_role || user.role || role,
+        jabatan:
+          user.bidang?.nama_bidang || "Administrasi",
+      });
+    } catch {
+      showToast("error", "Gagal memuat data profil!");
+    }
   };
 
   useEffect(() => {
-    setProfil(ambilProfil());
+    ambilProfil();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role]);
 
@@ -106,53 +101,48 @@ function ProfilAkun({ role }) {
   // SIMPAN PROFIL (NAMA + EMAIL)
   // =========================
 
-  const simpanProfil = () => {
+  const simpanProfil = async () => {
     if (!form.nama.trim() || !form.email.trim()) {
       showToast("error", "Nama dan email wajib diisi!");
       return;
     }
 
-    if (role === "admin") {
-      simpanProfilAdmin({
-        nama: form.nama.trim(),
-        email: form.email.trim(),
-      });
-    } else {
-      const key =
-        role === "pimpinan"
-          ? MASTER_KEYS.pimpinan
-          : MASTER_KEYS.user;
+    setSaving(true);
 
-      updateMasterData(key, profil.id, {
+    try {
+      await api.put("/profile", {
         nama: form.nama.trim(),
         email: form.email.trim(),
       });
+
+      setProfil((prev) => ({
+        ...prev,
+        nama: form.nama.trim(),
+        email: form.email.trim(),
+      }));
+
+      setMode(null);
+      showToast("success", "Profil berhasil diperbarui!");
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.errors?.email?.[0] ||
+        "Gagal menyimpan profil!";
+      showToast("error", msg);
+    } finally {
+      setSaving(false);
     }
-
-    setProfil((prev) => ({
-      ...prev,
-      nama: form.nama.trim(),
-      email: form.email.trim(),
-    }));
-
-    setMode(null);
-    showToast("success", "Profil berhasil diperbarui!");
   };
 
   // =========================
   // GANTI PASSWORD
   // =========================
 
-  const gantiPassword = () => {
-    if (passForm.lama !== profil.password) {
-      showToast("error", "Password lama tidak sesuai!");
-      return;
-    }
-
-    if (passForm.baru.length < 6) {
+  const gantiPassword = async () => {
+    if (passForm.baru.length < 8) {
       showToast(
         "error",
-        "Password baru minimal 6 karakter!"
+        "Password baru minimal 8 karakter!"
       );
       return;
     }
@@ -165,27 +155,25 @@ function ProfilAkun({ role }) {
       return;
     }
 
-    if (role === "admin") {
-      simpanProfilAdmin({ password: passForm.baru });
-    } else {
-      const key =
-        role === "pimpinan"
-          ? MASTER_KEYS.pimpinan
-          : MASTER_KEYS.user;
+    setSaving(true);
 
-      updateMasterData(key, profil.id, {
+    try {
+      await api.put("/profile", {
         password: passForm.baru,
+        password_confirmation: passForm.konfirmasi,
       });
+
+      setPassForm({ baru: "", konfirmasi: "" });
+      setMode(null);
+      showToast("success", "Password berhasil diganti!");
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        "Gagal mengganti password!";
+      showToast("error", msg);
+    } finally {
+      setSaving(false);
     }
-
-    setProfil((prev) => ({
-      ...prev,
-      password: passForm.baru,
-    }));
-
-    setPassForm({ lama: "", baru: "", konfirmasi: "" });
-    setMode(null);
-    showToast("success", "Password berhasil diganti!");
   };
 
   if (!profil) return null;
@@ -196,7 +184,7 @@ function ProfilAkun({ role }) {
   };
 
   const bukaPassword = () => {
-    setPassForm({ lama: "", baru: "", konfirmasi: "" });
+    setPassForm({ baru: "", konfirmasi: "" });
     setMode("password");
   };
 
@@ -270,7 +258,11 @@ function ProfilAkun({ role }) {
 
               <span className="header-status">
                 <span></span>
-                {profil.status}
+                {profil.status === "aktif"
+                  ? "Aktif"
+                  : profil.status === "nonaktif"
+                  ? "Nonaktif"
+                  : profil.status}
               </span>
 
               <button
@@ -318,7 +310,13 @@ function ProfilAkun({ role }) {
             <CheckCircle2 size={18} />
             <div>
               <span>Status Akun</span>
-              <strong>{profil.status}</strong>
+              <strong>
+                {profil.status === "aktif"
+                  ? "Aktif"
+                  : profil.status === "nonaktif"
+                  ? "Nonaktif"
+                  : profil.status}
+              </strong>
             </div>
           </div>
 
@@ -529,9 +527,10 @@ function ProfilAkun({ role }) {
                 <button
                   className="btn-profil-simpan"
                   onClick={simpanProfil}
+                  disabled={saving}
                 >
                   <Save size={16} />
-                  Simpan
+                  {saving ? "Menyimpan..." : "Simpan"}
                 </button>
               </div>
             )}
@@ -556,15 +555,9 @@ function ProfilAkun({ role }) {
             </div>
 
             {passInput(
-              "lama",
-              "Password Lama",
-              "Masukkan password lama"
-            )}
-
-            {passInput(
               "baru",
               "Password Baru",
-              "Minimal 6 karakter"
+              "Minimal 8 karakter"
             )}
 
             {passInput(
@@ -585,9 +578,10 @@ function ProfilAkun({ role }) {
               <button
                 className="btn-profil-simpan"
                 onClick={gantiPassword}
+                disabled={saving}
               >
                 <KeyRound size={16} />
-                Ganti Password
+                {saving ? "Menyimpan..." : "Ganti Password"}
               </button>
             </div>
 
@@ -615,7 +609,7 @@ function ProfilAkun({ role }) {
 
                 <div>
                   <span>Password</span>
-                  <strong>{profil.password}</strong>
+                  <strong>••••••••</strong>
                 </div>
               </div>
 
