@@ -50,6 +50,170 @@
   background: #22c55e;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-profil-action,
+.btn-profil-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 9px 15px;
+
+  border-radius: 10px;
+  border: 1px solid var(--primary-border, #99f6e4);
+
+  background: var(--primary-soft, #f0fdfa);
+  color: #0d9488;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.btn-profil-action:hover,
+.btn-profil-edit:hover {
+  background: #ccfbf1;
+}
+
+.btn-profil-edit {
+  margin-left: auto;
+  padding: 8px;
+}
+
+.profile-card-header {
+  align-items: center;
+}
+
+/* INPUT EDIT */
+
+.field-input-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-input {
+  flex: 1;
+  min-width: 0;
+
+  padding: 10px 12px;
+
+  border: 1px solid #dce3ec;
+  border-radius: 9px;
+
+  background: white;
+
+  outline: none;
+
+  font-family: inherit;
+  font-size: 13px;
+  color: #1e293b;
+
+  transition: border-color 0.15s;
+}
+
+.profile-input:focus {
+  border-color: #0d9488;
+}
+
+.field-eye {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  border: 1px solid #dce3ec;
+  border-radius: 9px;
+
+  background: white;
+  color: #64748b;
+
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.field-eye:hover {
+  border-color: #0d9488;
+  color: #0d9488;
+}
+
+/* AKSI FORM */
+
+.profile-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  margin-top: 16px;
+}
+
+.btn-profil-batal,
+.btn-profil-simpan {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 9px 16px;
+
+  border-radius: 9px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.btn-profil-batal {
+  border: 1px solid var(--border, #dce3ec);
+  background: white;
+  color: #64748b;
+}
+
+.btn-profil-batal:hover {
+  background: #f1f5f9;
+}
+
+.btn-profil-simpan {
+  border: 1px solid #0d9488;
+  background: #0d9488;
+  color: white;
+}
+
+.btn-profil-simpan:hover {
+  background: #0f766e;
+}
+
+.password-fields .profile-field {
+  background: #fffdf5;
+}
+
+@media (max-width: 650px) {
+  .header-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 /* HERO */
 
 .profile-hero {

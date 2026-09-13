@@ -27,6 +27,8 @@ import {
 
 import { useState, useRef, useEffect } from "react";
 
+import { hapusSesi } from "../services/masterData";
+
 function DashboardLayout({ title, children }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -338,6 +340,7 @@ function DashboardLayout({ title, children }) {
                     className="profile-dropdown-item profile-logout"
                     onClick={() => {
                       setShowProfile(false);
+                      hapusSesi();
                       navigate("/login");
                     }}
                   >

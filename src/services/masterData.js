@@ -13,6 +13,8 @@ const KEYS = {
   bidang: "masterBidang",
 };
 
+const KEY_SESI = "sesi";
+
 // =========================
 // SEED DATA AWAL
 // =========================
@@ -45,6 +47,7 @@ function seedData() {
         nip: "199001152020012001",
         bidang: "Tata Usaha",
         email: "rina@simas.com",
+        username: "pengguna",
         password: "pengguna123",
         status: "Aktif",
       },
@@ -54,6 +57,7 @@ function seedData() {
         nip: "199203102020012002",
         bidang: "Kepegawaian",
         email: "budi@simas.com",
+        username: "pengguna2",
         password: "pengguna123",
         status: "Aktif",
       },
@@ -63,6 +67,7 @@ function seedData() {
         nip: "199502202020012003",
         bidang: "Umum",
         email: "dewi@simas.com",
+        username: "pengguna3",
         password: "pengguna123",
         status: "Nonaktif",
       },
@@ -104,6 +109,99 @@ seedData();
 // Bersihkan sisa data yang tertulis pada key
 // "undefined" akibat bug pemakaian key di versi lama.
 localStorage.removeItem("undefined");
+
+// =========================
+// MIGRASI USERNAME USER
+// =========================
+// Data lama tidak memiliki field username pada
+// masterUser, isi otomatis berbasis urutan.
+function migrasiUsernameUser() {
+  const list = getMasterData(KEYS.user);
+  let berubah = false;
+
+  const data = list.map((item, index) => {
+    if (item.username) return item;
+
+    berubah = true;
+    return {
+      ...item,
+      username:
+        index === 0
+          ? "pengguna"
+          : `pengguna${index + 1}`,
+    };
+  });
+
+  if (berubah) {
+    localStorage.setItem(
+      KEYS.user,
+      JSON.stringify(data)
+    );
+  }
+}
+
+migrasiUsernameUser();
+
+// =========================
+// PROFIL ADMIN
+// =========================
+// Admin tidak tersimpan di master data, simpan
+// profil akunnya secara terpisah.
+const PROFIL_ADMIN_KEY = "profilAdmin";
+
+const PROFIL_ADMIN_BAWAAN = {
+  nama: "Admin SIMAS",
+  nip: "198765432101234567",
+  jabatan: "Administrator",
+  email: "admin@simas.com",
+  username: "admin",
+  password: "admin123",
+  status: "Aktif",
+};
+
+export const getProfilAdmin = () => {
+  const raw =
+    localStorage.getItem(PROFIL_ADMIN_KEY);
+
+  return raw
+    ? { ...PROFIL_ADMIN_BAWAAN, ...JSON.parse(raw) }
+    : { ...PROFIL_ADMIN_BAWAAN };
+};
+
+export const simpanProfilAdmin = (item) => {
+  const data = {
+    ...getProfilAdmin(),
+    ...item,
+  };
+
+  localStorage.setItem(
+    PROFIL_ADMIN_KEY,
+    JSON.stringify(data)
+  );
+
+  return data;
+};
+
+// =========================
+// SESI LOGIN
+// =========================
+
+export const getSesi = () => {
+  const raw = localStorage.getItem(KEY_SESI);
+
+  return raw ? JSON.parse(raw) : null;
+};
+
+export const simpanSesi = (role, username) => {
+  localStorage.setItem(
+    KEY_SESI,
+    JSON.stringify({ role, username })
+  );
+};
+
+export const hapusSesi = () => {
+  localStorage.removeItem(KEY_SESI);
+};
 
 // =========================
 // GET DATA

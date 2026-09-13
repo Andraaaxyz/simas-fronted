@@ -9,6 +9,13 @@ import {
   EyeOff,
 } from "lucide-react";
 
+import {
+  getProfilAdmin,
+  getMasterData,
+  simpanSesi,
+  MASTER_KEYS,
+} from "../../services/masterData";
+
 function Login() {
   const navigate = useNavigate();
 
@@ -32,10 +39,13 @@ function Login() {
     // =====================
     // LOGIN ADMIN
     // =====================
+    const profilAdmin = getProfilAdmin();
+
     if (
-      form.username === "admin" &&
-      form.password === "admin123"
+      form.username === profilAdmin.username &&
+      form.password === profilAdmin.password
     ) {
+      simpanSesi("admin", profilAdmin.username);
       navigate("/admin/dashboard");
       return;
     }
@@ -43,10 +53,18 @@ function Login() {
     // =====================
     // LOGIN PIMPINAN
     // =====================
-    if (
-      form.username === "pimpinan" &&
-      form.password === "pimpinan123"
-    ) {
+    const cari = (key) =>
+      getMasterData(key).find(
+        (u) =>
+          u.username === form.username &&
+          u.password === form.password &&
+          u.status === "Aktif"
+      );
+
+    let akun = cari(MASTER_KEYS.pimpinan);
+
+    if (akun) {
+      simpanSesi("pimpinan", akun.username);
       navigate("/pimpinan/dashboard");
       return;
     }
@@ -54,10 +72,10 @@ function Login() {
     // =====================
     // LOGIN PENGGUNA
     // =====================
-    if (
-      form.username === "pengguna" &&
-      form.password === "pengguna123"
-    ) {
+    akun = cari(MASTER_KEYS.user);
+
+    if (akun) {
+      simpanSesi("pengguna", akun.username);
       navigate("/pengguna/dashboard");
       return;
     }
