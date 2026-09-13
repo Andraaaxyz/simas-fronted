@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FileText,
   Clock,
   CheckCircle2,
-  XCircle,
+  Archive,
   Search,
   Eye,
   X,
@@ -21,161 +21,92 @@ import {
 } from "../../../utils/report";
 
 import {
-  usePagination,
+  useServerPagination,
   EntriesSelect,
   PaginationBar,
 } from "../../../component/Pagination";
 
+import { api } from "../../../services/apiClient";
+
+const STATUS_MAP = {
+  baru: { label: "Baru", className: "baru" },
+  didisposisi: { label: "Didisposisi", className: "didisposisikan" },
+  diarsipkan: { label: "Diarsipkan", className: "diarsipkan" },
+};
+
+const ubahStatus = (status) => STATUS_MAP[status] || { label: status || "-", className: "" };
+
 function Laporan() {
-  const [dataSurat, setDataSurat] = useState([]);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("Semua");
+  const [filterStatus, setFilterStatus] = useState("");
   const [selectedSurat, setSelectedSurat] = useState(null);
   const [showRekap, setShowRekap] = useState(false);
+  const [summary, setSummary] = useState(null);
+
+  const fetcher = (page, perPage) =>
+    api
+      .get("/laporan/surat-masuk", {
+        params: { page, per_page: perPage, search, status: filterStatus },
+      })
+      .then((res) => res.data?.data || { data: [] });
+
+  const pag = useServerPagination(fetcher, [search, filterStatus]);
 
   useEffect(() => {
-    const ambilData = () => {
-      const dataLama =
-        JSON.parse(localStorage.getItem("dataSurat")) || [];
+    if (summary !== null) return;
+    api
+      .get("/dashboard")
+      .then((r) => setSummary(r.data?.data?.summary || null))
+      .catch(() => setSummary(null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [summary]);
 
-      const data = dataLama.map((item) =>
-        item.perihal !== undefined
-          ? item
-          : {
-              ...item,
-              perihal: item.perihal || item.isi || "",
-              tanggalDiterima:
-                item.tanggalDiterima ||
-                item.tanggal ||
-                "",
-            }
-      );
+  const ambilSemua = async () => {
+    const res = await api.get("/laporan/surat-masuk", {
+      params: { per_page: 1000, search, status: filterStatus },
+    });
+    return res.data?.data?.data || [];
+  };
 
-      setDataSurat(data);
-
-      setSelectedSurat((prev) => {
-        if (!prev) return null;
-
-        const update = data.find(
-          (item) => item.id === prev.id
-        );
-
-        return update || null;
-      });
-    };
-
-    ambilData();
-
-    window.addEventListener("storage", ambilData);
-
-    const interval = setInterval(ambilData, 1000);
-
-    return () => {
-      window.removeEventListener("storage", ambilData);
-      clearInterval(interval);
-    };
-  }, []);
-
-  const totalSurat = dataSurat.length;
-
-  const jumlahDiproses = dataSurat.filter(
-    (item) => item.status === "Diproses"
-  ).length;
-
-  const jumlahSelesai = dataSurat.filter(
-    (item) => item.status === "Selesai"
-  ).length;
-
-  const jumlahDisetujui = dataSurat.filter(
-    (item) => item.status === "Disetujui"
-  ).length;
-
-  const jumlahDitolak = dataSurat.filter(
-    (item) => item.status === "Ditolak"
-  ).length;
-
-  const filteredData = dataSurat.filter((item) => {
-    const cocokSearch =
-      `${item.noSurat || ""} ${item.perihal || ""} ${
-        item.asal || ""
-      } ${item.tanggalDiterima || ""}`
-        .toLowerCase()
-        .includes(search.toLowerCase());
-
-    const cocokStatus =
-      filterStatus === "Semua" ||
-      item.status === filterStatus;
-
-    return cocokSearch && cocokStatus;
-  });
-
-  // =========================
-  // PAGINATION
-  // =========================
-  const pag = usePagination(filteredData, 10);
-
-  // =========================
-  // REKAP PER STATUS
-  // =========================
   const rekapPerStatus = () => {
-    const statusList = [
-      "Baru",
-      "Menunggu Disposisi",
-      "Didisposisikan",
-      "Diproses",
-      "Selesai",
-      "Diarsipkan",
-      "Disetujui",
-      "Ditolak",
-    ];
+    const statusList = ["baru", "didisposisi", "diarsipkan"];
 
     return statusList
       .map((status) => ({
-        status,
-        jumlah: dataSurat.filter(
-          (item) => item.status === status
-        ).length,
+        status: STATUS_MAP[status].label,
+        className: STATUS_MAP[status].className,
+        jumlah: pag.pageData.filter((r) => r.status === status).length,
       }))
       .filter((r) => r.jumlah > 0);
   };
 
-  // =========================
-  // EXPORT EXCEL
-  // =========================
-  const exportLaporan = () => {
-    const columns = [
-      { key: "noSurat", label: "No. Surat" },
-      { key: "perihal", label: "Perihal" },
-      { key: "asal", label: "Asal Surat" },
-      { key: "tanggalDiterima", label: "Tanggal Diterima", render: (r) => formatTanggal(r.tanggalDiterima) },
-      { key: "status", label: "Status" },
-    ];
+  const kolomLaporan = [
+    { key: "no_surat", label: "No. Surat" },
+    { key: "perihal", label: "Perihal" },
+    { key: "asal_surat", label: "Asal Surat" },
+    { key: "tanggal_terima", label: "Tanggal Diterima", render: (r) => formatTanggal(r.tanggal_terima) },
+    { key: "status", label: "Status", render: (r) => ubahStatus(r.status).label },
+  ];
+
+  const exportLaporan = async () => {
+    const rows = await ambilSemua();
 
     exportExcel({
-      rows: filteredData,
-      columns,
+      rows,
+      columns: kolomLaporan,
       filename: "laporan-pimpinan",
     });
   };
 
-  // =========================
-  // PRINT LAPORAN
-  // =========================
-  const printLaporan = () => {
-    const columns = [
-      { key: "noSurat", label: "No. Surat" },
-      { key: "perihal", label: "Perihal" },
-      { key: "asal", label: "Asal Surat" },
-      { key: "tanggalDiterima", label: "Tanggal Diterima", render: (r) => formatTanggal(r.tanggalDiterima) },
-      { key: "status", label: "Status" },
-    ];
+  const printLaporan = async () => {
+    const rows = await ambilSemua();
 
     buatHTMLPrint({
       title: "Laporan Surat",
-      subtitle: `Monitoring dan rekapitulasi administrasi surat - ${filterStatus === "Semua" ? "Semua Status" : filterStatus}`,
-      columns,
-      rows: filteredData,
-      footer: `Total surat: ${filteredData.length}`,
+      subtitle: `Monitoring dan rekapitulasi administrasi surat - ${filterStatus ? ubahStatus(filterStatus).label : "Semua Status"}`,
+      columns: kolomLaporan,
+      rows,
+      footer: `Total surat: ${rows.length}`,
     });
   };
 
@@ -212,7 +143,7 @@ function Laporan() {
 
             <div>
               <span>Total Surat</span>
-              <strong>{totalSurat}</strong>
+              <strong>{summary?.total_surat ?? pag.total}</strong>
               <small>Seluruh surat masuk</small>
             </div>
           </div>
@@ -223,9 +154,9 @@ function Laporan() {
             </div>
 
             <div>
-              <span>Diproses</span>
-              <strong>{jumlahDiproses}</strong>
-              <small>Sedang diproses</small>
+              <span>Baru</span>
+              <strong>{summary?.surat_baru ?? 0}</strong>
+              <small>Belum didisposisi</small>
             </div>
           </div>
 
@@ -235,33 +166,21 @@ function Laporan() {
             </div>
 
             <div>
-              <span>Selesai</span>
-              <strong>{jumlahSelesai}</strong>
-              <small>Surat selesai</small>
+              <span>Didisposisi</span>
+              <strong>{summary?.surat_didisposisi ?? 0}</strong>
+              <small>Sedang diproses</small>
             </div>
           </div>
 
           <div className="laporan-stat-card purple">
             <div className="stat-icon">
-              <CheckCircle2 size={22} />
+              <Archive size={22} />
             </div>
 
             <div>
-              <span>Disetujui</span>
-              <strong>{jumlahDisetujui}</strong>
-              <small>Keputusan pimpinan</small>
-            </div>
-          </div>
-
-          <div className="laporan-stat-card red">
-            <div className="stat-icon">
-              <XCircle size={22} />
-            </div>
-
-            <div>
-              <span>Ditolak</span>
-              <strong>{jumlahDitolak}</strong>
-              <small>Keputusan pimpinan</small>
+              <span>Diarsipkan</span>
+              <strong>{summary?.surat_diarsipkan ?? 0}</strong>
+              <small>Surat selesai diarsipkan</small>
             </div>
           </div>
 
@@ -280,7 +199,7 @@ function Laporan() {
             </div>
 
             <div className="laporan-total">
-              {filteredData.length} Data
+              {pag.total} Data
             </div>
 
           </div>
@@ -308,21 +227,10 @@ function Laporan() {
                 setFilterStatus(e.target.value)
               }
             >
-              <option value="Semua">Semua Status</option>
-              <option value="Baru">Baru</option>
-              <option value="Menunggu Disposisi">
-                Menunggu Disposisi
-              </option>
-              <option value="Didisposisikan">
-                Didisposisikan
-              </option>
-              <option value="Diproses">Diproses</option>
-              <option value="Selesai">Selesai</option>
-              <option value="Diarsipkan">
-                Diarsipkan
-              </option>
-              <option value="Disetujui">Disetujui</option>
-              <option value="Ditolak">Ditolak</option>
+              <option value="">Semua Status</option>
+              <option value="baru">Baru</option>
+              <option value="didisposisi">Didisposisi</option>
+              <option value="diarsipkan">Diarsipkan</option>
             </select>
 
             <div className="laporan-actions">
@@ -383,65 +291,61 @@ function Laporan() {
               <tbody>
 
                 {pag.pageData.length > 0 ? (
-                  pag.pageData.map((item, index) => (
-                    <tr key={item.id}>
+                  pag.pageData.map((item, index) => {
+                    const st = ubahStatus(item.status);
+                    return (
+                      <tr key={item.id}>
 
-                      <td>
-                        {(pag.page - 1) *
-                          pag.entries +
-                          index +
-                          1}
-                      </td>
+                        <td>
+                          {(pag.page - 1) *
+                            pag.entries +
+                            index +
+                            1}
+                        </td>
 
-                      <td>
-                        <strong className="nomor-surat">
-                          {item.noSurat}
-                        </strong>
-                      </td>
+                        <td>
+                          <strong className="nomor-surat">
+                            {item.no_surat}
+                          </strong>
+                        </td>
 
-                      <td>
-                        <span className="perihal">
-                          {item.perihal}
-                        </span>
-                      </td>
+                        <td>
+                          <span className="perihal">
+                            {item.perihal}
+                          </span>
+                        </td>
 
-                      <td>{item.asal}</td>
+                        <td>{item.asal_surat}</td>
 
-                      <td>
-                        {formatTanggal(
-                          item.tanggalDiterima
-                        )}
-                      </td>
+                        <td>
+                          {formatTanggal(
+                            item.tanggal_terima
+                          )}
+                        </td>
 
-                      <td>
-                        <span
-                          className={`laporan-status ${
-                            item.status
-                              ?.toLowerCase()
-                              .replace(
-                                /\s+/g,
-                                "-"
-                              )
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                      </td>
+                        <td>
+                          <span
+                            className={`laporan-status ${st.className}`}
+                          >
+                            {st.label}
+                          </span>
+                        </td>
 
-                      <td>
-                        <button
-                          className="laporan-eye"
-                          onClick={() =>
-                            setSelectedSurat(item)
-                          }
-                          title="Lihat detail"
-                        >
-                          <Eye size={17} />
-                        </button>
-                      </td>
+                        <td>
+                          <button
+                            className="laporan-eye"
+                            onClick={() =>
+                              setSelectedSurat(item)
+                            }
+                            title="Lihat detail"
+                          >
+                            <Eye size={17} />
+                          </button>
+                        </td>
 
-                    </tr>
-                  ))
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
                     <td
@@ -510,7 +414,7 @@ function Laporan() {
                 <div className="detail-box">
                   <span>Nomor Surat</span>
                   <strong>
-                    {selectedSurat.noSurat}
+                    {selectedSurat.no_surat}
                   </strong>
                 </div>
 
@@ -524,7 +428,7 @@ function Laporan() {
                 <div className="detail-box">
                   <span>Asal Surat</span>
                   <strong>
-                    {selectedSurat.asal}
+                    {selectedSurat.asal_surat}
                   </strong>
                 </div>
 
@@ -532,7 +436,7 @@ function Laporan() {
                   <span>Tanggal Diterima</span>
                   <strong>
                     {formatTanggal(
-                      selectedSurat.tanggalDiterima
+                      selectedSurat.tanggal_terima
                     )}
                   </strong>
                 </div>
@@ -542,28 +446,12 @@ function Laporan() {
 
                   <strong>
                     <span
-                      className={`laporan-status ${
-                        selectedSurat.status
-                          ?.toLowerCase()
-                          .replace(
-                            /\s+/g,
-                            "-"
-                          )
-                      }`}
+                      className={`laporan-status ${ubahStatus(selectedSurat.status).className}`}
                     >
-                      {selectedSurat.status}
+                      {ubahStatus(selectedSurat.status).label}
                     </span>
                   </strong>
                 </div>
-
-                {selectedSurat.keputusan && (
-                  <div className="detail-box keputusan-box">
-                    <span>Keputusan Pimpinan</span>
-                    <strong>
-                      {selectedSurat.keputusan}
-                    </strong>
-                  </div>
-                )}
 
               </div>
 
@@ -624,14 +512,7 @@ function Laporan() {
                         <td>{index + 1}</td>
                         <td>
                           <span
-                            className={`laporan-status ${
-                              r.status
-                                .toLowerCase()
-                                .replace(
-                                  /\s+/g,
-                                  "-"
-                                )
-                            }`}
+                            className={`laporan-status ${r.className}`}
                           >
                             {r.status}
                           </span>
@@ -642,12 +523,20 @@ function Laporan() {
                       </tr>
                     )
                   )}
+                  {rekapPerStatus().length === 0 && (
+                    <tr>
+                      <td colSpan="3" className="laporan-empty">
+                        <FileText size={40} />
+                        <span>Belum ada data surat</span>
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
 
               <div className="laporan-rekap-total">
                 <span>Total Surat</span>
-                <strong>{dataSurat.length}</strong>
+                <strong>{pag.total}</strong>
               </div>
             </div>
 

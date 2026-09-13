@@ -1,77 +1,84 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { CheckCircle } from "lucide-react";
+import { Download, ClipboardList } from "lucide-react";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./SuratMasuk.css";
 
-import FileDokumen from "../../../component/FileDokumen";
-import { formatTanggal, hariIniISO } from "../../../utils/tanggal";
+import { formatTanggal } from "../../../utils/tanggal";
+import { useToast } from "../../../component/Toast";
+
+import { api } from "../../../services/apiClient";
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+
+const labelStatus = (status) =>
+  status === "baru"
+    ? "Baru"
+    : status === "didisposisi"
+    ? "Didisposisi"
+    : status === "diarsipkan"
+    ? "Diarsipkan"
+    : status || "-";
 
 function PimpinanSuratDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const showToast = useToast();
 
   const [surat, setSurat] = useState(null);
-  const [keputusan, setKeputusan] = useState("");
+  const [timeline, setTimeline] = useState([]);
+  const [disposisi, setDisposisi] = useState(null);
 
   useEffect(() => {
-    const data =
-      JSON.parse(localStorage.getItem("dataSurat")) || [];
+    let aktif = true;
 
-    const cari =
-      data.find((s) => String(s.id) === String(id)) || null;
+    api
+      .get(`/surat-masuk/${id}`)
+      .then((res) => {
+        if (aktif) setSurat(res.data.data || res.data);
+      })
+      .catch(() => {
+        showToast("error", "Surat tidak ditemukan!");
+        navigate("/pimpinan/surat-masuk", { replace: true });
+      });
 
-    if (!cari) {
-      alert("Surat tidak ditemukan!");
-      navigate("/pimpinan/surat-masuk", { replace: true });
-      return;
-    }
+    api
+      .get(`/surat-masuk/${id}/timeline`)
+      .then((res) => {
+        if (aktif) setTimeline(res.data.data || []);
+      })
+      .catch(() => setTimeline([]));
 
-    setSurat(cari);
-    setKeputusan(cari.keputusan || "");
-  }, [id, navigate]);
+    api
+      .get("/disposisi", { params: { per_page: 50 } })
+      .then((res) => {
+        const list = res.data?.data?.data || res.data?.data || [];
 
-  const simpanKeputusan = () => {
-    if (!keputusan) {
-      alert("Silakan pilih keputusan terlebih dahulu!");
-      return;
-    }
+        const cari = list.find(
+          (d) => String(d.surat_masuk_id) === String(id)
+        );
 
-    const data = JSON.parse(localStorage.getItem("dataSurat")) || [];
+        if (aktif) setDisposisi(cari || null);
+      })
+      .catch(() => setDisposisi(null));
 
-    const dataBaru = data.map((item) =>
-      String(item.id) === String(id)
-        ? {
-            ...item,
-            keputusan: keputusan,
-            status:
-              keputusan === "Disetujui"
-                ? "Disetujui"
-                : "Ditolak",
-            timeline: [
-              ...(item.timeline || []),
-              {
-                label:
-                  keputusan === "Disetujui"
-                    ? "Surat disetujui"
-                    : "Surat ditolak",
-                tanggal: hariIniISO(),
-              },
-            ],
-          }
-        : item
-    );
-
-    localStorage.setItem("dataSurat", JSON.stringify(dataBaru));
-
-    setSurat(dataBaru.find((s) => String(s.id) === String(id)));
-    setKeputusan("");
-
-    alert("Keputusan berhasil disimpan!");
-  };
+    return () => {
+      aktif = false;
+    };
+  }, [id, navigate, showToast]);
 
   if (!surat) return null;
+
+  const baseStorage = API_BASE.replace(/\/api\/?$/, "");
+
+  const urlFile = surat.file_surat
+    ? `${baseStorage}/storage/${surat.file_surat}`
+    : "";
+
+  const namaFile = surat.file_surat
+    ? surat.file_surat.split("/").pop()
+    : "";
 
   return (
     <DashboardLayout title="Lihat Surat">
@@ -85,7 +92,7 @@ function PimpinanSuratDetailPage() {
             <h2>Detail Surat</h2>
 
             <p>
-              Informasi dan keputusan surat
+              Informasi lengkap surat masuk
             </p>
 
           </div>
@@ -106,14 +113,14 @@ function PimpinanSuratDetailPage() {
             <div className="detail-row">
               <span>No. Agenda</span>
               <strong>
-                {surat.noAgenda}
+                {surat.no_agenda}
               </strong>
             </div>
 
             <div className="detail-row">
               <span>No. Surat</span>
               <strong>
-                {surat.noSurat}
+                {surat.no_surat}
               </strong>
             </div>
 
@@ -121,7 +128,7 @@ function PimpinanSuratDetailPage() {
               <span>Tanggal Surat</span>
               <strong>
                 {formatTanggal(
-                  surat.tanggalSurat
+                  surat.tanggal_surat
                 )}
               </strong>
             </div>
@@ -130,7 +137,7 @@ function PimpinanSuratDetailPage() {
               <span>Tanggal Diterima</span>
               <strong>
                 {formatTanggal(
-                  surat.tanggalDiterima
+                  surat.tanggal_terima
                 )}
               </strong>
             </div>
@@ -138,28 +145,28 @@ function PimpinanSuratDetailPage() {
             <div className="detail-row">
               <span>Jenis Surat</span>
               <strong>
-                {surat.jenis || "-"}
+                {surat.jenis_surat?.nama_jenis || "-"}
               </strong>
             </div>
 
             <div className="detail-row">
               <span>Sifat Surat</span>
               <strong>
-                {surat.sifat || "-"}
+                {surat.sifat_surat?.nama_sifat || "-"}
               </strong>
             </div>
 
             <div className="detail-row">
               <span>Asal Surat</span>
               <strong>
-                {surat.asal}
+                {surat.asal_surat}
               </strong>
             </div>
 
             <div className="detail-row">
               <span>Tujuan Surat</span>
               <strong>
-                {surat.tujuan || "-"}
+                {surat.tujuan_surat || "-"}
               </strong>
             </div>
 
@@ -173,9 +180,19 @@ function PimpinanSuratDetailPage() {
             <div className="detail-row">
               <span>File Surat</span>
               <strong>
-                <FileDokumen
-                  value={surat.file}
-                />
+                {urlFile ? (
+                  <a
+                    className="file-download-link"
+                    href={urlFile}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Download size={15} />
+                    {namaFile}
+                  </a>
+                ) : (
+                  "-"
+                )}
               </strong>
             </div>
 
@@ -189,136 +206,80 @@ function PimpinanSuratDetailPage() {
             <div className="detail-row">
               <span>Status</span>
               <strong>
-                {surat.status}
+                {labelStatus(surat.status)}
               </strong>
             </div>
 
-            {/* KEPUTUSAN */}
-
-            <div className="form-group">
-
-              <label>
-                Keputusan Pimpinan
-              </label>
-
-              <select
-                value={keputusan}
-                onChange={(e) =>
-                  setKeputusan(
-                    e.target.value
-                  )
-                }
-              >
-
-                <option value="">
-                  Pilih Keputusan
-                </option>
-
-                <option value="Disetujui">
-                  Disetujui
-                </option>
-
-                <option value="Ditolak">
-                  Ditolak
-                </option>
-
-              </select>
-
-            </div>
-
-            {/* INFO DISPOSISI */}
-
-            {surat.disposisi && (
-              <div className="detail-disposisi-info">
-
-                <h3>
-                  Informasi Disposisi
-                </h3>
-
-                <div className="detail-row">
-                  <span>Tujuan</span>
-
-                  <strong>
-                    {surat.disposisi
-                      .tujuan || "-"}
-                  </strong>
-                </div>
-
-                <div className="detail-row">
-                  <span>Instruksi</span>
-
-                  <strong>
-                    {surat.disposisi
-                      .instruksi || "-"}
-                  </strong>
-                </div>
-
-                <div className="detail-row">
-                  <span>Catatan</span>
-
-                  <strong>
-                    {surat.disposisi
-                      .catatan || "-"}
-                  </strong>
-                </div>
-
-              </div>
-            )}
-
-            {/* TIMELINE */}
-
-            {surat.timeline &&
-              surat.timeline.length > 0 && (
-                <div className="detail-timeline">
-
-                  <h3>Riwayat</h3>
-
-                  {surat.timeline.map(
-                    (tl, i) => (
-                      <div
-                        className="timeline-item"
-                        key={i}
-                      >
-                        <div
-                          className="timeline-dot"
-                        />
-
-                        <div>
-                          <strong>
-                            {tl.label}
-                          </strong>
-
-                          <span>
-                            {formatTanggal(tl.tanggal)}
-                          </span>
-                        </div>
-                      </div>
-                    )
-                  )}
-
-                </div>
-              )}
-
           </div>
 
+          {disposisi && (
+            <div className="detail-disposisi-info">
+              <h3>Informasi Disposisi</h3>
+
+              <div className="detail-row">
+                <span>Tujuan</span>
+                <strong>
+                  {disposisi.penerima?.nama ||
+                    disposisi.kepada_user ||
+                    "-"}
+                </strong>
+              </div>
+
+              <div className="detail-row">
+                <span>Instruksi</span>
+                <strong>
+                  {disposisi.instruksi || "-"}
+                </strong>
+              </div>
+
+              <div className="detail-row">
+                <span>Catatan</span>
+                <strong>
+                  {disposisi.catatan || "-"}
+                </strong>
+              </div>
+            </div>
+          )}
+
+          {timeline.length > 0 && (
+            <div className="detail-timeline">
+              <h3>Riwayat</h3>
+
+              {timeline.map((tl, i) => (
+                <div
+                  className="timeline-item"
+                  key={i}
+                >
+                  <div className="timeline-dot" />
+
+                  <div>
+                    <strong>{tl.aktivitas}</strong>
+                    <span>{formatTanggal(tl.created_at)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="modal-footer">
+
+            {surat.status === "baru" && (
+              <button
+                className="btn-simpan"
+                onClick={() =>
+                  navigate(`/pimpinan/surat-masuk/disposisi/${surat.id}`)
+                }
+              >
+                <ClipboardList size={17} />
+                Buat Disposisi
+              </button>
+            )}
 
             <button
               className="btn-tutup"
               onClick={() => navigate("/pimpinan/surat-masuk")}
             >
               Kembali
-            </button>
-
-            <button
-              className="btn-simpan"
-              onClick={simpanKeputusan}
-            >
-
-              <CheckCircle size={17} />
-
-              Simpan Keputusan
-
             </button>
 
           </div>

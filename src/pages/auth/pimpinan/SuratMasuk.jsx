@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -12,86 +12,32 @@ import "./SuratMasuk.css";
 import { formatTanggal } from "../../../utils/tanggal";
 
 import {
-  usePagination,
+  useServerPagination,
   EntriesSelect,
   PaginationBar,
 } from "../../../component/Pagination";
 
+import { api } from "../../../services/apiClient";
+
+const STATUS_MAP = {
+  baru: { label: "Baru", className: "status-baru" },
+  didisposisi: { label: "Didisposisi", className: "status-didisposisikan" },
+  diarsipkan: { label: "Diarsipkan", className: "status-diarsipkan" },
+};
+
 function SuratMasuk() {
   const navigate = useNavigate();
-
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [dataSurat, setDataSurat] = useState([]);
 
-  // =========================
-  // AMBIL DATA SURAT
-  // =========================
+  const fetcher = (page, perPage) =>
+    api
+      .get("/surat-masuk", {
+        params: { page, per_page: perPage, search, status: filterStatus },
+      })
+      .then((res) => res.data?.data || { data: [] });
 
-  const migrasiData = (data) =>
-    data.map((item) => {
-      if (item.perihal !== undefined) return item;
-
-      return {
-        ...item,
-        noAgenda: item.noAgenda || "",
-        tanggalSurat: item.tanggalSurat || "",
-        tanggalDiterima: item.tanggalDiterima || item.tanggal || "",
-        jenis: item.jenis || "",
-        sifat: item.sifat || "",
-        tujuan: item.tujuan || "",
-        perihal: item.perihal || item.isi || "",
-        file: item.file || "",
-        lampiran: item.lampiran || "",
-      };
-    });
-
-  const ambilDataSurat = () => {
-    const data =
-      JSON.parse(localStorage.getItem("dataSurat")) || [];
-
-    setDataSurat(migrasiData(data));
-  };
-
-  useEffect(() => {
-    ambilDataSurat();
-
-    window.addEventListener(
-      "storage",
-      ambilDataSurat
-    );
-
-    return () => {
-      window.removeEventListener(
-        "storage",
-        ambilDataSurat
-      );
-    };
-  }, []);
-
-  // =========================
-  // SEARCH + FILTER
-  // =========================
-
-  const filteredData = dataSurat.filter((item) => {
-    const cocokSearch = `${item.noSurat || ""} ${
-      item.perihal || ""
-    } ${item.asal || ""} ${item.noAgenda || ""}`
-      .toLowerCase()
-      .includes(search.toLowerCase());
-
-    const cocokStatus =
-      !filterStatus ||
-      item.status === filterStatus;
-
-    return cocokSearch && cocokStatus;
-  });
-
-  // =========================
-  // PAGINATION
-  // =========================
-
-  const pag = usePagination(filteredData);
+  const pag = useServerPagination(fetcher, [search, filterStatus]);
 
   return (
     <DashboardLayout title="Surat Masuk">
@@ -111,7 +57,7 @@ function SuratMasuk() {
             </h2>
 
             <p>
-              Kelola dan berikan keputusan terhadap surat masuk.
+              Kelola dan disposisikan surat masuk.
             </p>
 
           </div>
@@ -151,18 +97,9 @@ function SuratMasuk() {
             <option value="">
               Semua Status
             </option>
-
-            {[
-              ...new Set(
-                dataSurat
-                  .map((d) => d.status)
-                  .filter(Boolean)
-              ),
-            ].map((st) => (
-              <option key={st} value={st}>
-                {st}
-              </option>
-            ))}
+            <option value="baru">Baru</option>
+            <option value="didisposisi">Didisposisi</option>
+            <option value="diarsipkan">Diarsipkan</option>
           </select>
 
           <EntriesSelect
@@ -201,109 +138,105 @@ function SuratMasuk() {
 
               {pag.pageData.length > 0 ? (
 
-                pag.pageData.map((item, index) => (
+                pag.pageData.map((item, index) => {
 
-                  <tr key={item.id}>
+                  const st = STATUS_MAP[item.status] || { label: item.status || "-", className: "" };
 
-                    <td>
-                      {(pag.page - 1) *
-                        pag.entries +
-                        index +
-                        1}
-                    </td>
+                  return (
+                    <tr key={item.id}>
 
-                    <td>
-                      <strong>
-                        {item.noAgenda}
-                      </strong>
-                    </td>
+                      <td>
+                        {(pag.page - 1) *
+                          pag.entries +
+                          index +
+                          1}
+                      </td>
 
-                    <td>
-                      <strong>
-                        {item.noSurat}
-                      </strong>
-                    </td>
+                      <td>
+                        <strong>
+                          {item.no_agenda}
+                        </strong>
+                      </td>
 
-                    <td>
-                      {formatTanggal(
-                        item.tanggalSurat
-                      )}
-                    </td>
+                      <td>
+                        <strong>
+                          {item.no_surat}
+                        </strong>
+                      </td>
 
-                    <td>
-                      {item.sifat || "-"}
-                    </td>
+                      <td>
+                        {formatTanggal(
+                          item.tanggal_surat
+                        )}
+                      </td>
 
-                    <td>
-                      {item.asal}
-                    </td>
+                      <td>
+                        {item.sifat_surat?.nama_sifat || "-"}
+                      </td>
 
-                    <td>
-                      {item.tujuan || "-"}
-                    </td>
+                      <td>
+                        {item.asal_surat}
+                      </td>
 
-                    <td>
-                      {item.perihal}
-                    </td>
+                      <td>
+                        {item.tujuan_surat || "-"}
+                      </td>
 
-                    <td>
+                      <td>
+                        {item.perihal}
+                      </td>
 
-                      <span
-                        className={`status ${
-                          item.status
-                            ?.toLowerCase()
-                            .replace(
-                              /\s+/g,
-                              "-"
-                            )
-                        }`}
-                      >
-                        {item.status}
-                      </span>
+                      <td>
 
-                    </td>
-
-                    <td>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          flexWrap: "wrap",
-                        }}
-                      >
-
-                        <button
-                          className="btn-eye"
-                          title="Lihat Detail"
-                          onClick={() =>
-                            navigate(`/pimpinan/surat-masuk/lihat/${item.id}`)
-                          }
+                        <span
+                          className={`status ${st.className}`}
                         >
-                          <Eye size={17} />
-                        </button>
+                          {st.label}
+                        </span>
 
-                        {!item.disposisi && (
+                      </td>
+
+                      <td>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            flexWrap: "wrap",
+                          }}
+                        >
+
                           <button
-                            className="btn-disposisi-aksi"
-                            title="Buat Disposisi"
+                            className="btn-eye"
+                            title="Lihat Detail"
                             onClick={() =>
-                              navigate(`/pimpinan/surat-masuk/disposisi/${item.id}`)
+                              navigate(`/pimpinan/surat-masuk/lihat/${item.id}`)
                             }
                           >
-                            <ClipboardList
-                              size={17}
-                            />
+                            <Eye size={17} />
                           </button>
-                        )}
 
-                      </div>
+                          {item.status === "baru" && (
+                            <button
+                              className="btn-disposisi-aksi"
+                              title="Buat Disposisi"
+                              onClick={() =>
+                                navigate(`/pimpinan/surat-masuk/disposisi/${item.id}`)
+                              }
+                            >
+                              <ClipboardList
+                                size={17}
+                              />
+                            </button>
+                          )}
 
-                    </td>
+                        </div>
 
-                  </tr>
+                      </td>
 
-                ))
+                    </tr>
+                  );
+                })
 
               ) : (
 

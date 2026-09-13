@@ -8,138 +8,68 @@ import {
   formatTanggal,
   hariIniISO,
 } from "../../../utils/tanggal";
+import { useToast } from "../../../component/Toast";
+import { api } from "../../../services/apiClient";
 
 function PimpinanDisposisiFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const showToast = useToast();
 
   const [surat, setSurat] = useState(null);
+  const [daftarUser, setDaftarUser] = useState([]);
 
   const [formDisposisi, setFormDisposisi] = useState({
-    tujuan: "",
+    kepada_user: "",
     instruksi: "",
     catatan: "",
   });
 
   useEffect(() => {
-    const data =
-      JSON.parse(localStorage.getItem("dataSurat")) || [];
+    api
+      .get(`/surat-masuk/${id}`)
+      .then((res) => setSurat(res.data.data || res.data))
+      .catch(() => {
+        showToast("error", "Surat tidak ditemukan!");
+        navigate("/pimpinan/surat-masuk", { replace: true });
+      });
 
-    const cari =
-      data.find((s) => String(s.id) === String(id)) || null;
+    api
+      .get("/users/opsi-disposisi")
+      .then((res) => {
+        const list = Array.isArray(res.data?.data)
+          ? res.data.data
+          : res.data?.data?.data || [];
+        setDaftarUser(list);
+      })
+      .catch(() => setDaftarUser([]));
+  }, [id, navigate, showToast]);
 
-    if (!cari) {
-      alert("Surat tidak ditemukan!");
-      navigate("/pimpinan/surat-masuk", { replace: true });
+  const kirimDisposisi = async () => {
+    if (!formDisposisi.kepada_user || !formDisposisi.instruksi) {
+      showToast("warning", "Tujuan dan instruksi wajib diisi!");
       return;
     }
 
-    setSurat(cari);
-  }, [id, navigate]);
+    try {
+      await api.post("/disposisi", {
+        surat_masuk_id: surat.id,
+        kepada_user: formDisposisi.kepada_user,
+        tanggal_disposisi: hariIniISO(),
+        instruksi: formDisposisi.instruksi,
+        catatan: formDisposisi.catatan,
+      });
 
-  // =========================
-  // OPSI TUJUAN (DARI MASTER USER)
-  // =========================
-
-  const opsiTujuan = () => {
-    const data =
-      JSON.parse(
-        localStorage.getItem("masterUser")
-      ) || [];
-
-    if (data.length > 0) {
-      return data.map((u) => u.nama);
+      showToast("success", "Disposisi berhasil dikirim!");
+      navigate("/pimpinan/surat-masuk");
+    } catch (err) {
+      showToast(
+        "error",
+        err.response?.data?.message ||
+          Object.values(err.response?.data?.errors || {}).flat()[0] ||
+          "Gagal mengirim disposisi!"
+      );
     }
-
-    return [
-      "Pengguna 1",
-      "Pengguna 2",
-      "Pengguna 3",
-    ];
-  };
-
-  // =========================
-  // KIRIM DISPOSISI
-  // =========================
-
-  const kirimDisposisi = () => {
-    if (!formDisposisi.tujuan || !formDisposisi.instruksi) {
-      alert("Tujuan dan instruksi wajib diisi!");
-      return;
-    }
-
-    const tanggalISO = hariIniISO();
-
-    const disposisiBaru = {
-      id: Date.now(),
-      noAgenda: surat.noAgenda,
-      noSurat: surat.noSurat,
-      asal: surat.asal,
-      perihal: surat.perihal,
-      tanggal: surat.tanggalDiterima,
-      pengguna: formDisposisi.tujuan,
-      instruksi: formDisposisi.instruksi,
-      catatan: formDisposisi.catatan,
-      tanggalDisposisi: tanggalISO,
-      status: "Menunggu",
-    };
-
-    // =========================
-    // SIMPAN KE DATA DISPOSISI
-    // =========================
-
-    const dataDisposisiLama =
-      JSON.parse(
-        localStorage.getItem("dataDisposisi")
-      ) || [];
-
-    localStorage.setItem(
-      "dataDisposisi",
-      JSON.stringify([
-        ...dataDisposisiLama,
-        disposisiBaru,
-      ])
-    );
-
-    // =========================
-    // UPDATE SURAT
-    // =========================
-
-    const dataSurat =
-      JSON.parse(localStorage.getItem("dataSurat")) || [];
-
-    const suratUpdate = dataSurat.map((item) =>
-      item.id === surat.id
-        ? {
-            ...item,
-            status: "Didisposisikan",
-            keputusan: "",
-
-            disposisi: {
-              tujuan: formDisposisi.tujuan,
-              instruksi: formDisposisi.instruksi,
-              catatan: formDisposisi.catatan,
-              tanggalDisposisi: tanggalISO,
-            },
-
-            timeline: [
-              ...(item.timeline || []),
-              {
-                label: "Disposisi dibuat",
-                tanggal: tanggalISO,
-              },
-            ],
-          }
-        : item
-    );
-
-    localStorage.setItem(
-      "dataSurat",
-      JSON.stringify(suratUpdate)
-    );
-
-    alert("Disposisi berhasil dikirim!");
-    navigate("/pimpinan/surat-masuk");
   };
 
   if (!surat) return null;
@@ -183,12 +113,12 @@ function PimpinanDisposisiFormPage() {
 
               <div className="detail-row">
                 <span>No. Agenda</span>
-                <strong>{surat.noAgenda}</strong>
+                <strong>{surat.no_agenda}</strong>
               </div>
 
               <div className="detail-row">
                 <span>No. Surat</span>
-                <strong>{surat.noSurat}</strong>
+                <strong>{surat.no_surat}</strong>
               </div>
 
               <div className="detail-row">
@@ -198,22 +128,22 @@ function PimpinanDisposisiFormPage() {
 
               <div className="detail-row">
                 <span>Asal Surat</span>
-                <strong>{surat.asal}</strong>
+                <strong>{surat.asal_surat}</strong>
               </div>
 
               <div className="detail-row">
                 <span>Jenis Surat</span>
-                <strong>{surat.jenis || "-"}</strong>
+                <strong>{surat.jenis_surat?.nama_jenis || "-"}</strong>
               </div>
 
               <div className="detail-row">
                 <span>Sifat Surat</span>
-                <strong>{surat.sifat || "-"}</strong>
+                <strong>{surat.sifat_surat?.nama_sifat || "-"}</strong>
               </div>
 
               <div className="detail-row">
                 <span>Tanggal Diterima</span>
-                <strong>{formatTanggal(surat.tanggalDiterima)}</strong>
+                <strong>{formatTanggal(surat.tanggal_terima)}</strong>
               </div>
 
             </div>
@@ -227,11 +157,11 @@ function PimpinanDisposisiFormPage() {
                 <label>Tujuan Kepada</label>
 
                 <select
-                  value={formDisposisi.tujuan}
+                  value={formDisposisi.kepada_user}
                   onChange={(e) =>
                     setFormDisposisi({
                       ...formDisposisi,
-                      tujuan: e.target.value,
+                      kepada_user: e.target.value,
                     })
                   }
                 >
@@ -239,12 +169,24 @@ function PimpinanDisposisiFormPage() {
                     Pilih penerima
                   </option>
 
-                  {opsiTujuan().map((o) => (
-                    <option key={o} value={o}>
-                      {o}
+                  {daftarUser.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.nama}
                     </option>
                   ))}
                 </select>
+
+              </div>
+
+              <div className="form-group">
+
+                <label>Tanggal Disposisi</label>
+
+                <input
+                  type="date"
+                  value={hariIniISO()}
+                  disabled
+                />
 
               </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Search,
   Eye,
@@ -9,117 +9,74 @@ import {
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import "./SuratMasuk.css";
 
-import FileDokumen from "../../../component/FileDokumen";
 import { formatTanggal } from "../../../utils/tanggal";
 
 import {
-  usePagination,
+  useServerPagination,
   EntriesSelect,
   PaginationBar,
 } from "../../../component/Pagination";
 
+import { api } from "../../../services/apiClient";
+
 function ArsipDigital() {
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
-  const [dataArsip, setDataArsip] = useState([]);
   const [selectedArsip, setSelectedArsip] =
     useState(null);
 
-  // =========================
-  // AMBIL SURAT ARSIP
-  // =========================
-  const ambilData = () => {
-    const dataSuratLama =
-      JSON.parse(
-        localStorage.getItem("dataSurat")
-      ) || [];
+  const fetcher = (page, perPage) =>
+    api
+      .get("/arsip-digital", {
+        params: { page, per_page: perPage },
+      })
+      .then((res) => res.data.data);
 
-    const dataSurat = dataSuratLama.map((item) =>
-      item.perihal !== undefined
-        ? item
-        : {
-            ...item,
-            perihal: item.perihal || item.isi || "",
-            tanggalSurat: item.tanggalSurat || "",
-            tanggalDiterima:
-              item.tanggalDiterima ||
-              item.tanggal ||
-              "",
-            tujuan: item.tujuan || "",
-            file: item.file || "",
-            lampiran: item.lampiran || "",
-          }
-    );
+  const pag = useServerPagination(fetcher, []);
 
-    const arsip = dataSurat.filter(
-      (item) =>
-        item.status === "Selesai" ||
-        item.status === "Diarsipkan" ||
-        item.status === "Disetujui"
-    );
+  const listArsip = pag.pageData.map((item) => ({
+    id: item.id,
+    noSurat: item.surat_masuk?.no_surat || "-",
+    perihal: item.surat_masuk?.perihal || "-",
+    asal: item.surat_masuk?.asal_surat || "-",
+    tanggalDiterima: item.surat_masuk?.tanggal_terima,
+    namaFile: item.nama_file,
+  }));
 
-    setDataArsip(arsip);
+  const cocokSearch = (item) =>
+    `${item.noSurat} ${item.perihal} ${item.asal} ${item.tanggalDiterima}`
+      .toLowerCase()
+      .includes(search.toLowerCase());
 
-    setSelectedArsip((prev) => {
-      if (!prev) return null;
+  const filteredData = listArsip.filter(cocokSearch);
 
-      const update = arsip.find(
-        (item) => item.id === prev.id
+  const detail =
+    selectedArsip &&
+    filteredData.find((d) => d.id === selectedArsip.id);
+
+  const unduhFile = async (arsipId) => {
+    try {
+      const res = await api.get(
+        `/arsip-digital/${arsipId}/download`,
+        { responseType: "blob" }
       );
 
-      return update || null;
-    });
-  };
+      const disposition = res.headers["content-disposition"] || "";
+      const nama =
+        disposition.match(/filename="?([^";]+)"?/i)?.[1] ||
+        "arsip-file";
 
-  useEffect(() => {
-    ambilData();
-
-    window.addEventListener(
-      "storage",
-      ambilData
-    );
-
-    const interval = setInterval(
-      ambilData,
-      1000
-    );
-
-    return () => {
-      window.removeEventListener(
-        "storage",
-        ambilData
-      );
-
-      clearInterval(interval);
-    };
-  }, []);
-
-  // =========================
-  // SEARCH + FILTER
-  // =========================
-  const filteredData = dataArsip.filter(
-    (item) => {
-      const cocokSearch =
-        `${item.noSurat || ""} ${
-          item.perihal || ""
-        } ${item.asal || ""} ${
-          item.noAgenda || ""
-        }`
-          .toLowerCase()
-          .includes(search.toLowerCase());
-
-      const cocokStatus =
-        !filterStatus ||
-        item.status === filterStatus;
-
-      return cocokSearch && cocokStatus;
+      const url = URL.createObjectURL(res.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = nama;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch {
+      // abaikan kesalahan download
     }
-  );
-
-  // =========================
-  // PAGINATION
-  // =========================
-  const pag = usePagination(filteredData);
+  };
 
   return (
     <DashboardLayout title="Arsip Digital">
@@ -158,30 +115,6 @@ function ArsipDigital() {
 
           </div>
 
-          <select
-            className="pag-filter"
-            value={filterStatus}
-            onChange={(e) =>
-              setFilterStatus(e.target.value)
-            }
-          >
-            <option value="">
-              Semua Status
-            </option>
-
-            {[
-              ...new Set(
-                dataArsip
-                  .map((d) => d.status)
-                  .filter(Boolean)
-              ),
-            ].map((st) => (
-              <option key={st} value={st}>
-                {st}
-              </option>
-            ))}
-          </select>
-
           <EntriesSelect
             value={pag.entries}
             onChange={pag.changeEntries}
@@ -210,9 +143,9 @@ function ArsipDigital() {
 
             <tbody>
 
-              {pag.pageData.length > 0 ? (
+              {filteredData.length > 0 ? (
 
-                pag.pageData.map((item, index) => (
+                filteredData.map((item, index) => (
 
                   <tr key={item.id}>
 
@@ -245,17 +178,8 @@ function ArsipDigital() {
 
                     <td>
 
-                      <span
-                        className={`status ${
-                          item.status
-                            ?.toLowerCase()
-                            .replace(
-                              /\s+/g,
-                              "-"
-                            )
-                        }`}
-                      >
-                        {item.status}
+                      <span className="status status-diarsipkan">
+                        Diarsipkan
                       </span>
 
                     </td>
@@ -274,28 +198,15 @@ function ArsipDigital() {
                           <Eye size={17} />
                         </button>
 
-                        {item.file && (
-                          <a
-                            className="btn-eye btn-download-arsip"
-                            title="Download File"
-                            href={
-                              typeof item.file ===
-                              "string"
-                                ? item.file
-                                : item.file.data
-                            }
-                            download={
-                              typeof item.file ===
-                              "string"
-                                ? item.file
-                                : item.file.nama
-                            }
-                          >
-                            <Download
-                              size={17}
-                            />
-                          </a>
-                        )}
+                        <button
+                          className="btn-eye btn-download-arsip"
+                          title="Download File"
+                          onClick={() => unduhFile(item.id)}
+                        >
+                          <Download
+                            size={17}
+                          />
+                        </button>
 
                       </div>
 
@@ -340,7 +251,7 @@ function ArsipDigital() {
         {/* =========================
             MODAL DETAIL
         ========================= */}
-        {selectedArsip && (
+        {detail && (
 
           <div className="modal-overlay">
 
@@ -378,28 +289,21 @@ function ArsipDigital() {
                 <div className="detail-row">
                   <span>No. Surat</span>
                   <strong>
-                    {selectedArsip.noSurat}
+                    {detail.noSurat}
                   </strong>
                 </div>
 
                 <div className="detail-row">
                   <span>Asal Surat</span>
                   <strong>
-                    {selectedArsip.asal}
-                  </strong>
-                </div>
-
-                <div className="detail-row">
-                  <span>Tujuan Surat</span>
-                  <strong>
-                    {selectedArsip.tujuan || "-"}
+                    {detail.asal}
                   </strong>
                 </div>
 
                 <div className="detail-row">
                   <span>Perihal</span>
                   <strong>
-                    {selectedArsip.perihal}
+                    {detail.perihal}
                   </strong>
                 </div>
 
@@ -407,24 +311,22 @@ function ArsipDigital() {
                   <span>Tanggal Diterima</span>
                   <strong>
                     {formatTanggal(
-                      selectedArsip.tanggalDiterima
+                      detail.tanggalDiterima
                     )}
-                  </strong>
-                </div>
-
-                <div className="detail-row">
-                  <span>File Surat</span>
-                  <strong>
-                    <FileDokumen
-                      value={selectedArsip.file}
-                    />
                   </strong>
                 </div>
 
                 <div className="detail-row">
                   <span>Status</span>
                   <strong>
-                    {selectedArsip.status}
+                    Diarsipkan
+                  </strong>
+                </div>
+
+                <div className="detail-row">
+                  <span>File Surat</span>
+                  <strong>
+                    {detail.namaFile || "-"}
                   </strong>
                 </div>
 
@@ -432,6 +334,14 @@ function ArsipDigital() {
 
               {/* FOOTER */}
               <div className="modal-footer">
+
+                <button
+                  className="btn-download-arsip btn-simpan"
+                  onClick={() => unduhFile(detail.id)}
+                >
+                  <Download size={16} />
+                  Download
+                </button>
 
                 <button
                   className="btn-tutup"
