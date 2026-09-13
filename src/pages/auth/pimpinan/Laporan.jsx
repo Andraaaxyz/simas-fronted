@@ -10,6 +10,8 @@ import {
   BarChart3,
   FileSpreadsheet,
   Printer,
+  Filter,
+  ChevronDown,
 } from "lucide-react";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
@@ -34,14 +36,26 @@ const STATUS_MAP = {
   diarsipkan: { label: "Diarsipkan", className: "diarsipkan" },
 };
 
+const OPSI_STATUS = [
+  { v: "baru", l: "Baru" },
+  { v: "didisposisi", l: "Didisposisi" },
+  { v: "diarsipkan", l: "Diarsipkan" },
+];
+
 const ubahStatus = (status) => STATUS_MAP[status] || { label: status || "-", className: "" };
+
+const toggleTag = (setter, current, value) =>
+  setter(current === value ? "" : value);
 
 function Laporan() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [selectedSurat, setSelectedSurat] = useState(null);
   const [showRekap, setShowRekap] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const [summary, setSummary] = useState(null);
+
+  const jumlahFilterAktif = filterStatus ? 1 : 0;
 
   const fetcher = (page, perPage) =>
     api
@@ -220,19 +234,6 @@ function Laporan() {
               />
             </div>
 
-            <select
-              className="laporan-filter"
-              value={filterStatus}
-              onChange={(e) =>
-                setFilterStatus(e.target.value)
-              }
-            >
-              <option value="">Semua Status</option>
-              <option value="baru">Baru</option>
-              <option value="didisposisi">Didisposisi</option>
-              <option value="diarsipkan">Diarsipkan</option>
-            </select>
-
             <div className="laporan-actions">
 
               <button
@@ -268,6 +269,48 @@ function Laporan() {
               value={pag.entries}
               onChange={pag.changeEntries}
             />
+
+          </div>
+
+          <div className="laporan-filter-wrap">
+
+            <button
+              className={`laporan-filter-toggle ${showFilter ? "open" : ""}`}
+              onClick={() => setShowFilter((v) => !v)}
+              title="Buka / tutup filter laporan"
+            >
+              <Filter size={18} />
+              Filter Tags
+              {jumlahFilterAktif > 0 && (
+                <span className="laporan-filter-badge">
+                  {jumlahFilterAktif}
+                </span>
+              )}
+              <ChevronDown size={18} className="laporan-filter-chevron" />
+            </button>
+
+            <div className={`laporan-filter-panel ${showFilter ? "open" : ""}`}>
+              <div className="laporan-filter-panel-inner">
+
+                <div className="laporan-tagbar">
+
+                  <div className="laporan-tag-group">
+                    <span className="laporan-tag-label">Status</span>
+                    {OPSI_STATUS.map((tag) => (
+                      <button
+                        key={tag.v}
+                        className={`laporan-tag ${filterStatus === tag.v ? "active" : ""}`}
+                        onClick={() => toggleTag(setFilterStatus, filterStatus, tag.v)}
+                      >
+                        {tag.l}
+                      </button>
+                    ))}
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
 
           </div>
 

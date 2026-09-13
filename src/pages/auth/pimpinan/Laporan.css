@@ -223,6 +223,135 @@
   font-size: 12px;
 }
 
+/* FILTER TAG */
+
+.laporan-tagbar {
+  padding: 13px 24px;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+
+  background: #f8fafc;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.laporan-tag-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.laporan-tag-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin-right: 2px;
+}
+
+.laporan-tag {
+  height: 30px;
+  padding: 0 13px;
+
+  border: 1px solid #d8dee8;
+  border-radius: 999px;
+
+  background: #ffffff;
+  color: #40516a;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.18s;
+}
+
+.laporan-tag:hover {
+  border-color: #0d9488;
+  color: #0d9488;
+}
+
+.laporan-tag.active {
+  background: #0d9488;
+  border-color: #0d9488;
+  color: #ffffff;
+}
+
+/* FILTER TOGGLE + PANEL */
+
+.laporan-filter-wrap {
+  padding: 14px 24px 0;
+}
+
+.laporan-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  background: #1d4ed8;
+  border: 1px solid #1d4ed8;
+  border-radius: 9px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.2s;
+}
+
+.laporan-filter-toggle:hover {
+  background: #1e40af;
+  border-color: #1e40af;
+}
+
+.laporan-filter-chevron {
+  transition: transform 0.3s ease;
+}
+
+.laporan-filter-toggle.open .laporan-filter-chevron {
+  transform: rotate(180deg);
+}
+
+.laporan-filter-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #1d4ed8;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.laporan-filter-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.35s ease, opacity 0.3s ease;
+}
+
+.laporan-filter-panel.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.laporan-filter-panel-inner {
+  overflow: hidden;
+}
+
+.laporan-tagbar {
+  margin-top: 14px;
+}
+
 /* =========================
    AKSI LAPORAN
 ========================= */
@@ -648,6 +777,11 @@
 
   .laporan-filter {
     width: 100%;
+  }
+
+  .laporan-filter-toggle {
+    width: 100%;
+    justify-content: center;
   }
 
   .laporan-detail {

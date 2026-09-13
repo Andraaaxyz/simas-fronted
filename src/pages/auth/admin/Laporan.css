@@ -275,6 +275,143 @@
 }
 
 /* =========================
+   FILTER TAG
+========================= */
+
+.laporan-filter-wrap {
+  margin-top: 16px;
+}
+
+.laporan-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  background: #1d4ed8;
+  border: 1px solid #1d4ed8;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.2s;
+}
+
+.laporan-filter-toggle:hover {
+  background: #1e40af;
+  border-color: #1e40af;
+}
+
+.laporan-filter-chevron {
+  transition: transform 0.3s ease;
+}
+
+.laporan-filter-toggle.open .laporan-filter-chevron {
+  transform: rotate(180deg);
+}
+
+.laporan-filter-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #1d4ed8;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.laporan-filter-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.35s ease, opacity 0.3s ease;
+}
+
+.laporan-filter-panel.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.laporan-filter-panel-inner {
+  overflow: hidden;
+}
+
+.laporan-tagbar {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 22px;
+  padding: 13px 16px;
+  background: #f8fafc;
+  border: 1px solid #e5e9f0;
+  border-radius: 12px;
+}
+
+.laporan-tag-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.laporan-tag-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin-right: 2px;
+}
+
+.laporan-tag {
+  height: 30px;
+  padding: 0 13px;
+  border: 1px solid #d8dee8;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #40516a;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.18s;
+}
+
+.laporan-tag:hover {
+  border-color: #0d9488;
+  color: #0d9488;
+}
+
+.laporan-tag.active {
+  background: #0d9488;
+  border-color: #0d9488;
+  color: #ffffff;
+}
+
+.laporan-tag-date {
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #273449;
+  background: #ffffff;
+  outline: none;
+}
+
+.laporan-tag-sep {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+/* =========================
    TABLE
 ========================= */
 
@@ -566,5 +703,10 @@
   .laporan-search,
   .laporan-filter {
     width: 100%;
+  }
+
+  .laporan-filter-toggle {
+    width: 100%;
+    justify-content: center;
   }
 }

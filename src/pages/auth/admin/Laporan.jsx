@@ -11,6 +11,8 @@ import {
   Printer,
   BarChart3,
   Users,
+  Filter,
+  ChevronDown,
 } from "lucide-react";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
@@ -39,6 +41,28 @@ const ubahStatus = (status) => STATUS_MAP[status] || { label: status, className:
 
 const aman = (v) => v || "";
 
+const toggleTag = (setter, current, value) =>
+  setter(current === value ? "" : value);
+
+const OPSI_STATUS = [
+  { v: "baru", l: "Baru" },
+  { v: "didisposisi", l: "Didisposisi" },
+  { v: "diarsipkan", l: "Diarsipkan" },
+];
+
+const OPSI_JENIS = [
+  { v: "1", l: "Surat Edaran" },
+  { v: "2", l: "Surat Undangan" },
+  { v: "3", l: "Surat Keputusan" },
+  { v: "4", l: "Surat Tugas" },
+];
+
+const OPSI_SIFAT = [
+  { v: "1", l: "Penting" },
+  { v: "2", l: "Biasa" },
+  { v: "3", l: "Rahasia" },
+];
+
 function Laporan() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
@@ -48,7 +72,16 @@ function Laporan() {
   const [tanggalAkhir, setTanggalAkhir] = useState("");
   const [selectedSurat, setSelectedSurat] = useState(null);
   const [showRekap, setShowRekap] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const [summary, setSummary] = useState(null);
+
+  const jumlahFilterAktif = [
+    filterStatus,
+    filterJenis,
+    filterSifat,
+    tanggalAwal,
+    tanggalAkhir,
+  ].filter(Boolean).length;
 
   const fetcher = (page, perPage) =>
     api
@@ -245,53 +278,6 @@ function Laporan() {
                   />
                 </div>
 
-                <select
-                  className="laporan-filter"
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                >
-                  <option value="">Semua Status</option>
-                  <option value="baru">Baru</option>
-                  <option value="didisposisi">Didisposisi</option>
-                  <option value="diarsipkan">Diarsipkan</option>
-                </select>
-
-                <select
-                  className="laporan-filter"
-                  value={filterJenis}
-                  onChange={(e) => setFilterJenis(e.target.value)}
-                >
-                  <option value="">Semua Jenis</option>
-                  <option value="1">Surat Edaran</option>
-                  <option value="2">Surat Undangan</option>
-                  <option value="3">Surat Keputusan</option>
-                  <option value="4">Surat Tugas</option>
-                </select>
-
-                <select
-                  className="laporan-filter"
-                  value={filterSifat}
-                  onChange={(e) => setFilterSifat(e.target.value)}
-                >
-                  <option value="">Semua Sifat</option>
-                  <option value="1">Penting</option>
-                  <option value="2">Biasa</option>
-                  <option value="3">Rahasia</option>
-                </select>
-
-                <input
-                  type="date"
-                  className="laporan-filter"
-                  value={tanggalAwal}
-                  onChange={(e) => setTanggalAwal(e.target.value)}
-                />
-                <input
-                  type="date"
-                  className="laporan-filter"
-                  value={tanggalAkhir}
-                  onChange={(e) => setTanggalAkhir(e.target.value)}
-                />
-
                 <div className="laporan-actions">
                   <button
                     className="btn-laporan-rekap"
@@ -320,6 +306,91 @@ function Laporan() {
                 </div>
 
                 <EntriesSelect value={pag.entries} onChange={pag.changeEntries} />
+              </div>
+
+              <div className="laporan-filter-wrap">
+
+                <button
+                  className={`laporan-filter-toggle ${showFilter ? "open" : ""}`}
+                  onClick={() => setShowFilter((v) => !v)}
+                  title="Buka / tutup filter laporan"
+                >
+                  <Filter size={18} />
+                  Filter Tags
+                  {jumlahFilterAktif > 0 && (
+                    <span className="laporan-filter-badge">
+                      {jumlahFilterAktif}
+                    </span>
+                  )}
+                  <ChevronDown size={18} className="laporan-filter-chevron" />
+                </button>
+
+                <div className={`laporan-filter-panel ${showFilter ? "open" : ""}`}>
+                  <div className="laporan-filter-panel-inner">
+
+                    <div className="laporan-tagbar">
+
+                      <div className="laporan-tag-group">
+                        <span className="laporan-tag-label">Status</span>
+                        {OPSI_STATUS.map((tag) => (
+                          <button
+                            key={tag.v}
+                            className={`laporan-tag ${filterStatus === tag.v ? "active" : ""}`}
+                            onClick={() => toggleTag(setFilterStatus, filterStatus, tag.v)}
+                          >
+                            {tag.l}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="laporan-tag-group">
+                        <span className="laporan-tag-label">Jenis</span>
+                        {OPSI_JENIS.map((tag) => (
+                          <button
+                            key={tag.v}
+                            className={`laporan-tag ${filterJenis === tag.v ? "active" : ""}`}
+                            onClick={() => toggleTag(setFilterJenis, filterJenis, tag.v)}
+                          >
+                            {tag.l}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="laporan-tag-group">
+                        <span className="laporan-tag-label">Sifat</span>
+                        {OPSI_SIFAT.map((tag) => (
+                          <button
+                            key={tag.v}
+                            className={`laporan-tag ${filterSifat === tag.v ? "active" : ""}`}
+                            onClick={() => toggleTag(setFilterSifat, filterSifat, tag.v)}
+                          >
+                            {tag.l}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="laporan-tag-group">
+                        <span className="laporan-tag-label">Tanggal</span>
+                        <input
+                          type="date"
+                          className="laporan-tag-date"
+                          value={tanggalAwal}
+                          onChange={(e) => setTanggalAwal(e.target.value)}
+                        />
+                        <span className="laporan-tag-sep">—</span>
+                        <input
+                          type="date"
+                          className="laporan-tag-date"
+                          value={tanggalAkhir}
+                          onChange={(e) => setTanggalAkhir(e.target.value)}
+                        />
+                      </div>
+
+                    </div>
+
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
